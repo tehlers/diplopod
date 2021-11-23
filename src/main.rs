@@ -20,6 +20,7 @@ fn main() {
             height: 220.0,
             ..Default::default()
         })
+        .add_system(player_input::player_input.system())
         .insert_resource(ClearColor(Color::BLACK))
         .run();
 }

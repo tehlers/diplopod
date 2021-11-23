@@ -9,5 +9,7 @@ pub fn spawn_diplopod(mut commands: Commands, materials: Res<Materials>) {
             sprite: Sprite::new(Vec2::new(10.0, 10.0)),
             ..Default::default()
         })
-        .insert(DiplopodHead);
+        .insert(DiplopodHead {
+            direction: Vec2::ZERO,
+        });
 }
