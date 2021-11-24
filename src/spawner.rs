@@ -11,5 +11,6 @@ pub fn spawn_diplopod(mut commands: Commands, materials: Res<Materials>) {
         })
         .insert(DiplopodHead {
             direction: Vec2::ZERO,
-        });
+        })
+        .insert(Position { x: 0, y: 0 });
 }

@@ -4,7 +4,19 @@ mod spawner;
 mod systems;
 
 use crate::systems::*;
+use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+
+mod prelude {
+    pub const ARENA_WIDTH: u32 = 39;
+    pub const ARENA_HEIGHT: u32 = 21;
+}
+
+#[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
+pub enum Phase {
+    Input,
+    Movement,
+}
 
 fn main() {
     App::build()
@@ -20,7 +32,21 @@ fn main() {
             height: 220.0,
             ..Default::default()
         })
-        .add_system(player_input::player_input.system())
+        .add_system(
+            player_input::player_input
+                .system()
+                .label(Phase::Input)
+                .before(Phase::Movement),
+        )
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(0.150))
+                .with_system(movement::movement.system().label(Phase::Movement)),
+        )
+        .add_system_set_to_stage(
+            CoreStage::PostUpdate,
+            SystemSet::new().with_system(position_translation::position_translation.system()),
+        )
         .insert_resource(ClearColor(Color::BLACK))
         .run();
 }
