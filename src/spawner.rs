@@ -1,3 +1,4 @@
+use crate::components::Size;
 use crate::components::*;
 use crate::resources::*;
 use bevy::prelude::*;
@@ -12,5 +13,6 @@ pub fn spawn_diplopod(mut commands: Commands, materials: Res<Materials>) {
         .insert(DiplopodHead {
             direction: Vec2::ZERO,
         })
-        .insert(Position { x: 0, y: 0 });
+        .insert(Position { x: 0, y: 0 })
+        .insert(Size::square(0.5));
 }
