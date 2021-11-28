@@ -1,5 +1,6 @@
 use crate::components::Size;
 use crate::components::*;
+use crate::prelude::AMOUNT_OF_FOOD;
 use crate::resources::*;
 use bevy::prelude::*;
 
@@ -44,4 +45,17 @@ fn spawn_segment(
         .insert(position)
         .insert(Size::square(1.0))
         .id()
+}
+
+pub fn spawn_food(mut commands: Commands, materials: Res<Materials>, mut free_consumable_positions: ResMut<FreeConsumablePositions>) {
+    for _ in 0..AMOUNT_OF_FOOD {
+    commands
+        .spawn_bundle(SpriteBundle {
+            material: materials.food_material.clone(),
+            ..Default::default()
+        })
+        .insert(Food)
+        .insert(free_consumable_positions.positions.pop().unwrap())
+        .insert(Size::square(2.0));
+    }
 }

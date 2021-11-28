@@ -7,6 +7,7 @@ mod systems;
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 use events::*;
+use prelude::*;
 use resources::*;
 use systems::*;
 
@@ -16,6 +17,7 @@ mod prelude {
     pub const CONSUMABLE_SCALE_FACTOR: u32 = 2;
     pub const ARENA_WIDTH: u32 = CONSUMABLE_WIDTH * CONSUMABLE_SCALE_FACTOR;
     pub const ARENA_HEIGHT: u32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
+    pub const AMOUNT_OF_FOOD: u32 = 16;
 }
 
 #[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
@@ -29,6 +31,7 @@ fn main() {
         .add_startup_system(setup::setup.system())
         .add_plugins(DefaultPlugins)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::spawn_diplopod.system())
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::spawn_food.system())
         .insert_resource(WindowDescriptor {
             title: "Diplopod".to_string(),
             width: 400.0,
@@ -36,6 +39,10 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(DiplopodSegments::default())
+        .insert_resource(FreeConsumablePositions::new(
+            CONSUMABLE_WIDTH as i32,
+            CONSUMABLE_HEIGHT as i32,
+        ))
         .add_system(
             player_input::player_input
                 .system()
@@ -52,6 +59,7 @@ fn main() {
             CoreStage::PostUpdate,
             SystemSet::new()
                 .with_system(position_translation::position_translation.system())
+                .with_system(position_translation::consumable_position_translation.system())
                 .with_system(size_scaling::size_scaling.system()),
         )
         .insert_resource(ClearColor(Color::BLACK))

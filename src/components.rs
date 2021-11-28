@@ -25,3 +25,11 @@ pub struct Position {
     pub x: i32,
     pub y: i32,
 }
+
+#[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct ConsumablePosition {
+    pub x: i32,
+    pub y: i32,
+}
+
+pub struct Food;
