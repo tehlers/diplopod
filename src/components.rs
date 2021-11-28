@@ -3,6 +3,9 @@ use bevy::prelude::*;
 pub struct DiplopodHead {
     pub direction: Vec2,
 }
+
+pub struct DiplopodSegment;
+
 pub struct Size {
     pub width: f32,
     pub height: f32,
@@ -15,4 +18,10 @@ impl Size {
             height: x,
         }
     }
+}
+
+#[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
 }

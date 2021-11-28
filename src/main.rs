@@ -6,10 +6,14 @@ mod systems;
 use crate::systems::*;
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+use resources::*;
 
 mod prelude {
-    pub const ARENA_WIDTH: u32 = 39 * 2;
-    pub const ARENA_HEIGHT: u32 = 21 * 2;
+    pub const CONSUMABLE_WIDTH: u32 = 39;
+    pub const CONSUMABLE_HEIGHT: u32 = 21;
+    pub const CONSUMABLE_SCALE_FACTOR: u32 = 2;
+    pub const ARENA_WIDTH: u32 = CONSUMABLE_WIDTH * CONSUMABLE_SCALE_FACTOR;
+    pub const ARENA_HEIGHT: u32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
 }
 
 #[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
@@ -32,6 +36,7 @@ fn main() {
             height: 220.0,
             ..Default::default()
         })
+        .insert_resource(DiplopodSegments::default())
         .add_system(
             player_input::player_input
                 .system()

@@ -1,5 +1,5 @@
+use crate::components::*;
 use crate::prelude::*;
-use crate::resources::*;
 use bevy::prelude::*;
 
 pub fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut Transform)>) {
