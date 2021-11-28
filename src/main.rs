@@ -1,12 +1,14 @@
 mod components;
+mod events;
 mod resources;
 mod spawner;
 mod systems;
 
-use crate::systems::*;
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+use events::*;
 use resources::*;
+use systems::*;
 
 mod prelude {
     pub const CONSUMABLE_WIDTH: u32 = 39;
@@ -43,6 +45,7 @@ fn main() {
                 .label(Phase::Input)
                 .before(Phase::Movement),
         )
+        .add_system(game_over::game_over.system().after(Phase::Movement))
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.1))
@@ -55,5 +58,6 @@ fn main() {
                 .with_system(size_scaling::size_scaling.system()),
         )
         .insert_resource(ClearColor(Color::BLACK))
+        .add_event::<GameOver>()
         .run();
 }

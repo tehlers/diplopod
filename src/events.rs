@@ -1,0 +1,1 @@
+pub struct GameOver;
