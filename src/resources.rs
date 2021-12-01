@@ -30,4 +30,8 @@ impl FreeConsumablePositions {
 
         Self { positions }
     }
+
+    pub fn shuffle(&mut self) {
+        self.positions.shuffle(&mut thread_rng());
+    }
 }

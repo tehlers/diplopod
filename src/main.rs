@@ -30,7 +30,7 @@ fn main() {
     App::build()
         .add_startup_system(setup::setup.system())
         .add_plugins(DefaultPlugins)
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::spawn_diplopod.system())
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod.system())
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::spawn_food.system())
         .insert_resource(WindowDescriptor {
             title: "Diplopod".to_string(),

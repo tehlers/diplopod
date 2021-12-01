@@ -27,7 +27,9 @@ pub fn movement(
             game_over_writer.send(GameOver);
         }
 
-        if segment_positions.contains(&head_pos) {
+        if segment_positions.contains(&head_pos)
+            && (head.direction.x != 0.0 || head.direction.y != 0.0)
+        {
             game_over_writer.send(GameOver);
         }
 
