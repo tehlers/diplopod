@@ -12,11 +12,11 @@ use resources::*;
 use systems::*;
 
 mod prelude {
-    pub const CONSUMABLE_WIDTH: u32 = 39;
-    pub const CONSUMABLE_HEIGHT: u32 = 21;
-    pub const CONSUMABLE_SCALE_FACTOR: u32 = 2;
-    pub const ARENA_WIDTH: u32 = CONSUMABLE_WIDTH * CONSUMABLE_SCALE_FACTOR;
-    pub const ARENA_HEIGHT: u32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
+    pub const CONSUMABLE_WIDTH: i32 = 39;
+    pub const CONSUMABLE_HEIGHT: i32 = 21;
+    pub const CONSUMABLE_SCALE_FACTOR: i32 = 2;
+    pub const ARENA_WIDTH: i32 = CONSUMABLE_WIDTH * CONSUMABLE_SCALE_FACTOR;
+    pub const ARENA_HEIGHT: i32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
     pub const AMOUNT_OF_FOOD: u32 = 16;
 }
 

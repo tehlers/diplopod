@@ -12,6 +12,7 @@ pub struct Materials {
 #[derive(Default)]
 pub struct DiplopodSegments(pub Vec<Entity>);
 
+#[derive(Clone)]
 pub struct FreeConsumablePositions {
     pub positions: Vec<ConsumablePosition>,
 }
@@ -33,5 +34,15 @@ impl FreeConsumablePositions {
 
     pub fn shuffle(&mut self) {
         self.positions.shuffle(&mut thread_rng());
+    }
+
+    pub fn remove(&mut self, position: &ConsumablePosition) {
+        self.positions.retain(|&p| p != *position);
+    }
+
+    pub fn remove_all(&mut self, positions: &Vec<ConsumablePosition>) {
+        for position in positions {
+            self.remove(position);
+        }
     }
 }

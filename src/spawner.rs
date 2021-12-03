@@ -1,6 +1,6 @@
 use crate::components::Size;
 use crate::components::*;
-use crate::prelude::AMOUNT_OF_FOOD;
+use crate::prelude::{AMOUNT_OF_FOOD, ARENA_HEIGHT, ARENA_WIDTH};
 use crate::resources::*;
 use bevy::prelude::*;
 
@@ -26,7 +26,10 @@ pub fn spawn_diplopod(
             direction: Vec2::ZERO,
         })
         .insert(DiplopodSegment)
-        .insert(Position { x: 0, y: 0 })
+        .insert(Position {
+            x: ARENA_WIDTH / 2,
+            y: ARENA_HEIGHT / 2,
+        })
         .insert(Size::square(1.0))
         .id()];
 
@@ -34,7 +37,10 @@ pub fn spawn_diplopod(
         segments.0.push(spawn_segment(
             commands,
             &materials.diplopod_material,
-            Position { x: 0, y: 0 },
+            Position {
+                x: ARENA_WIDTH / 2,
+                y: ARENA_HEIGHT / 2,
+            },
         ));
     }
 }
@@ -60,14 +66,25 @@ pub fn spawn_food(
     materials: Res<Materials>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
 ) {
+    let segment_positions = vec![Position {
+        x: ARENA_WIDTH / 2,
+        y: ARENA_HEIGHT / 2,
+    }
+    .to_consumable_position()];
+
+    let mut position_candidates = free_consumable_positions.clone();
+    position_candidates.remove_all(&segment_positions);
+
     for _ in 0..AMOUNT_OF_FOOD {
+        let pos = position_candidates.positions.pop().unwrap();
         commands
             .spawn_bundle(SpriteBundle {
                 material: materials.food_material.clone(),
                 ..Default::default()
             })
             .insert(Food)
-            .insert(free_consumable_positions.positions.pop().unwrap())
+            .insert(pos)
             .insert(Size::square(2.0));
+        free_consumable_positions.remove(&pos);
     }
 }
