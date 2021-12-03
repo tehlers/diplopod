@@ -32,20 +32,9 @@ pub fn spawn_diplopod(
         })
         .insert(Size::square(1.0))
         .id()];
-
-    for _ in 0..20 {
-        segments.0.push(spawn_segment(
-            commands,
-            &materials.diplopod_material,
-            Position {
-                x: ARENA_WIDTH / 2,
-                y: ARENA_HEIGHT / 2,
-            },
-        ));
-    }
 }
 
-fn spawn_segment(
+fn _spawn_segment(
     commands: &mut Commands,
     material: &Handle<ColorMaterial>,
     position: Position,

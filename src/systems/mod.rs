@@ -1,3 +1,4 @@
+pub mod eat;
 pub mod game_over;
 pub mod movement;
 pub mod player_input;

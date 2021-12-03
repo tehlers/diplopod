@@ -24,6 +24,7 @@ mod prelude {
 pub enum Phase {
     Input,
     Movement,
+    Eat,
 }
 
 fn main() {
@@ -53,7 +54,8 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.1))
-                .with_system(movement::movement.system().label(Phase::Movement)),
+                .with_system(movement::movement.system().label(Phase::Movement))
+                .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement)),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
