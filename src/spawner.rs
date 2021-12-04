@@ -34,7 +34,7 @@ pub fn spawn_diplopod(
         .id()];
 }
 
-fn _spawn_segment(
+pub fn spawn_segment(
     commands: &mut Commands,
     material: &Handle<ColorMaterial>,
     position: Position,

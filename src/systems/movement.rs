@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::resources::LastTailPosition;
 use crate::{components::*, events::GameOver, resources::DiplopodSegments};
 use bevy::prelude::*;
 
@@ -6,6 +7,7 @@ pub fn movement(
     mut heads: Query<(Entity, &DiplopodHead)>,
     mut positions: Query<&mut Position>,
     segments: ResMut<DiplopodSegments>,
+    mut last_tail_position: ResMut<LastTailPosition>,
     mut game_over_writer: EventWriter<GameOver>,
 ) {
     if let Some((head_entity, head)) = heads.iter_mut().next() {
@@ -36,5 +38,7 @@ pub fn movement(
             .for_each(|(pos, segment)| {
                 *positions.get_mut(*segment).unwrap() = *pos;
             });
+
+        last_tail_position.0 = Some(*segment_positions.last().unwrap());
     }
 }

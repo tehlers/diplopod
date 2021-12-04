@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use crate::components::ConsumablePosition;
+use crate::components::{ConsumablePosition, Position};
 
 pub struct Materials {
     pub diplopod_material: Handle<ColorMaterial>,
@@ -46,3 +46,6 @@ impl FreeConsumablePositions {
         }
     }
 }
+
+#[derive(Default)]
+pub struct LastTailPosition(pub Option<Position>);

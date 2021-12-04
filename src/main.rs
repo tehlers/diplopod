@@ -25,6 +25,7 @@ pub enum Phase {
     Input,
     Movement,
     Eat,
+    Growth,
 }
 
 fn main() {
@@ -40,6 +41,7 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(DiplopodSegments::default())
+        .insert_resource(LastTailPosition::default())
         .insert_resource(FreeConsumablePositions::new(
             CONSUMABLE_WIDTH as i32,
             CONSUMABLE_HEIGHT as i32,
@@ -55,7 +57,8 @@ fn main() {
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.1))
                 .with_system(movement::movement.system().label(Phase::Movement))
-                .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement)),
+                .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement))
+                .with_system(growth::growth.system().label(Phase::Growth).after(Phase::Eat)),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
@@ -66,5 +69,6 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
+        .add_event::<Growth>()
         .run();
 }
