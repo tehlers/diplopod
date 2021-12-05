@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{resources::{LastTailPosition, DiplopodSegments, Materials}, events::Growth, spawner};
+use crate::{
+    events::Growth,
+    resources::{DiplopodSegments, LastTailPosition, Materials},
+    spawner,
+};
 
 pub fn growth(
     mut commands: Commands,

@@ -50,10 +50,10 @@ pub fn spawn_segment(
         .id()
 }
 
-pub fn spawn_food(
-    mut commands: Commands,
+pub fn init_food(
+    commands: Commands,
     materials: Res<Materials>,
-    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    free_consumable_positions: ResMut<FreeConsumablePositions>,
 ) {
     let segment_positions = vec![Position {
         x: ARENA_WIDTH / 2,
@@ -64,16 +64,36 @@ pub fn spawn_food(
     let mut position_candidates = free_consumable_positions.clone();
     position_candidates.remove_all(&segment_positions);
 
-    for _ in 0..AMOUNT_OF_FOOD {
-        let pos = position_candidates.positions.pop().unwrap();
-        commands
-            .spawn_bundle(SpriteBundle {
-                material: materials.food_material.clone(),
-                ..Default::default()
-            })
-            .insert(Food)
-            .insert(pos)
-            .insert(Size::square(2.0));
-        free_consumable_positions.remove(&pos);
+    spawn_food(
+        AMOUNT_OF_FOOD,
+        commands,
+        materials,
+        position_candidates,
+        free_consumable_positions,
+    );
+}
+
+pub fn spawn_food(
+    amount: u32,
+    mut commands: Commands,
+    materials: Res<Materials>,
+    mut position_candidates: FreeConsumablePositions,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    for _ in 0..amount {
+        match position_candidates.positions.pop() {
+            None => break,
+            Some(pos) => {
+                commands
+                    .spawn_bundle(SpriteBundle {
+                        material: materials.food_material.clone(),
+                        ..Default::default()
+                    })
+                    .insert(Food)
+                    .insert(pos)
+                    .insert(Size::square(2.0));
+                free_consumable_positions.remove(&pos);
+            }
+        }
     }
 }

@@ -33,7 +33,7 @@ fn main() {
         .add_startup_system(setup::setup.system())
         .add_plugins(DefaultPlugins)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod.system())
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::spawn_food.system())
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food.system())
         .insert_resource(WindowDescriptor {
             title: "Diplopod".to_string(),
             width: 400.0,
@@ -58,7 +58,18 @@ fn main() {
                 .with_run_criteria(FixedTimestep::step(0.1))
                 .with_system(movement::movement.system().label(Phase::Movement))
                 .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement))
-                .with_system(growth::growth.system().label(Phase::Growth).after(Phase::Eat)),
+                .with_system(
+                    growth::growth
+                        .system()
+                        .label(Phase::Growth)
+                        .after(Phase::Eat),
+                )
+                .with_system(
+                    spawn_food::spawn_food
+                        .system()
+                        .label(Phase::Growth)
+                        .after(Phase::Eat),
+                ),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
@@ -70,5 +81,6 @@ fn main() {
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
         .add_event::<Growth>()
+        .add_event::<SpawnFood>()
         .run();
 }

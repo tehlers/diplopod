@@ -27,6 +27,6 @@ pub fn game_over(
         free_consumable_positions.shuffle();
 
         spawn_diplopod(&mut commands, &materials, &mut segments_res);
-        spawn_food(commands, materials, free_consumable_positions);
+        init_food(commands, materials, free_consumable_positions);
     }
 }
