@@ -1,7 +1,6 @@
 mod components;
 mod events;
 mod resources;
-mod spawner;
 mod systems;
 
 use bevy::core::FixedTimestep;
@@ -65,7 +64,7 @@ fn main() {
                         .after(Phase::Eat),
                 )
                 .with_system(
-                    spawn_food::spawn_food
+                    spawner::spawn_new_food
                         .system()
                         .label(Phase::Growth)
                         .after(Phase::Eat),

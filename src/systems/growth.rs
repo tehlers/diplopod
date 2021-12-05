@@ -3,8 +3,9 @@ use bevy::prelude::*;
 use crate::{
     events::Growth,
     resources::{DiplopodSegments, LastTailPosition, Materials},
-    spawner,
 };
+
+use super::spawner;
 
 pub fn growth(
     mut commands: Commands,

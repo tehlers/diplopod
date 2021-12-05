@@ -1,8 +1,9 @@
 use crate::components::*;
 use crate::events::GameOver;
 use crate::resources::*;
-use crate::spawner::*;
 use bevy::prelude::*;
+
+use super::spawner::*;
 
 pub fn game_over(
     mut commands: Commands,

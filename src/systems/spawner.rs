@@ -1,5 +1,6 @@
 use crate::components::Size;
 use crate::components::*;
+use crate::events::SpawnFood;
 use crate::prelude::{AMOUNT_OF_FOOD, ARENA_HEIGHT, ARENA_WIDTH};
 use crate::resources::*;
 use bevy::prelude::*;
@@ -73,7 +74,36 @@ pub fn init_food(
     );
 }
 
-pub fn spawn_food(
+pub fn spawn_new_food(
+    commands: Commands,
+    segments: ResMut<DiplopodSegments>,
+    mut spawn_food_reader: EventReader<SpawnFood>,
+    materials: Res<Materials>,
+    mut positions: Query<&mut Position>,
+    free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    if spawn_food_reader.iter().next().is_some() {
+        let segment_positions = segments
+            .0
+            .iter()
+            .map(|e| *positions.get_mut(*e).unwrap())
+            .map(|p| p.to_consumable_position())
+            .collect::<Vec<ConsumablePosition>>();
+
+        let mut position_candidates = free_consumable_positions.clone();
+        position_candidates.remove_all(&segment_positions);
+
+        spawn_food(
+            1,
+            commands,
+            materials,
+            position_candidates,
+            free_consumable_positions,
+        );
+    }
+}
+
+fn spawn_food(
     amount: u32,
     mut commands: Commands,
     materials: Res<Materials>,
