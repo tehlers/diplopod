@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     components::{ConsumablePosition, DiplopodHead, Food, Position},
-    events::{Growth, SpawnFood},
+    events::{Growth, SpawnFood, SpawnPoison},
     resources::FreeConsumablePositions,
 };
 
@@ -10,6 +10,7 @@ pub fn eat(
     mut commands: Commands,
     mut growth_writer: EventWriter<Growth>,
     mut spawn_food_writer: EventWriter<SpawnFood>,
+    mut spawn_poison_writer: EventWriter<SpawnPoison>,
     food_positions: Query<(Entity, &ConsumablePosition), With<Food>>,
     head_positions: Query<&Position, With<DiplopodHead>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
@@ -22,6 +23,7 @@ pub fn eat(
                 free_consumable_positions.shuffle();
                 growth_writer.send(Growth);
                 spawn_food_writer.send(SpawnFood);
+                spawn_poison_writer.send(SpawnPoison);
             }
         }
     }

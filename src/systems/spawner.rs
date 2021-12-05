@@ -1,6 +1,6 @@
 use crate::components::Size;
 use crate::components::*;
-use crate::events::SpawnFood;
+use crate::events::{SpawnFood, SpawnPoison};
 use crate::prelude::{AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH};
 use crate::resources::*;
 use bevy::prelude::*;
@@ -165,6 +165,35 @@ pub fn spawn_poison(
         &mut position_candidates,
         free_consumable_positions,
     );
+}
+
+pub fn spawn_new_poison(
+    mut commands: Commands,
+    segments: ResMut<DiplopodSegments>,
+    mut spawn_poison_reader: EventReader<SpawnPoison>,
+    materials: Res<Materials>,
+    mut positions: Query<&mut Position>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    if spawn_poison_reader.iter().next().is_some() {
+        let segment_positions = segments
+            .0
+            .iter()
+            .map(|e| *positions.get_mut(*e).unwrap())
+            .map(|p| p.to_consumable_position())
+            .collect::<Vec<ConsumablePosition>>();
+
+        let mut position_candidates = free_consumable_positions.clone();
+        position_candidates.remove_all(&segment_positions);
+
+        spawn_random_poison(
+            1,
+            &mut commands,
+            &materials,
+            &mut position_candidates,
+            &mut free_consumable_positions,
+        );
+    }
 }
 
 fn spawn_random_poison(

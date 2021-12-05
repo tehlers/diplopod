@@ -70,6 +70,12 @@ fn main() {
                         .system()
                         .label(Phase::Growth)
                         .after(Phase::Eat),
+                )
+                .with_system(
+                    spawner::spawn_new_poison
+                        .system()
+                        .label(Phase::Growth)
+                        .after(Phase::Eat),
                 ),
         )
         .add_system_set_to_stage(
@@ -83,5 +89,6 @@ fn main() {
         .add_event::<GameOver>()
         .add_event::<Growth>()
         .add_event::<SpawnFood>()
+        .add_event::<SpawnPoison>()
         .run();
 }
