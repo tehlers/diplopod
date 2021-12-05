@@ -17,6 +17,7 @@ mod prelude {
     pub const ARENA_WIDTH: i32 = CONSUMABLE_WIDTH * CONSUMABLE_SCALE_FACTOR;
     pub const ARENA_HEIGHT: i32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
     pub const AMOUNT_OF_FOOD: u32 = 16;
+    pub const AMOUNT_OF_POISON: u32 = 17;
 }
 
 #[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
@@ -33,6 +34,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod.system())
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food.system())
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_poison.system())
         .insert_resource(WindowDescriptor {
             title: "Diplopod".to_string(),
             width: 400.0,

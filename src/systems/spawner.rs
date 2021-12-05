@@ -1,7 +1,7 @@
 use crate::components::Size;
 use crate::components::*;
 use crate::events::SpawnFood;
-use crate::prelude::{AMOUNT_OF_FOOD, ARENA_HEIGHT, ARENA_WIDTH};
+use crate::prelude::{AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH};
 use crate::resources::*;
 use bevy::prelude::*;
 
@@ -52,9 +52,17 @@ pub fn spawn_segment(
 }
 
 pub fn init_food(
-    commands: Commands,
+    mut commands: Commands,
     materials: Res<Materials>,
-    free_consumable_positions: ResMut<FreeConsumablePositions>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    spawn_food(&mut commands, &materials, &mut free_consumable_positions);
+}
+
+pub fn spawn_food(
+    commands: &mut Commands,
+    materials: &Res<Materials>,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
     let segment_positions = vec![Position {
         x: ARENA_WIDTH / 2,
@@ -65,22 +73,22 @@ pub fn init_food(
     let mut position_candidates = free_consumable_positions.clone();
     position_candidates.remove_all(&segment_positions);
 
-    spawn_food(
+    spawn_random_food(
         AMOUNT_OF_FOOD,
         commands,
         materials,
-        position_candidates,
+        &mut position_candidates,
         free_consumable_positions,
     );
 }
 
 pub fn spawn_new_food(
-    commands: Commands,
+    mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
     mut spawn_food_reader: EventReader<SpawnFood>,
     materials: Res<Materials>,
     mut positions: Query<&mut Position>,
-    free_consumable_positions: ResMut<FreeConsumablePositions>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
 ) {
     if spawn_food_reader.iter().next().is_some() {
         let segment_positions = segments
@@ -93,22 +101,22 @@ pub fn spawn_new_food(
         let mut position_candidates = free_consumable_positions.clone();
         position_candidates.remove_all(&segment_positions);
 
-        spawn_food(
+        spawn_random_food(
             1,
-            commands,
-            materials,
-            position_candidates,
-            free_consumable_positions,
+            &mut commands,
+            &materials,
+            &mut position_candidates,
+            &mut free_consumable_positions,
         );
     }
 }
 
-fn spawn_food(
+fn spawn_random_food(
     amount: u32,
-    mut commands: Commands,
-    materials: Res<Materials>,
-    mut position_candidates: FreeConsumablePositions,
-    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    commands: &mut Commands,
+    materials: &Res<Materials>,
+    position_candidates: &mut FreeConsumablePositions,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
     for _ in 0..amount {
         match position_candidates.positions.pop() {
@@ -120,6 +128,62 @@ fn spawn_food(
                         ..Default::default()
                     })
                     .insert(Food)
+                    .insert(pos)
+                    .insert(Size::square(2.0));
+                free_consumable_positions.remove(&pos);
+            }
+        }
+    }
+}
+
+pub fn init_poison(
+    mut commands: Commands,
+    materials: Res<Materials>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    spawn_poison(&mut commands, &materials, &mut free_consumable_positions);
+}
+
+pub fn spawn_poison(
+    commands: &mut Commands,
+    materials: &Res<Materials>,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+) {
+    let segment_positions = vec![Position {
+        x: ARENA_WIDTH / 2,
+        y: ARENA_HEIGHT / 2,
+    }
+    .to_consumable_position()];
+
+    let mut position_candidates = free_consumable_positions.clone();
+    position_candidates.remove_all(&segment_positions);
+
+    spawn_random_poison(
+        AMOUNT_OF_POISON,
+        commands,
+        materials,
+        &mut position_candidates,
+        free_consumable_positions,
+    );
+}
+
+fn spawn_random_poison(
+    amount: u32,
+    commands: &mut Commands,
+    materials: &Res<Materials>,
+    position_candidates: &mut FreeConsumablePositions,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+) {
+    for _ in 0..amount {
+        match position_candidates.positions.pop() {
+            None => break,
+            Some(pos) => {
+                commands
+                    .spawn_bundle(SpriteBundle {
+                        material: materials.poison_material.clone(),
+                        ..Default::default()
+                    })
+                    .insert(Poison)
                     .insert(pos)
                     .insert(Size::square(2.0));
                 free_consumable_positions.remove(&pos);

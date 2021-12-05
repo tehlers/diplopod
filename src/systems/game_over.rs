@@ -11,6 +11,7 @@ pub fn game_over(
     materials: Res<Materials>,
     mut segments_res: ResMut<DiplopodSegments>,
     food: Query<Entity, With<Food>>,
+    poison: Query<Entity, With<Poison>>,
     segments: Query<Entity, With<DiplopodSegment>>,
     consumable_positions: Query<&ConsumablePosition>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
@@ -20,7 +21,7 @@ pub fn game_over(
             commands.entity(ent).despawn();
         }
 
-        for ent in food.iter() {
+        for ent in food.iter().chain(poison.iter()) {
             let position = consumable_positions.get(ent).unwrap();
             free_consumable_positions.positions.push(position.clone());
             commands.entity(ent).despawn();
@@ -28,6 +29,7 @@ pub fn game_over(
         free_consumable_positions.shuffle();
 
         spawn_diplopod(&mut commands, &materials, &mut segments_res);
-        init_food(commands, materials, free_consumable_positions);
+        spawn_food(&mut commands, &materials, &mut free_consumable_positions);
+        spawn_poison(&mut commands, &materials, &mut free_consumable_positions);
     }
 }
