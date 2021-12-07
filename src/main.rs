@@ -72,6 +72,12 @@ fn main() {
                         .after(Phase::Eat),
                 )
                 .with_system(
+                    spawner::spawn_new_superfood
+                        .system()
+                        .label(Phase::Growth)
+                        .after(Phase::Eat),
+                )
+                .with_system(
                     spawner::spawn_new_poison
                         .system()
                         .label(Phase::Growth)
@@ -89,6 +95,7 @@ fn main() {
         .add_event::<GameOver>()
         .add_event::<Growth>()
         .add_event::<SpawnFood>()
+        .add_event::<SpawnSuperfood>()
         .add_event::<SpawnPoison>()
         .run();
 }

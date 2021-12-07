@@ -46,3 +46,5 @@ pub struct ConsumablePosition {
 pub struct Food;
 
 pub struct Poison;
+
+pub struct Superfood;

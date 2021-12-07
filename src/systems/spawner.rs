@@ -1,6 +1,6 @@
 use crate::components::Size;
 use crate::components::*;
-use crate::events::{SpawnFood, SpawnPoison};
+use crate::events::{SpawnFood, SpawnPoison, SpawnSuperfood};
 use crate::prelude::{AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH};
 use crate::resources::*;
 use bevy::prelude::*;
@@ -218,5 +218,52 @@ fn spawn_random_poison(
                 free_consumable_positions.remove(&pos);
             }
         }
+    }
+}
+
+pub fn spawn_new_superfood(
+    mut commands: Commands,
+    segments: ResMut<DiplopodSegments>,
+    mut spawn_superfood_reader: EventReader<SpawnSuperfood>,
+    materials: Res<Materials>,
+    mut positions: Query<&mut Position>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    if spawn_superfood_reader.iter().next().is_some() {
+        let segment_positions = segments
+            .0
+            .iter()
+            .map(|e| *positions.get_mut(*e).unwrap())
+            .map(|p| p.to_consumable_position())
+            .collect::<Vec<ConsumablePosition>>();
+
+        let mut position_candidates = free_consumable_positions.clone();
+        position_candidates.remove_all(&segment_positions);
+
+        spawn_random_superfood(
+            &mut commands,
+            &materials,
+            &mut position_candidates,
+            &mut free_consumable_positions,
+        );
+    }
+}
+
+fn spawn_random_superfood(
+    commands: &mut Commands,
+    materials: &Res<Materials>,
+    position_candidates: &mut FreeConsumablePositions,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+) {
+    if let Some(pos) = position_candidates.positions.pop() {
+        commands
+            .spawn_bundle(SpriteBundle {
+                material: materials.superfood_material.clone(),
+                ..Default::default()
+            })
+            .insert(Superfood)
+            .insert(pos)
+            .insert(Size::square(2.0));
+        free_consumable_positions.remove(&pos);
     }
 }
