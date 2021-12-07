@@ -1,6 +1,6 @@
 pub struct GameOver;
 
-pub struct Growth;
+pub struct Growth(pub u8);
 
 pub struct SpawnFood;
 
