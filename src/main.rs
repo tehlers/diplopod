@@ -61,19 +61,7 @@ fn main() {
                 .with_system(movement::movement.system().label(Phase::Movement))
                 .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement))
                 .with_system(
-                    spawner::spawn_new_food
-                        .system()
-                        .label(Phase::Spawn)
-                        .after(Phase::Eat),
-                )
-                .with_system(
-                    spawner::spawn_new_superfood
-                        .system()
-                        .label(Phase::Spawn)
-                        .after(Phase::Eat),
-                )
-                .with_system(
-                    spawner::spawn_new_poison
+                    spawner::spawn_consumables
                         .system()
                         .label(Phase::Spawn)
                         .after(Phase::Eat),
@@ -95,8 +83,6 @@ fn main() {
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
         .add_event::<Growth>()
-        .add_event::<SpawnFood>()
-        .add_event::<SpawnSuperfood>()
-        .add_event::<SpawnPoison>()
+        .add_event::<SpawnConsumables>()
         .run();
 }

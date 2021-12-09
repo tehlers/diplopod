@@ -1,6 +1,6 @@
 use crate::components::Size;
 use crate::components::*;
-use crate::events::{SpawnFood, SpawnPoison, SpawnSuperfood};
+use crate::events::SpawnConsumables;
 use crate::prelude::{AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH};
 use crate::resources::*;
 use bevy::prelude::*;
@@ -82,35 +82,6 @@ pub fn spawn_food(
     );
 }
 
-pub fn spawn_new_food(
-    mut commands: Commands,
-    segments: ResMut<DiplopodSegments>,
-    mut spawn_food_reader: EventReader<SpawnFood>,
-    materials: Res<Materials>,
-    mut positions: Query<&mut Position>,
-    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
-) {
-    if spawn_food_reader.iter().next().is_some() {
-        let segment_positions = segments
-            .0
-            .iter()
-            .map(|e| *positions.get_mut(*e).unwrap())
-            .map(|p| p.to_consumable_position())
-            .collect::<Vec<ConsumablePosition>>();
-
-        let mut position_candidates = free_consumable_positions.clone();
-        position_candidates.remove_all(&segment_positions);
-
-        spawn_random_food(
-            1,
-            &mut commands,
-            &materials,
-            &mut position_candidates,
-            &mut free_consumable_positions,
-        );
-    }
-}
-
 fn spawn_random_food(
     amount: u32,
     commands: &mut Commands,
@@ -167,35 +138,6 @@ pub fn spawn_poison(
     );
 }
 
-pub fn spawn_new_poison(
-    mut commands: Commands,
-    segments: ResMut<DiplopodSegments>,
-    mut spawn_poison_reader: EventReader<SpawnPoison>,
-    materials: Res<Materials>,
-    mut positions: Query<&mut Position>,
-    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
-) {
-    if spawn_poison_reader.iter().next().is_some() {
-        let segment_positions = segments
-            .0
-            .iter()
-            .map(|e| *positions.get_mut(*e).unwrap())
-            .map(|p| p.to_consumable_position())
-            .collect::<Vec<ConsumablePosition>>();
-
-        let mut position_candidates = free_consumable_positions.clone();
-        position_candidates.remove_all(&segment_positions);
-
-        spawn_random_poison(
-            1,
-            &mut commands,
-            &materials,
-            &mut position_candidates,
-            &mut free_consumable_positions,
-        );
-    }
-}
-
 fn spawn_random_poison(
     amount: u32,
     commands: &mut Commands,
@@ -221,34 +163,6 @@ fn spawn_random_poison(
     }
 }
 
-pub fn spawn_new_superfood(
-    mut commands: Commands,
-    segments: ResMut<DiplopodSegments>,
-    mut spawn_superfood_reader: EventReader<SpawnSuperfood>,
-    materials: Res<Materials>,
-    mut positions: Query<&mut Position>,
-    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
-) {
-    if spawn_superfood_reader.iter().next().is_some() {
-        let segment_positions = segments
-            .0
-            .iter()
-            .map(|e| *positions.get_mut(*e).unwrap())
-            .map(|p| p.to_consumable_position())
-            .collect::<Vec<ConsumablePosition>>();
-
-        let mut position_candidates = free_consumable_positions.clone();
-        position_candidates.remove_all(&segment_positions);
-
-        spawn_random_superfood(
-            &mut commands,
-            &materials,
-            &mut position_candidates,
-            &mut free_consumable_positions,
-        );
-    }
-}
-
 fn spawn_random_superfood(
     commands: &mut Commands,
     materials: &Res<Materials>,
@@ -265,5 +179,49 @@ fn spawn_random_superfood(
             .insert(pos)
             .insert(Size::square(2.0));
         free_consumable_positions.remove(&pos);
+    }
+}
+
+pub fn spawn_consumables(
+    mut commands: Commands,
+    segments: ResMut<DiplopodSegments>,
+    mut spawn_consumables_reader: EventReader<SpawnConsumables>,
+    materials: Res<Materials>,
+    mut positions: Query<&mut Position>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+) {
+    if spawn_consumables_reader.iter().next().is_some() {
+        let segment_positions = segments
+            .0
+            .iter()
+            .map(|e| *positions.get_mut(*e).unwrap())
+            .map(|p| p.to_consumable_position())
+            .collect::<Vec<ConsumablePosition>>();
+
+        let mut position_candidates = free_consumable_positions.clone();
+        position_candidates.remove_all(&segment_positions);
+
+        spawn_random_food(
+            1,
+            &mut commands,
+            &materials,
+            &mut position_candidates,
+            &mut free_consumable_positions,
+        );
+
+        spawn_random_poison(
+            1,
+            &mut commands,
+            &materials,
+            &mut position_candidates,
+            &mut free_consumable_positions,
+        );
+
+        spawn_random_superfood(
+            &mut commands,
+            &materials,
+            &mut position_candidates,
+            &mut free_consumable_positions,
+        );
     }
 }

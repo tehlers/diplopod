@@ -3,16 +3,14 @@ use rand::{thread_rng, Rng};
 
 use crate::{
     components::{ConsumablePosition, DiplopodHead, Food, Poison, Position, Superfood},
-    events::{GameOver, Growth, SpawnFood, SpawnPoison, SpawnSuperfood},
+    events::{GameOver, Growth, SpawnConsumables},
     resources::FreeConsumablePositions,
 };
 
 pub fn eat(
     mut commands: Commands,
     mut growth_writer: EventWriter<Growth>,
-    mut spawn_food_writer: EventWriter<SpawnFood>,
-    mut spawn_superfood_writer: EventWriter<SpawnSuperfood>,
-    mut spawn_poison_writer: EventWriter<SpawnPoison>,
+    mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
     food_positions: Query<(Entity, &ConsumablePosition), With<Food>>,
     superfood_positions: Query<(Entity, &ConsumablePosition), With<Superfood>>,
@@ -27,11 +25,8 @@ pub fn eat(
                 free_consumable_positions.positions.push(*food_pos);
                 free_consumable_positions.shuffle();
                 growth_writer.send(Growth(1));
-                spawn_food_writer.send(SpawnFood);
-                if head_pos.x % 2 == 0 {
-                    spawn_superfood_writer.send(SpawnSuperfood);
-                }
-                spawn_poison_writer.send(SpawnPoison);
+
+                spawn_consumables_writer.send(SpawnConsumables);
             }
         }
 
