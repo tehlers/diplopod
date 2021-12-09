@@ -25,6 +25,7 @@ pub enum Phase {
     Input,
     Movement,
     Eat,
+    Spawn,
     Growth,
 }
 
@@ -60,28 +61,28 @@ fn main() {
                 .with_system(movement::movement.system().label(Phase::Movement))
                 .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement))
                 .with_system(
-                    growth::growth
-                        .system()
-                        .label(Phase::Growth)
-                        .after(Phase::Eat),
-                )
-                .with_system(
                     spawner::spawn_new_food
                         .system()
-                        .label(Phase::Growth)
+                        .label(Phase::Spawn)
                         .after(Phase::Eat),
                 )
                 .with_system(
                     spawner::spawn_new_superfood
                         .system()
-                        .label(Phase::Growth)
+                        .label(Phase::Spawn)
                         .after(Phase::Eat),
                 )
                 .with_system(
                     spawner::spawn_new_poison
                         .system()
-                        .label(Phase::Growth)
+                        .label(Phase::Spawn)
                         .after(Phase::Eat),
+                )
+                .with_system(
+                    growth::growth
+                        .system()
+                        .label(Phase::Growth)
+                        .after(Phase::Spawn),
                 ),
         )
         .add_system_set_to_stage(
