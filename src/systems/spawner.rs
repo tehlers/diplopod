@@ -189,8 +189,9 @@ pub fn spawn_consumables(
     materials: Res<Materials>,
     mut positions: Query<&mut Position>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    mut last_special_spawn: ResMut<LastSpecialSpawn>,
 ) {
-    if spawn_consumables_reader.iter().next().is_some() {
+    if let Some(spawn_event) = spawn_consumables_reader.iter().next() {
         let segment_positions = segments
             .0
             .iter()
@@ -201,27 +202,33 @@ pub fn spawn_consumables(
         let mut position_candidates = free_consumable_positions.clone();
         position_candidates.remove_all(&segment_positions);
 
-        spawn_random_food(
-            1,
-            &mut commands,
-            &materials,
-            &mut position_candidates,
-            &mut free_consumable_positions,
-        );
+        if spawn_event.regular {
+            spawn_random_food(
+                1,
+                &mut commands,
+                &materials,
+                &mut position_candidates,
+                &mut free_consumable_positions,
+            );
 
-        spawn_random_poison(
-            1,
-            &mut commands,
-            &materials,
-            &mut position_candidates,
-            &mut free_consumable_positions,
-        );
+            spawn_random_poison(
+                1,
+                &mut commands,
+                &materials,
+                &mut position_candidates,
+                &mut free_consumable_positions,
+            );
+        }
 
-        spawn_random_superfood(
-            &mut commands,
-            &materials,
-            &mut position_candidates,
-            &mut free_consumable_positions,
-        );
+        let new_size = segments.0.len() as u32 + spawn_event.new_segments as u32;
+        if new_size - last_special_spawn.0 >= 16 {
+            spawn_random_superfood(
+                &mut commands,
+                &materials,
+                &mut position_candidates,
+                &mut free_consumable_positions,
+            );
+            last_special_spawn.0 = new_size;
+        }
     }
 }

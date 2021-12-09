@@ -44,6 +44,7 @@ fn main() {
         })
         .insert_resource(DiplopodSegments::default())
         .insert_resource(LastTailPosition::default())
+        .insert_resource(LastSpecialSpawn::default())
         .insert_resource(FreeConsumablePositions::new(
             CONSUMABLE_WIDTH as i32,
             CONSUMABLE_HEIGHT as i32,

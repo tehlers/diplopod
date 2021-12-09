@@ -26,7 +26,10 @@ pub fn eat(
                 free_consumable_positions.shuffle();
                 growth_writer.send(Growth(1));
 
-                spawn_consumables_writer.send(SpawnConsumables);
+                spawn_consumables_writer.send(SpawnConsumables {
+                    regular: true,
+                    new_segments: 1,
+                });
             }
         }
 
@@ -35,7 +38,12 @@ pub fn eat(
                 commands.entity(ent).despawn();
                 free_consumable_positions.positions.push(*superfood_pos);
                 free_consumable_positions.shuffle();
-                growth_writer.send(Growth(thread_rng().gen_range(2..10)));
+                let new_segments = thread_rng().gen_range(2..10);
+                growth_writer.send(Growth(new_segments));
+                spawn_consumables_writer.send(SpawnConsumables {
+                    regular: false,
+                    new_segments: new_segments,
+                });
             }
         }
 
