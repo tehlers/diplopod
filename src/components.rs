@@ -48,3 +48,5 @@ pub struct Food;
 pub struct Poison;
 
 pub struct Superfood;
+
+pub struct Antidote;

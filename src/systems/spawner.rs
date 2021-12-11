@@ -184,6 +184,25 @@ fn spawn_random_superfood(
     }
 }
 
+fn spawn_random_antidote(
+    commands: &mut Commands,
+    materials: &Res<Materials>,
+    position_candidates: &mut FreeConsumablePositions,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+) {
+    if let Some(pos) = position_candidates.positions.pop() {
+        commands
+            .spawn_bundle(SpriteBundle {
+                material: materials.antidote_material.clone(),
+                ..Default::default()
+            })
+            .insert(Antidote)
+            .insert(pos)
+            .insert(Size::square(2.0));
+        free_consumable_positions.remove(&pos);
+    }
+}
+
 pub fn spawn_consumables(
     mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
@@ -192,6 +211,7 @@ pub fn spawn_consumables(
     mut positions: Query<&mut Position>,
     consumable_positions: Query<&ConsumablePosition>,
     superfood: Query<Entity, With<Superfood>>,
+    antidotes: Query<Entity, With<Antidote>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
 ) {
@@ -226,10 +246,29 @@ pub fn spawn_consumables(
 
         let new_size = segments.0.len() as u32 + spawn_event.new_segments as u32;
         if new_size - last_special_spawn.0 > SPECIAL_SPAWN_INTERVAL {
+            last_special_spawn.0 = (new_size / SPECIAL_SPAWN_INTERVAL) * SPECIAL_SPAWN_INTERVAL;
+
             for ent in superfood.iter() {
                 let position = consumable_positions.get(ent).unwrap();
                 free_consumable_positions.positions.push(position.clone());
                 commands.entity(ent).despawn();
+            }
+            free_consumable_positions.shuffle();
+
+            if last_special_spawn.0 % (SPECIAL_SPAWN_INTERVAL * 2) == 0 {
+                for ent in antidotes.iter() {
+                    let position = consumable_positions.get(ent).unwrap();
+                    free_consumable_positions.positions.push(position.clone());
+                    commands.entity(ent).despawn();
+                }
+                free_consumable_positions.shuffle();
+
+                spawn_random_antidote(
+                    &mut commands,
+                    &materials,
+                    &mut position_candidates,
+                    &mut free_consumable_positions,
+                );
             }
 
             spawn_random_superfood(
@@ -238,7 +277,6 @@ pub fn spawn_consumables(
                 &mut position_candidates,
                 &mut free_consumable_positions,
             );
-            last_special_spawn.0 = (new_size / SPECIAL_SPAWN_INTERVAL) * SPECIAL_SPAWN_INTERVAL;
         }
     }
 }

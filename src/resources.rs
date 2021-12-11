@@ -9,6 +9,7 @@ pub struct Materials {
     pub food_material: Handle<ColorMaterial>,
     pub superfood_material: Handle<ColorMaterial>,
     pub poison_material: Handle<ColorMaterial>,
+    pub antidote_material: Handle<ColorMaterial>,
 }
 
 #[derive(Default)]

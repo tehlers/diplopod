@@ -8,5 +8,6 @@ pub fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>
         food_material: materials.add(Color::GREEN.into()),
         superfood_material: materials.add(Color::BLUE.into()),
         poison_material: materials.add(Color::RED.into()),
+        antidote_material: materials.add(Color::WHITE.into()),
     });
 }

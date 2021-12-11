@@ -13,6 +13,7 @@ pub fn game_over(
     food: Query<Entity, With<Food>>,
     superfood: Query<Entity, With<Superfood>>,
     poison: Query<Entity, With<Poison>>,
+    antidotes: Query<Entity, With<Antidote>>,
     segments: Query<Entity, With<DiplopodSegment>>,
     consumable_positions: Query<&ConsumablePosition>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
@@ -23,7 +24,12 @@ pub fn game_over(
             commands.entity(ent).despawn();
         }
 
-        for ent in food.iter().chain(poison.iter()).chain(superfood.iter()) {
+        for ent in food
+            .iter()
+            .chain(poison.iter())
+            .chain(superfood.iter())
+            .chain(antidotes.iter())
+        {
             let position = consumable_positions.get(ent).unwrap();
             free_consumable_positions.positions.push(position.clone());
             commands.entity(ent).despawn();
