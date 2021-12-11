@@ -1,7 +1,9 @@
 use crate::components::Size;
 use crate::components::*;
 use crate::events::SpawnConsumables;
-use crate::prelude::{AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH};
+use crate::prelude::{
+    AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH, SPECIAL_SPAWN_INTERVAL,
+};
 use crate::resources::*;
 use bevy::prelude::*;
 
@@ -188,6 +190,8 @@ pub fn spawn_consumables(
     mut spawn_consumables_reader: EventReader<SpawnConsumables>,
     materials: Res<Materials>,
     mut positions: Query<&mut Position>,
+    consumable_positions: Query<&ConsumablePosition>,
+    superfood: Query<Entity, With<Superfood>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
 ) {
@@ -221,14 +225,20 @@ pub fn spawn_consumables(
         }
 
         let new_size = segments.0.len() as u32 + spawn_event.new_segments as u32;
-        if new_size - last_special_spawn.0 >= 16 {
+        if new_size - last_special_spawn.0 > SPECIAL_SPAWN_INTERVAL {
+            for ent in superfood.iter() {
+                let position = consumable_positions.get(ent).unwrap();
+                free_consumable_positions.positions.push(position.clone());
+                commands.entity(ent).despawn();
+            }
+
             spawn_random_superfood(
                 &mut commands,
                 &materials,
                 &mut position_candidates,
                 &mut free_consumable_positions,
             );
-            last_special_spawn.0 = new_size;
+            last_special_spawn.0 = (new_size / SPECIAL_SPAWN_INTERVAL) * SPECIAL_SPAWN_INTERVAL;
         }
     }
 }

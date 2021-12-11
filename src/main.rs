@@ -18,6 +18,7 @@ mod prelude {
     pub const ARENA_HEIGHT: i32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
     pub const AMOUNT_OF_FOOD: u32 = 16;
     pub const AMOUNT_OF_POISON: u32 = 17;
+    pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 }
 
 #[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
