@@ -2,9 +2,9 @@ use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
 use crate::{
-    components::{ConsumablePosition, DiplopodHead, Food, Poison, Position, Superfood},
+    components::{Antidote, ConsumablePosition, DiplopodHead, Food, Poison, Position, Superfood},
     events::{GameOver, Growth, SpawnConsumables},
-    resources::FreeConsumablePositions,
+    resources::{FreeConsumablePositions, ImmunityTime},
 };
 
 pub fn eat(
@@ -15,8 +15,10 @@ pub fn eat(
     food_positions: Query<(Entity, &ConsumablePosition), With<Food>>,
     superfood_positions: Query<(Entity, &ConsumablePosition), With<Superfood>>,
     poison_positions: Query<(Entity, &ConsumablePosition), With<Poison>>,
+    antidote_positions: Query<(Entity, &ConsumablePosition), With<Antidote>>,
     head_positions: Query<&Position, With<DiplopodHead>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    mut immunity_time: ResMut<ImmunityTime>,
 ) {
     for head_pos in head_positions.iter() {
         for (ent, food_pos) in food_positions.iter() {
@@ -47,9 +49,24 @@ pub fn eat(
             }
         }
 
-        for (_ent, poison_pos) in poison_positions.iter() {
+        for (ent, antidote_pos) in antidote_positions.iter() {
+            if *antidote_pos == head_pos.to_consumable_position() {
+                commands.entity(ent).despawn();
+                free_consumable_positions.positions.push(*antidote_pos);
+                immunity_time.0 = 10;
+            }
+        }
+
+        for (ent, poison_pos) in poison_positions.iter() {
             if *poison_pos == head_pos.to_consumable_position() {
-                game_over_writer.send(GameOver);
+                if immunity_time.0 > 0 {
+                    commands.entity(ent).despawn();
+                    free_consumable_positions.positions.push(*poison_pos);
+                    free_consumable_positions.shuffle();
+                    growth_writer.send(Growth(1));
+                } else {
+                    game_over_writer.send(GameOver);
+                }
             }
         }
     }

@@ -55,3 +55,6 @@ pub struct LastTailPosition(pub Option<Position>);
 
 #[derive(Default)]
 pub struct LastSpecialSpawn(pub u32);
+
+#[derive(Default)]
+pub struct ImmunityTime(pub u8);
