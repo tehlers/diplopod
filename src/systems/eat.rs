@@ -53,7 +53,7 @@ pub fn eat(
             if *antidote_pos == head_pos.to_consumable_position() {
                 commands.entity(ent).despawn();
                 free_consumable_positions.positions.push(*antidote_pos);
-                immunity_time.0 = 10;
+                immunity_time.0 = immunity_time.0 + 10;
             }
         }
 

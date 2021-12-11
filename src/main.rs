@@ -57,6 +57,16 @@ fn main() {
                 .label(Phase::Input)
                 .before(Phase::Movement),
         )
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(1.0))
+                .with_system(
+                    limit_immunity::limit_immunity
+                        .system()
+                        .label(Phase::Input)
+                        .before(Phase::Movement),
+                ),
+        )
         .add_system(game_over::game_over.system().after(Phase::Movement))
         .add_system_set(
             SystemSet::new()
