@@ -84,7 +84,8 @@ fn main() {
                         .system()
                         .label(Phase::Growth)
                         .after(Phase::Spawn),
-                ),
+                )
+                .with_system(change_color::change_color.system()),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
