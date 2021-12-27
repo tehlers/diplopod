@@ -18,6 +18,7 @@ pub fn game_over(
     consumable_positions: Query<&ConsumablePosition>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
+    mut immunity_time: ResMut<ImmunityTime>,
 ) {
     if reader.iter().next().is_some() {
         for ent in segments.iter() {
@@ -37,6 +38,7 @@ pub fn game_over(
         free_consumable_positions.shuffle();
 
         last_special_spawn.0 = 0;
+        immunity_time.0 = 0;
 
         spawn_diplopod(&mut commands, &materials, &mut segments_res);
         spawn_food(&mut commands, &materials, &mut free_consumable_positions);
