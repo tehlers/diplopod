@@ -3,6 +3,7 @@ pub mod eat;
 pub mod game_over;
 pub mod growth;
 pub mod limit_immunity;
+pub mod move_antidote;
 pub mod movement;
 pub mod player_input;
 pub mod position_translation;

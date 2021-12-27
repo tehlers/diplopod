@@ -67,6 +67,16 @@ fn main() {
                         .before(Phase::Movement),
                 ),
         )
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(0.5))
+                .with_system(
+                    move_antidote::move_antidote
+                        .system()
+                        .label(Phase::Input)
+                        .before(Phase::Movement),
+                ),
+        )
         .add_system(game_over::game_over.system().after(Phase::Movement))
         .add_system_set(
             SystemSet::new()
