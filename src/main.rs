@@ -5,6 +5,7 @@ mod systems;
 
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use events::*;
 use prelude::*;
 use resources::*;
@@ -40,8 +41,10 @@ pub enum Phase {
 
 fn main() {
     App::new()
+        .insert_resource(Msaa { samples: 4 })
         .add_startup_system(setup::setup)
         .add_plugins(DefaultPlugins)
+        .add_plugin(ShapePlugin)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_poison)
@@ -51,6 +54,7 @@ fn main() {
             height: 220.0,
             ..Default::default()
         })
+        .insert_resource(ConsumableRadius::default())
         .insert_resource(DiplopodSegments::default())
         .insert_resource(LastTailPosition::default())
         .insert_resource(LastSpecialSpawn::default())
@@ -83,6 +87,7 @@ fn main() {
                 ),
         )
         .add_system(game_over::game_over.after(Phase::Movement))
+        .add_system(size_scaling::resize_consumables)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.075))

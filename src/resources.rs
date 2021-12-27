@@ -50,3 +50,6 @@ pub struct LastSpecialSpawn(pub u32);
 
 #[derive(Default)]
 pub struct ImmunityTime(pub u8);
+
+#[derive(Default)]
+pub struct ConsumableRadius(pub f32);

@@ -7,6 +7,7 @@ use crate::prelude::{
 };
 use crate::resources::*;
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 
 pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
     spawn_diplopod(&mut commands, &mut segments);
@@ -51,13 +52,19 @@ pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) 
 pub fn init_food(
     mut commands: Commands,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    consumable_radius: Res<ConsumableRadius>,
 ) {
-    spawn_food(&mut commands, &mut free_consumable_positions);
+    spawn_food(
+        &mut commands,
+        &mut free_consumable_positions,
+        &consumable_radius,
+    );
 }
 
 pub fn spawn_food(
     commands: &mut Commands,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    consumable_radius: &Res<ConsumableRadius>,
 ) {
     let segment_positions = vec![Position {
         x: ARENA_WIDTH / 2,
@@ -73,6 +80,7 @@ pub fn spawn_food(
         commands,
         &mut position_candidates,
         free_consumable_positions,
+        &consumable_radius,
     );
 }
 
@@ -81,22 +89,28 @@ fn spawn_random_food(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    consumable_radius: &Res<ConsumableRadius>,
 ) {
+    let shape = shapes::Circle {
+        radius: consumable_radius.0,
+        center: Vec2::new(0., 0.),
+    };
+
     for _ in 0..amount {
         match position_candidates.positions.pop() {
             None => break,
             Some(pos) => {
                 commands
-                    .spawn_bundle(SpriteBundle {
-                        sprite: Sprite {
-                            color: FOOD_COLOR,
-                            ..Default::default()
+                    .spawn_bundle(GeometryBuilder::build_as(
+                        &shape,
+                        DrawMode::Outlined {
+                            fill_mode: FillMode::color(FOOD_COLOR),
+                            outline_mode: StrokeMode::color(FOOD_COLOR),
                         },
-                        ..Default::default()
-                    })
+                        Transform::default(),
+                    ))
                     .insert(Food)
-                    .insert(pos)
-                    .insert(Size::square(2.0));
+                    .insert(pos);
                 free_consumable_positions.remove(&pos);
             }
         }
@@ -106,13 +120,19 @@ fn spawn_random_food(
 pub fn init_poison(
     mut commands: Commands,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    consumable_radius: Res<ConsumableRadius>,
 ) {
-    spawn_poison(&mut commands, &mut free_consumable_positions);
+    spawn_poison(
+        &mut commands,
+        &mut free_consumable_positions,
+        &consumable_radius,
+    );
 }
 
 pub fn spawn_poison(
     commands: &mut Commands,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    consumable_radius: &Res<ConsumableRadius>,
 ) {
     let segment_positions = vec![Position {
         x: ARENA_WIDTH / 2,
@@ -128,6 +148,7 @@ pub fn spawn_poison(
         commands,
         &mut position_candidates,
         free_consumable_positions,
+        consumable_radius,
     );
 }
 
@@ -136,22 +157,28 @@ fn spawn_random_poison(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    consumable_radius: &Res<ConsumableRadius>,
 ) {
+    let shape = shapes::Circle {
+        radius: consumable_radius.0,
+        center: Vec2::new(0., 0.),
+    };
+
     for _ in 0..amount {
         match position_candidates.positions.pop() {
             None => break,
             Some(pos) => {
                 commands
-                    .spawn_bundle(SpriteBundle {
-                        sprite: Sprite {
-                            color: POISON_COLOR,
-                            ..Default::default()
+                    .spawn_bundle(GeometryBuilder::build_as(
+                        &shape,
+                        DrawMode::Outlined {
+                            fill_mode: FillMode::color(POISON_COLOR),
+                            outline_mode: StrokeMode::color(POISON_COLOR),
                         },
-                        ..Default::default()
-                    })
+                        Transform::default(),
+                    ))
                     .insert(Poison)
-                    .insert(pos)
-                    .insert(Size::square(2.0));
+                    .insert(pos);
                 free_consumable_positions.remove(&pos);
             }
         }
@@ -210,6 +237,7 @@ pub fn spawn_consumables(
     antidotes: Query<Entity, With<Antidote>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
+    consumable_radius: Res<ConsumableRadius>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.iter().next() {
         let segment_positions = segments
@@ -228,6 +256,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
+                &consumable_radius,
             );
 
             spawn_random_poison(
@@ -235,6 +264,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
+                &consumable_radius,
             );
         }
 
