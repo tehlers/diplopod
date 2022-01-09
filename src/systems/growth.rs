@@ -2,7 +2,8 @@ use bevy::prelude::*;
 
 use crate::{
     events::Growth,
-    resources::{DiplopodSegments, ImmunityTime, LastTailPosition, Materials},
+    prelude::{ANTIDOTE_COLOR, DIPLOPOD_COLOR},
+    resources::{DiplopodSegments, ImmunityTime, LastTailPosition},
 };
 
 use super::spawner;
@@ -12,7 +13,6 @@ pub fn growth(
     last_tail_position: Res<LastTailPosition>,
     mut segments: ResMut<DiplopodSegments>,
     mut growth_reader: EventReader<Growth>,
-    materials: Res<Materials>,
     immunity_time: Res<ImmunityTime>,
 ) {
     if let Some(growth) = growth_reader.iter().next() {
@@ -20,9 +20,9 @@ pub fn growth(
             segments.0.push(spawner::spawn_segment(
                 &mut commands,
                 if immunity_time.0 > 0 {
-                    &materials.antidote_material
+                    ANTIDOTE_COLOR
                 } else {
-                    &materials.diplopod_material
+                    DIPLOPOD_COLOR
                 },
                 last_tail_position.0.unwrap(),
             ));

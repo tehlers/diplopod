@@ -2,27 +2,23 @@ use crate::components::Size;
 use crate::components::*;
 use crate::events::SpawnConsumables;
 use crate::prelude::{
-    AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ARENA_HEIGHT, ARENA_WIDTH, SPECIAL_SPAWN_INTERVAL,
+    AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ANTIDOTE_COLOR, ARENA_HEIGHT, ARENA_WIDTH, DIPLOPOD_COLOR,
+    FOOD_COLOR, POISON_COLOR, SPECIAL_SPAWN_INTERVAL, SUPERFOOD_COLOR,
 };
 use crate::resources::*;
 use bevy::prelude::*;
 
-pub fn init_diplopod(
-    mut commands: Commands,
-    materials: Res<Materials>,
-    mut segments: ResMut<DiplopodSegments>,
-) {
-    spawn_diplopod(&mut commands, &materials, &mut segments);
+pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
+    spawn_diplopod(&mut commands, &mut segments);
 }
 
-pub fn spawn_diplopod(
-    commands: &mut Commands,
-    materials: &Res<Materials>,
-    segments: &mut ResMut<DiplopodSegments>,
-) {
+pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
     segments.0 = vec![commands
         .spawn_bundle(SpriteBundle {
-            material: materials.diplopod_material.clone(),
+            sprite: Sprite {
+                color: DIPLOPOD_COLOR,
+                ..Default::default()
+            },
             ..Default::default()
         })
         .insert(DiplopodHead {
@@ -37,14 +33,13 @@ pub fn spawn_diplopod(
         .id()];
 }
 
-pub fn spawn_segment(
-    commands: &mut Commands,
-    material: &Handle<ColorMaterial>,
-    position: Position,
-) -> Entity {
+pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> Entity {
     commands
         .spawn_bundle(SpriteBundle {
-            material: material.clone(),
+            sprite: Sprite {
+                color,
+                ..Default::default()
+            },
             ..Default::default()
         })
         .insert(DiplopodSegment)
@@ -55,15 +50,13 @@ pub fn spawn_segment(
 
 pub fn init_food(
     mut commands: Commands,
-    materials: Res<Materials>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
 ) {
-    spawn_food(&mut commands, &materials, &mut free_consumable_positions);
+    spawn_food(&mut commands, &mut free_consumable_positions);
 }
 
 pub fn spawn_food(
     commands: &mut Commands,
-    materials: &Res<Materials>,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
     let segment_positions = vec![Position {
@@ -78,7 +71,6 @@ pub fn spawn_food(
     spawn_random_food(
         AMOUNT_OF_FOOD,
         commands,
-        materials,
         &mut position_candidates,
         free_consumable_positions,
     );
@@ -87,7 +79,6 @@ pub fn spawn_food(
 fn spawn_random_food(
     amount: u32,
     commands: &mut Commands,
-    materials: &Res<Materials>,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
@@ -97,7 +88,10 @@ fn spawn_random_food(
             Some(pos) => {
                 commands
                     .spawn_bundle(SpriteBundle {
-                        material: materials.food_material.clone(),
+                        sprite: Sprite {
+                            color: FOOD_COLOR,
+                            ..Default::default()
+                        },
                         ..Default::default()
                     })
                     .insert(Food)
@@ -111,15 +105,13 @@ fn spawn_random_food(
 
 pub fn init_poison(
     mut commands: Commands,
-    materials: Res<Materials>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
 ) {
-    spawn_poison(&mut commands, &materials, &mut free_consumable_positions);
+    spawn_poison(&mut commands, &mut free_consumable_positions);
 }
 
 pub fn spawn_poison(
     commands: &mut Commands,
-    materials: &Res<Materials>,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
     let segment_positions = vec![Position {
@@ -134,7 +126,6 @@ pub fn spawn_poison(
     spawn_random_poison(
         AMOUNT_OF_POISON,
         commands,
-        materials,
         &mut position_candidates,
         free_consumable_positions,
     );
@@ -143,7 +134,6 @@ pub fn spawn_poison(
 fn spawn_random_poison(
     amount: u32,
     commands: &mut Commands,
-    materials: &Res<Materials>,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
@@ -153,7 +143,10 @@ fn spawn_random_poison(
             Some(pos) => {
                 commands
                     .spawn_bundle(SpriteBundle {
-                        material: materials.poison_material.clone(),
+                        sprite: Sprite {
+                            color: POISON_COLOR,
+                            ..Default::default()
+                        },
                         ..Default::default()
                     })
                     .insert(Poison)
@@ -167,14 +160,16 @@ fn spawn_random_poison(
 
 fn spawn_random_superfood(
     commands: &mut Commands,
-    materials: &Res<Materials>,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         commands
             .spawn_bundle(SpriteBundle {
-                material: materials.superfood_material.clone(),
+                sprite: Sprite {
+                    color: SUPERFOOD_COLOR,
+                    ..Default::default()
+                },
                 ..Default::default()
             })
             .insert(Superfood)
@@ -186,14 +181,16 @@ fn spawn_random_superfood(
 
 fn spawn_random_antidote(
     commands: &mut Commands,
-    materials: &Res<Materials>,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         commands
             .spawn_bundle(SpriteBundle {
-                material: materials.antidote_material.clone(),
+                sprite: Sprite {
+                    color: ANTIDOTE_COLOR,
+                    ..Default::default()
+                },
                 ..Default::default()
             })
             .insert(Antidote)
@@ -207,7 +204,6 @@ pub fn spawn_consumables(
     mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
     mut spawn_consumables_reader: EventReader<SpawnConsumables>,
-    materials: Res<Materials>,
     mut positions: Query<&mut Position>,
     consumable_positions: Query<&ConsumablePosition>,
     superfood: Query<Entity, With<Superfood>>,
@@ -230,7 +226,6 @@ pub fn spawn_consumables(
             spawn_random_food(
                 1,
                 &mut commands,
-                &materials,
                 &mut position_candidates,
                 &mut free_consumable_positions,
             );
@@ -238,7 +233,6 @@ pub fn spawn_consumables(
             spawn_random_poison(
                 1,
                 &mut commands,
-                &materials,
                 &mut position_candidates,
                 &mut free_consumable_positions,
             );
@@ -265,7 +259,6 @@ pub fn spawn_consumables(
 
                 spawn_random_antidote(
                     &mut commands,
-                    &materials,
                     &mut position_candidates,
                     &mut free_consumable_positions,
                 );
@@ -273,7 +266,6 @@ pub fn spawn_consumables(
 
             spawn_random_superfood(
                 &mut commands,
-                &materials,
                 &mut position_candidates,
                 &mut free_consumable_positions,
             );

@@ -8,7 +8,6 @@ use super::spawner::*;
 pub fn game_over(
     mut commands: Commands,
     mut reader: EventReader<GameOver>,
-    materials: Res<Materials>,
     mut segments_res: ResMut<DiplopodSegments>,
     food: Query<Entity, With<Food>>,
     superfood: Query<Entity, With<Superfood>>,
@@ -40,8 +39,8 @@ pub fn game_over(
         last_special_spawn.0 = 0;
         immunity_time.0 = 0;
 
-        spawn_diplopod(&mut commands, &materials, &mut segments_res);
-        spawn_food(&mut commands, &materials, &mut free_consumable_positions);
-        spawn_poison(&mut commands, &materials, &mut free_consumable_positions);
+        spawn_diplopod(&mut commands, &mut segments_res);
+        spawn_food(&mut commands, &mut free_consumable_positions);
+        spawn_poison(&mut commands, &mut free_consumable_positions);
     }
 }

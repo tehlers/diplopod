@@ -4,14 +4,6 @@ use rand::thread_rng;
 
 use crate::components::{ConsumablePosition, Position};
 
-pub struct Materials {
-    pub diplopod_material: Handle<ColorMaterial>,
-    pub food_material: Handle<ColorMaterial>,
-    pub superfood_material: Handle<ColorMaterial>,
-    pub poison_material: Handle<ColorMaterial>,
-    pub antidote_material: Handle<ColorMaterial>,
-}
-
 #[derive(Default)]
 pub struct DiplopodSegments(pub Vec<Entity>);
 

@@ -11,6 +11,8 @@ use resources::*;
 use systems::*;
 
 mod prelude {
+    use bevy::prelude::Color;
+
     pub const CONSUMABLE_WIDTH: i32 = 39;
     pub const CONSUMABLE_HEIGHT: i32 = 21;
     pub const CONSUMABLE_SCALE_FACTOR: i32 = 2;
@@ -19,6 +21,12 @@ mod prelude {
     pub const AMOUNT_OF_FOOD: u32 = 16;
     pub const AMOUNT_OF_POISON: u32 = 17;
     pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
+
+    pub const DIPLOPOD_COLOR: Color = Color::ORANGE;
+    pub const FOOD_COLOR: Color = Color::GREEN;
+    pub const SUPERFOOD_COLOR: Color = Color::BLUE;
+    pub const POISON_COLOR: Color = Color::RED;
+    pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 }
 
 #[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
@@ -31,7 +39,7 @@ pub enum Phase {
 }
 
 fn main() {
-    App::build()
+    App::new()
         .add_startup_system(setup::setup.system())
         .add_plugins(DefaultPlugins)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod.system())

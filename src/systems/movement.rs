@@ -21,7 +21,10 @@ pub fn movement(
         head_pos.x += head.direction.x as i32;
         head_pos.y += head.direction.y as i32;
 
-        if head_pos.x < 0 || head_pos.y < 0 || head_pos.x >= ARENA_WIDTH || head_pos.y >= ARENA_HEIGHT
+        if head_pos.x < 0
+            || head_pos.y < 0
+            || head_pos.x >= ARENA_WIDTH
+            || head_pos.y >= ARENA_HEIGHT
         {
             game_over_writer.send(GameOver);
         }
