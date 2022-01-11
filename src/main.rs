@@ -40,11 +40,11 @@ pub enum Phase {
 
 fn main() {
     App::new()
-        .add_startup_system(setup::setup.system())
+        .add_startup_system(setup::setup)
         .add_plugins(DefaultPlugins)
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod.system())
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food.system())
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_poison.system())
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod)
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food)
+        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_poison)
         .insert_resource(WindowDescriptor {
             title: "Diplopod".to_string(),
             width: 400.0,
@@ -61,7 +61,6 @@ fn main() {
         ))
         .add_system(
             player_input::player_input
-                .system()
                 .label(Phase::Input)
                 .before(Phase::Movement),
         )
@@ -70,7 +69,6 @@ fn main() {
                 .with_run_criteria(FixedTimestep::step(1.0))
                 .with_system(
                     limit_immunity::limit_immunity
-                        .system()
                         .label(Phase::Input)
                         .before(Phase::Movement),
                 ),
@@ -80,37 +78,30 @@ fn main() {
                 .with_run_criteria(FixedTimestep::step(0.5))
                 .with_system(
                     move_antidote::move_antidote
-                        .system()
                         .label(Phase::Input)
                         .before(Phase::Movement),
                 ),
         )
-        .add_system(game_over::game_over.system().after(Phase::Movement))
+        .add_system(game_over::game_over.after(Phase::Movement))
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.075))
-                .with_system(movement::movement.system().label(Phase::Movement))
-                .with_system(eat::eat.system().label(Phase::Eat).after(Phase::Movement))
+                .with_system(movement::movement.label(Phase::Movement))
+                .with_system(eat::eat.label(Phase::Eat).after(Phase::Movement))
                 .with_system(
                     spawner::spawn_consumables
-                        .system()
                         .label(Phase::Spawn)
                         .after(Phase::Eat),
                 )
-                .with_system(
-                    growth::growth
-                        .system()
-                        .label(Phase::Growth)
-                        .after(Phase::Spawn),
-                )
-                .with_system(change_color::change_color.system()),
+                .with_system(growth::growth.label(Phase::Growth).after(Phase::Spawn))
+                .with_system(change_color::change_color),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
             SystemSet::new()
-                .with_system(position_translation::position_translation.system())
-                .with_system(position_translation::consumable_position_translation.system())
-                .with_system(size_scaling::size_scaling.system()),
+                .with_system(position_translation::position_translation)
+                .with_system(position_translation::consumable_position_translation)
+                .with_system(size_scaling::size_scaling),
         )
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
