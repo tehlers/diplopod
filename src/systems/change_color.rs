@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     components::DiplopodSegment,
-    prelude::{ANTIDOTE_COLOR, DIPLOPOD_COLOR},
+    prelude::{DIPLOPOD_COLOR, DIPLOPOD_IMMUNE_COLOR},
     resources::ImmunityTime,
 };
 
@@ -12,14 +12,14 @@ pub fn change_color(
 ) {
     if immunity_time.0 > 2 {
         for mut sprite in query.iter_mut() {
-            sprite.color = ANTIDOTE_COLOR;
+            sprite.color = DIPLOPOD_IMMUNE_COLOR;
         }
     } else if immunity_time.0 > 0 {
         for mut sprite in query.iter_mut() {
-            if sprite.color == ANTIDOTE_COLOR {
+            if sprite.color == DIPLOPOD_IMMUNE_COLOR {
                 sprite.color = DIPLOPOD_COLOR;
             } else {
-                sprite.color = ANTIDOTE_COLOR;
+                sprite.color = DIPLOPOD_IMMUNE_COLOR;
             }
         }
     } else {

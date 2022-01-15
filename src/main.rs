@@ -24,9 +24,11 @@ mod prelude {
     pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 
     pub const DIPLOPOD_COLOR: Color = Color::ORANGE;
+    pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
     pub const FOOD_COLOR: Color = Color::GREEN;
     pub const SUPERFOOD_COLOR: Color = Color::BLUE;
-    pub const POISON_COLOR: Color = Color::RED;
+    pub const POISON_OUTLINE_COLOR: Color = Color::RED;
+    pub const POISON_FILL_COLOR: Color = Color::BLACK;
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 }
 

@@ -3,7 +3,7 @@ use crate::components::*;
 use crate::events::SpawnConsumables;
 use crate::prelude::{
     AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ANTIDOTE_COLOR, ARENA_HEIGHT, ARENA_WIDTH, DIPLOPOD_COLOR,
-    FOOD_COLOR, POISON_COLOR, SPECIAL_SPAWN_INTERVAL, SUPERFOOD_COLOR,
+    FOOD_COLOR, POISON_FILL_COLOR, POISON_OUTLINE_COLOR, SPECIAL_SPAWN_INTERVAL, SUPERFOOD_COLOR,
 };
 use crate::resources::*;
 use bevy::prelude::*;
@@ -172,8 +172,8 @@ fn spawn_random_poison(
                     .spawn_bundle(GeometryBuilder::build_as(
                         &shape,
                         DrawMode::Outlined {
-                            fill_mode: FillMode::color(POISON_COLOR),
-                            outline_mode: StrokeMode::color(POISON_COLOR),
+                            fill_mode: FillMode::color(POISON_FILL_COLOR),
+                            outline_mode: StrokeMode::new(POISON_OUTLINE_COLOR, 7.0),
                         },
                         Transform::default(),
                     ))
