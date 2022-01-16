@@ -1,4 +1,4 @@
-use crate::components::{Food, Poison, Size};
+use crate::components::{Food, Poison, Size, Superfood};
 use crate::prelude::*;
 use crate::resources::ConsumableRadius;
 use bevy::prelude::*;
@@ -18,7 +18,10 @@ pub fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>
 
 pub fn resize_consumables(
     mut reader: EventReader<WindowResized>,
-    mut paths: Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
+    mut paths: QuerySet<(
+        QueryState<&mut Path, Or<(With<Food>, With<Poison>)>>,
+        QueryState<&mut Path, With<Superfood>>,
+    )>,
     mut consumable_radius: ResMut<ConsumableRadius>,
 ) {
     if let Some(resized) = reader.iter().next() {
@@ -29,8 +32,19 @@ pub fn resize_consumables(
             center: Vec2::new(0., 0.),
         };
 
-        for mut path in paths.iter_mut() {
+        for mut path in paths.q0().iter_mut() {
             *path = ShapePath::build_as(&shape);
+        }
+
+        for mut path in paths.q1().iter_mut() {
+            let mut path_builder = PathBuilder::new();
+            path_builder.move_to(-consumable_radius.0 * Vec2::X);
+            path_builder.line_to(consumable_radius.0 * Vec2::X);
+            path_builder.move_to(-consumable_radius.0 * Vec2::Y);
+            path_builder.line_to(consumable_radius.0 * Vec2::Y);
+            let star = path_builder.build().0;
+
+            *path = ShapePath::build_as(&star);
         }
     }
 }

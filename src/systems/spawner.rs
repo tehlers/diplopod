@@ -189,19 +189,24 @@ fn spawn_random_superfood(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    consumable_radius: Res<ConsumableRadius>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
+        let mut path_builder = PathBuilder::new();
+        path_builder.move_to(-consumable_radius.0 * Vec2::X);
+        path_builder.line_to(consumable_radius.0 * Vec2::X);
+        path_builder.move_to(-consumable_radius.0 * Vec2::Y);
+        path_builder.line_to(consumable_radius.0 * Vec2::Y);
+        let star = path_builder.build().0;
+
         commands
-            .spawn_bundle(SpriteBundle {
-                sprite: Sprite {
-                    color: SUPERFOOD_COLOR,
-                    ..Default::default()
-                },
-                ..Default::default()
-            })
+            .spawn_bundle(GeometryBuilder::build_as(
+                &star,
+                DrawMode::Stroke(StrokeMode::new(SUPERFOOD_COLOR, 7.5)),
+                Transform::from_rotation(Quat::from_rotation_z(0.75)),
+            ))
             .insert(Superfood)
-            .insert(pos)
-            .insert(Size::square(2.0));
+            .insert(pos);
         free_consumable_positions.remove(&pos);
     }
 }
@@ -298,6 +303,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
+                consumable_radius,
             );
         }
     }
