@@ -203,7 +203,7 @@ fn spawn_random_superfood(
             .spawn_bundle(GeometryBuilder::build_as(
                 &star,
                 DrawMode::Stroke(StrokeMode::new(SUPERFOOD_COLOR, 7.5)),
-                Transform::from_rotation(Quat::from_rotation_z(0.75)),
+                Transform::default(),
             ))
             .insert(Superfood)
             .insert(pos);

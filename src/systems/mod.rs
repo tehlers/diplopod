@@ -7,6 +7,7 @@ pub mod move_antidote;
 pub mod movement;
 pub mod player_input;
 pub mod position_translation;
+pub mod rotate_superfood;
 pub mod setup;
 pub mod size_scaling;
 pub mod spawner;

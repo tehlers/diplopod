@@ -108,7 +108,8 @@ fn main() {
             SystemSet::new()
                 .with_system(position_translation::position_translation)
                 .with_system(position_translation::consumable_position_translation)
-                .with_system(size_scaling::size_scaling),
+                .with_system(size_scaling::size_scaling)
+                .with_system(rotate_superfood::rotate_superfood),
         )
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
