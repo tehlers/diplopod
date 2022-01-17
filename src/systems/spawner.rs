@@ -189,7 +189,7 @@ fn spawn_random_superfood(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: Res<ConsumableRadius>,
+    consumable_radius: &Res<ConsumableRadius>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         let mut path_builder = PathBuilder::new();
@@ -197,11 +197,11 @@ fn spawn_random_superfood(
         path_builder.line_to(consumable_radius.0 * Vec2::X);
         path_builder.move_to(-consumable_radius.0 * Vec2::Y);
         path_builder.line_to(consumable_radius.0 * Vec2::Y);
-        let star = path_builder.build().0;
+        let cross = path_builder.build().0;
 
         commands
             .spawn_bundle(GeometryBuilder::build_as(
-                &star,
+                &cross,
                 DrawMode::Stroke(StrokeMode::new(SUPERFOOD_COLOR, 7.5)),
                 Transform::default(),
             ))
@@ -215,19 +215,24 @@ fn spawn_random_antidote(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    consumable_radius: &Res<ConsumableRadius>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
+        let mut path_builder = PathBuilder::new();
+        path_builder.move_to(-consumable_radius.0 * Vec2::X);
+        path_builder.line_to(consumable_radius.0 * Vec2::X);
+        path_builder.move_to(-consumable_radius.0 * Vec2::Y);
+        path_builder.line_to(consumable_radius.0 * Vec2::Y);
+        let cross = path_builder.build().0;
+
         commands
-            .spawn_bundle(SpriteBundle {
-                sprite: Sprite {
-                    color: ANTIDOTE_COLOR,
-                    ..Default::default()
-                },
-                ..Default::default()
-            })
+            .spawn_bundle(GeometryBuilder::build_as(
+                &cross,
+                DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, consumable_radius.0 * 0.9)),
+                Transform::default(),
+            ))
             .insert(Antidote)
-            .insert(pos)
-            .insert(Size::square(2.0));
+            .insert(pos);
         free_consumable_positions.remove(&pos);
     }
 }
@@ -296,6 +301,7 @@ pub fn spawn_consumables(
                     &mut commands,
                     &mut position_candidates,
                     &mut free_consumable_positions,
+                    &consumable_radius,
                 );
             }
 
@@ -303,7 +309,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
-                consumable_radius,
+                &consumable_radius,
             );
         }
     }

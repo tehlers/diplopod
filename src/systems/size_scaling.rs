@@ -1,4 +1,4 @@
-use crate::components::{Food, Poison, Size, Superfood};
+use crate::components::{Antidote, Food, Poison, Size, Superfood};
 use crate::prelude::*;
 use crate::resources::ConsumableRadius;
 use bevy::prelude::*;
@@ -21,6 +21,7 @@ pub fn resize_consumables(
     mut paths: QuerySet<(
         QueryState<&mut Path, Or<(With<Food>, With<Poison>)>>,
         QueryState<&mut Path, With<Superfood>>,
+        QueryState<(&mut Path, &mut DrawMode), With<Antidote>>,
     )>,
     mut consumable_radius: ResMut<ConsumableRadius>,
 ) {
@@ -36,15 +37,21 @@ pub fn resize_consumables(
             *path = ShapePath::build_as(&shape);
         }
 
-        for mut path in paths.q1().iter_mut() {
-            let mut path_builder = PathBuilder::new();
-            path_builder.move_to(-consumable_radius.0 * Vec2::X);
-            path_builder.line_to(consumable_radius.0 * Vec2::X);
-            path_builder.move_to(-consumable_radius.0 * Vec2::Y);
-            path_builder.line_to(consumable_radius.0 * Vec2::Y);
-            let star = path_builder.build().0;
+        let mut path_builder = PathBuilder::new();
+        path_builder.move_to(-consumable_radius.0 * Vec2::X);
+        path_builder.line_to(consumable_radius.0 * Vec2::X);
+        path_builder.move_to(-consumable_radius.0 * Vec2::Y);
+        path_builder.line_to(consumable_radius.0 * Vec2::Y);
+        let cross = path_builder.build().0;
 
-            *path = ShapePath::build_as(&star);
+        for mut path in paths.q1().iter_mut() {
+            *path = ShapePath::build_as(&cross);
+        }
+
+        for (mut path, mut draw_mode) in paths.q2().iter_mut() {
+            *path = ShapePath::build_as(&cross);
+            *draw_mode =
+                DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, consumable_radius.0 * 0.9));
         }
     }
 }
