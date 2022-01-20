@@ -3,7 +3,7 @@ use rand::{thread_rng, Rng};
 
 use crate::{
     components::{Antidote, ConsumablePosition, DiplopodHead, Food, Poison, Position, Superfood},
-    events::{GameOver, Growth, SpawnConsumables},
+    events::{GameOver, Growth, ShowMessage, SpawnConsumables},
     resources::{FreeConsumablePositions, ImmunityTime},
 };
 
@@ -12,6 +12,7 @@ pub fn eat(
     mut growth_writer: EventWriter<Growth>,
     mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
+    mut show_message_writer: EventWriter<ShowMessage>,
     food_positions: Query<(Entity, &ConsumablePosition), With<Food>>,
     superfood_positions: Query<(Entity, &ConsumablePosition), With<Superfood>>,
     poison_positions: Query<(Entity, &ConsumablePosition), With<Poison>>,
@@ -42,9 +43,15 @@ pub fn eat(
                 free_consumable_positions.shuffle();
                 let new_segments = thread_rng().gen_range(2..10);
                 growth_writer.send(Growth(new_segments));
+
+                show_message_writer.send(ShowMessage {
+                    text: new_segments.to_string(),
+                    position: superfood_pos.clone(),
+                });
+
                 spawn_consumables_writer.send(SpawnConsumables {
                     regular: false,
-                    new_segments: new_segments,
+                    new_segments,
                 });
             }
         }

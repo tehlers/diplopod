@@ -14,6 +14,7 @@ pub fn game_over(
     poison: Query<Entity, With<Poison>>,
     antidotes: Query<Entity, With<Antidote>>,
     segments: Query<Entity, With<DiplopodSegment>>,
+    messages: Query<Entity, With<Text>>,
     consumable_positions: Query<&ConsumablePosition>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
@@ -30,6 +31,7 @@ pub fn game_over(
             .chain(poison.iter())
             .chain(superfood.iter())
             .chain(antidotes.iter())
+            .chain(messages.iter())
         {
             let position = consumable_positions.get(ent).unwrap();
             free_consumable_positions.positions.push(position.clone());

@@ -1,5 +1,6 @@
 pub mod change_color;
 pub mod eat;
+pub mod fade_text;
 pub mod game_over;
 pub mod growth;
 pub mod limit_immunity;
@@ -9,5 +10,6 @@ pub mod player_input;
 pub mod position_translation;
 pub mod rotate_superfood;
 pub mod setup;
+pub mod show_message;
 pub mod size_scaling;
 pub mod spawner;

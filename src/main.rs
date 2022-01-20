@@ -101,7 +101,21 @@ fn main() {
                         .after(Phase::Eat),
                 )
                 .with_system(growth::growth.label(Phase::Growth).after(Phase::Spawn))
+                .with_system(
+                    show_message::show_message
+                        .label(Phase::Spawn)
+                        .after(Phase::Eat),
+                )
                 .with_system(change_color::change_color),
+        )
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(0.2))
+                .with_system(
+                    fade_text::fade_text
+                        .label(Phase::Growth)
+                        .after(Phase::Spawn),
+                ),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
@@ -115,5 +129,6 @@ fn main() {
         .add_event::<GameOver>()
         .add_event::<Growth>()
         .add_event::<SpawnConsumables>()
+        .add_event::<ShowMessage>()
         .run();
 }

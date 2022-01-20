@@ -57,3 +57,6 @@ pub struct Superfood;
 
 #[derive(Component)]
 pub struct Antidote;
+
+#[derive(Component)]
+pub struct FadingText(pub f32);
