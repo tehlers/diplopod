@@ -26,7 +26,7 @@ pub fn consumable_position_translation(
                 window.height() as f32,
                 CONSUMABLE_HEIGHT as f32,
             ),
-            0.0,
+            1.0,
         )
     }
 }
