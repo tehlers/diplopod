@@ -66,7 +66,12 @@ fn main() {
             CONSUMABLE_HEIGHT as i32,
         ))
         .add_system(
-            player_input::player_input
+            player_input::keyboard
+                .label(Phase::Input)
+                .before(Phase::Movement),
+        )
+        .add_system(
+            player_input::gamepad
                 .label(Phase::Input)
                 .before(Phase::Movement),
         )
