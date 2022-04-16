@@ -197,7 +197,7 @@ fn spawn_random_superfood(
         path_builder.line_to(consumable_radius.0 * Vec2::X);
         path_builder.move_to(-consumable_radius.0 * Vec2::Y);
         path_builder.line_to(consumable_radius.0 * Vec2::Y);
-        let cross = path_builder.build().0;
+        let cross = path_builder.build();
 
         commands
             .spawn_bundle(GeometryBuilder::build_as(
@@ -223,7 +223,7 @@ fn spawn_random_antidote(
         path_builder.line_to(consumable_radius.0 * Vec2::X);
         path_builder.move_to(-consumable_radius.0 * Vec2::Y);
         path_builder.line_to(consumable_radius.0 * Vec2::Y);
-        let cross = path_builder.build().0;
+        let cross = path_builder.build();
 
         commands
             .spawn_bundle(GeometryBuilder::build_as(

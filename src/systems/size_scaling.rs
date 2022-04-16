@@ -18,10 +18,10 @@ pub fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>
 
 pub fn resize_consumables(
     mut reader: EventReader<WindowResized>,
-    mut paths: QuerySet<(
-        QueryState<&mut Path, Or<(With<Food>, With<Poison>)>>,
-        QueryState<&mut Path, With<Superfood>>,
-        QueryState<(&mut Path, &mut DrawMode), With<Antidote>>,
+    mut paths: ParamSet<(
+        Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
+        Query<&mut Path, With<Superfood>>,
+        Query<(&mut Path, &mut DrawMode), With<Antidote>>,
     )>,
     mut consumable_radius: ResMut<ConsumableRadius>,
 ) {
@@ -33,7 +33,7 @@ pub fn resize_consumables(
             center: Vec2::new(0., 0.),
         };
 
-        for mut path in paths.q0().iter_mut() {
+        for mut path in paths.p0().iter_mut() {
             *path = ShapePath::build_as(&shape);
         }
 
@@ -42,13 +42,13 @@ pub fn resize_consumables(
         path_builder.line_to(consumable_radius.0 * Vec2::X);
         path_builder.move_to(-consumable_radius.0 * Vec2::Y);
         path_builder.line_to(consumable_radius.0 * Vec2::Y);
-        let cross = path_builder.build().0;
+        let cross = path_builder.build();
 
-        for mut path in paths.q1().iter_mut() {
+        for mut path in paths.p1().iter_mut() {
             *path = ShapePath::build_as(&cross);
         }
 
-        for (mut path, mut draw_mode) in paths.q2().iter_mut() {
+        for (mut path, mut draw_mode) in paths.p2().iter_mut() {
             *path = ShapePath::build_as(&cross);
             *draw_mode =
                 DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, consumable_radius.0 * 0.9));
