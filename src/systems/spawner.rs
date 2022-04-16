@@ -18,9 +18,9 @@ pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSeg
         .spawn_bundle(SpriteBundle {
             sprite: Sprite {
                 color: DIPLOPOD_COLOR,
-                ..Default::default()
+                ..default()
             },
-            ..Default::default()
+            ..default()
         })
         .insert(DiplopodHead {
             direction: Vec2::ZERO,
@@ -39,9 +39,9 @@ pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) 
         .spawn_bundle(SpriteBundle {
             sprite: Sprite {
                 color,
-                ..Default::default()
+                ..default()
             },
-            ..Default::default()
+            ..default()
         })
         .insert(DiplopodSegment)
         .insert(position)

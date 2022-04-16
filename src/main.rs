@@ -54,7 +54,7 @@ fn main() {
             title: "Diplopod".to_string(),
             width: 400.0,
             height: 220.0,
-            ..Default::default()
+            ..default()
         })
         .insert_resource(ConsumableRadius::default())
         .insert_resource(DiplopodSegments::default())
