@@ -3,8 +3,8 @@ mod events;
 mod resources;
 mod systems;
 
-use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+use bevy::time::FixedTimestep;
 use bevy_prototype_lyon::prelude::*;
 use events::*;
 use prelude::*;

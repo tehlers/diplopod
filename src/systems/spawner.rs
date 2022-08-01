@@ -37,10 +37,7 @@ pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSeg
 pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> Entity {
     commands
         .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color,
-                ..default()
-            },
+            sprite: Sprite { color, ..default() },
             ..default()
         })
         .insert(DiplopodSegment)

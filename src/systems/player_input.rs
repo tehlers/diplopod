@@ -36,7 +36,8 @@ pub fn gamepad(
         let mut direction = Vec2::ZERO;
 
         for gamepad in gamepads.iter().cloned() {
-            if let Some(left_stick_x) = axes.get(GamepadAxis(gamepad, GamepadAxisType::LeftStickX))
+            if let Some(left_stick_x) =
+                axes.get(GamepadAxis::new(gamepad, GamepadAxisType::LeftStickX))
             {
                 if left_stick_x <= -0.01 {
                     direction = Vec2::new(-1.0, 0.0);
@@ -47,7 +48,8 @@ pub fn gamepad(
                 }
             }
 
-            if let Some(left_stick_y) = axes.get(GamepadAxis(gamepad, GamepadAxisType::LeftStickY))
+            if let Some(left_stick_y) =
+                axes.get(GamepadAxis::new(gamepad, GamepadAxisType::LeftStickY))
             {
                 if left_stick_y <= -0.01 {
                     direction = Vec2::new(direction.x, -1.0);

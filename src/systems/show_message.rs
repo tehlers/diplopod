@@ -23,7 +23,8 @@ pub fn show_message(
 
         commands
             .spawn_bundle(Text2dBundle {
-                text: Text::with_section(&show_message.text, text_style.clone(), text_alignment),
+                text: Text::from_section(&show_message.text, text_style.clone())
+                    .with_alignment(text_alignment),
                 ..default()
             })
             .insert(show_message.position.clone())
