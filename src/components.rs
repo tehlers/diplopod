@@ -25,7 +25,7 @@ impl Size {
     }
 }
 
-#[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Position {
     pub x: i32,
     pub y: i32,

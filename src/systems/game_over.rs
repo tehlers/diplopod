@@ -19,7 +19,7 @@ pub fn game_over(
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     mut immunity_time: ResMut<ImmunityTime>,
-    consumable_radius: Res<ConsumableRadius>,
+    tile_size: Res<TileSize>,
 ) {
     if reader.iter().next().is_some() {
         for ent in segments.iter() {
@@ -43,15 +43,7 @@ pub fn game_over(
         immunity_time.0 = 0;
 
         spawn_diplopod(&mut commands, &mut segments_res);
-        spawn_food(
-            &mut commands,
-            &mut free_consumable_positions,
-            &consumable_radius,
-        );
-        spawn_poison(
-            &mut commands,
-            &mut free_consumable_positions,
-            &consumable_radius,
-        );
+        spawn_food(&mut commands, &mut free_consumable_positions, &tile_size);
+        spawn_poison(&mut commands, &mut free_consumable_positions, &tile_size);
     }
 }

@@ -51,5 +51,11 @@ pub struct LastSpecialSpawn(pub u32);
 #[derive(Default)]
 pub struct ImmunityTime(pub u8);
 
-#[derive(Default)]
-pub struct ConsumableRadius(pub f32);
+#[derive(Default, Debug)]
+pub struct TileSize(pub i32);
+
+#[derive(Default, Debug)]
+pub struct UpperLeft {
+    pub x: i32,
+    pub y: i32,
+}

@@ -56,7 +56,8 @@ fn main() {
             height: 220.0,
             ..default()
         })
-        .insert_resource(ConsumableRadius::default())
+        .insert_resource(TileSize::default())
+        .insert_resource(UpperLeft::default())
         .insert_resource(DiplopodSegments::default())
         .insert_resource(LastTailPosition::default())
         .insert_resource(LastSpecialSpawn::default())

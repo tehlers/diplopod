@@ -49,19 +49,15 @@ pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) 
 pub fn init_food(
     mut commands: Commands,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
-    consumable_radius: Res<ConsumableRadius>,
+    tile_size: Res<TileSize>,
 ) {
-    spawn_food(
-        &mut commands,
-        &mut free_consumable_positions,
-        &consumable_radius,
-    );
+    spawn_food(&mut commands, &mut free_consumable_positions, &tile_size);
 }
 
 pub fn spawn_food(
     commands: &mut Commands,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: &Res<ConsumableRadius>,
+    tile_size: &Res<TileSize>,
 ) {
     let segment_positions = vec![Position {
         x: ARENA_WIDTH / 2,
@@ -77,7 +73,7 @@ pub fn spawn_food(
         commands,
         &mut position_candidates,
         free_consumable_positions,
-        &consumable_radius,
+        &tile_size,
     );
 }
 
@@ -86,10 +82,10 @@ fn spawn_random_food(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: &Res<ConsumableRadius>,
+    tile_size: &Res<TileSize>,
 ) {
     let shape = shapes::Circle {
-        radius: consumable_radius.0,
+        radius: tile_size.0 as f32,
         center: Vec2::new(0., 0.),
     };
 
@@ -117,19 +113,15 @@ fn spawn_random_food(
 pub fn init_poison(
     mut commands: Commands,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
-    consumable_radius: Res<ConsumableRadius>,
+    tile_size: Res<TileSize>,
 ) {
-    spawn_poison(
-        &mut commands,
-        &mut free_consumable_positions,
-        &consumable_radius,
-    );
+    spawn_poison(&mut commands, &mut free_consumable_positions, &tile_size);
 }
 
 pub fn spawn_poison(
     commands: &mut Commands,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: &Res<ConsumableRadius>,
+    tile_size: &Res<TileSize>,
 ) {
     let segment_positions = vec![Position {
         x: ARENA_WIDTH / 2,
@@ -145,7 +137,7 @@ pub fn spawn_poison(
         commands,
         &mut position_candidates,
         free_consumable_positions,
-        consumable_radius,
+        tile_size,
     );
 }
 
@@ -154,10 +146,10 @@ fn spawn_random_poison(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: &Res<ConsumableRadius>,
+    tile_size: &Res<TileSize>,
 ) {
     let shape = shapes::Circle {
-        radius: consumable_radius.0,
+        radius: tile_size.0 as f32,
         center: Vec2::new(0., 0.),
     };
 
@@ -186,14 +178,14 @@ fn spawn_random_superfood(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: &Res<ConsumableRadius>,
+    tile_size: &Res<TileSize>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         let mut path_builder = PathBuilder::new();
-        path_builder.move_to(-consumable_radius.0 * Vec2::X);
-        path_builder.line_to(consumable_radius.0 * Vec2::X);
-        path_builder.move_to(-consumable_radius.0 * Vec2::Y);
-        path_builder.line_to(consumable_radius.0 * Vec2::Y);
+        path_builder.move_to(-tile_size.0 as f32 * Vec2::X);
+        path_builder.line_to(tile_size.0 as f32 * Vec2::X);
+        path_builder.move_to(-tile_size.0 as f32 * Vec2::Y);
+        path_builder.line_to(tile_size.0 as f32 * Vec2::Y);
         let cross = path_builder.build();
 
         commands
@@ -212,20 +204,20 @@ fn spawn_random_antidote(
     commands: &mut Commands,
     position_candidates: &mut FreeConsumablePositions,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
-    consumable_radius: &Res<ConsumableRadius>,
+    tile_size: &Res<TileSize>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         let mut path_builder = PathBuilder::new();
-        path_builder.move_to(-consumable_radius.0 * Vec2::X);
-        path_builder.line_to(consumable_radius.0 * Vec2::X);
-        path_builder.move_to(-consumable_radius.0 * Vec2::Y);
-        path_builder.line_to(consumable_radius.0 * Vec2::Y);
+        path_builder.move_to(-tile_size.0 as f32 * Vec2::X);
+        path_builder.line_to(tile_size.0 as f32 * Vec2::X);
+        path_builder.move_to(-tile_size.0 as f32 * Vec2::Y);
+        path_builder.line_to(tile_size.0 as f32 * Vec2::Y);
         let cross = path_builder.build();
 
         commands
             .spawn_bundle(GeometryBuilder::build_as(
                 &cross,
-                DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, consumable_radius.0 * 0.9)),
+                DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9)),
                 Transform::default(),
             ))
             .insert(Antidote)
@@ -244,7 +236,7 @@ pub fn spawn_consumables(
     antidotes: Query<Entity, With<Antidote>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
-    consumable_radius: Res<ConsumableRadius>,
+    tile_size: Res<TileSize>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.iter().next() {
         let segment_positions = segments
@@ -263,7 +255,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
-                &consumable_radius,
+                &tile_size,
             );
 
             spawn_random_poison(
@@ -271,7 +263,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
-                &consumable_radius,
+                &tile_size,
             );
         }
 
@@ -298,7 +290,7 @@ pub fn spawn_consumables(
                     &mut commands,
                     &mut position_candidates,
                     &mut free_consumable_positions,
-                    &consumable_radius,
+                    &tile_size,
                 );
             }
 
@@ -306,7 +298,7 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_consumable_positions,
-                &consumable_radius,
+                &tile_size,
             );
         }
     }
