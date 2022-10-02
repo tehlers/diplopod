@@ -46,7 +46,7 @@ pub fn eat(
 
                 show_message_writer.send(ShowMessage {
                     text: new_segments.to_string(),
-                    position: superfood_pos.clone(),
+                    position: *superfood_pos,
                 });
 
                 spawn_consumables_writer.send(SpawnConsumables {
@@ -60,7 +60,7 @@ pub fn eat(
             if *antidote_pos == head_pos.to_consumable_position() {
                 commands.entity(ent).despawn();
                 free_consumable_positions.positions.push(*antidote_pos);
-                immunity_time.0 = immunity_time.0 + 10;
+                immunity_time.0 += 10;
             }
         }
 

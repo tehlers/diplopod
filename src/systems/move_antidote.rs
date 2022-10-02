@@ -10,13 +10,8 @@ pub fn move_antidote(
     mut antidotes: Query<&mut ConsumablePosition, With<Antidote>>,
     mut segment_positions: Query<&mut Position, With<DiplopodSegment>>,
 ) {
-    let blocked_positions = segment_positions
-        .iter_mut()
-        .map(|p| p.to_consumable_position())
-        .collect::<Vec<ConsumablePosition>>();
-
     for mut pos in antidotes.iter_mut() {
-        let mut new_pos = pos.clone();
+        let mut new_pos = *pos;
         match thread_rng().gen_range(0..4) {
             0 => new_pos.x -= 1,
             1 => new_pos.x += 1,
@@ -29,7 +24,10 @@ pub fn move_antidote(
             || new_pos.x >= CONSUMABLE_WIDTH
             || new_pos.y < 0
             || new_pos.y >= CONSUMABLE_HEIGHT
-            || blocked_positions.contains(&new_pos)
+            || segment_positions
+                .iter_mut()
+                .map(|p| p.to_consumable_position())
+                .any(|x| x == new_pos)
         {
             continue;
         }

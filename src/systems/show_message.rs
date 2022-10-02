@@ -23,11 +23,11 @@ pub fn show_message(
 
         commands
             .spawn_bundle(Text2dBundle {
-                text: Text::from_section(&show_message.text, text_style.clone())
+                text: Text::from_section(&show_message.text, text_style)
                     .with_alignment(text_alignment),
                 ..default()
             })
-            .insert(show_message.position.clone())
+            .insert(show_message.position)
             .insert(FadingText(1.0));
     }
 }

@@ -32,7 +32,7 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn to_consumable_position(&self) -> ConsumablePosition {
+    pub fn to_consumable_position(self) -> ConsumablePosition {
         ConsumablePosition {
             x: self.x / CONSUMABLE_SCALE_FACTOR,
             y: self.y / CONSUMABLE_SCALE_FACTOR,

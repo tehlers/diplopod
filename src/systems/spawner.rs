@@ -73,7 +73,7 @@ pub fn spawn_food(
         commands,
         &mut position_candidates,
         free_consumable_positions,
-        &tile_size,
+        tile_size,
     );
 }
 
@@ -273,7 +273,7 @@ pub fn spawn_consumables(
 
             for ent in superfood.iter() {
                 let position = consumable_positions.get(ent).unwrap();
-                free_consumable_positions.positions.push(position.clone());
+                free_consumable_positions.positions.push(*position);
                 commands.entity(ent).despawn();
             }
             free_consumable_positions.shuffle();
@@ -281,7 +281,7 @@ pub fn spawn_consumables(
             if last_special_spawn.0 % (SPECIAL_SPAWN_INTERVAL * 2) == 0 {
                 for ent in antidotes.iter() {
                     let position = consumable_positions.get(ent).unwrap();
-                    free_consumable_positions.positions.push(position.clone());
+                    free_consumable_positions.positions.push(*position);
                     commands.entity(ent).despawn();
                 }
                 free_consumable_positions.shuffle();

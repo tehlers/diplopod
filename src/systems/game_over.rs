@@ -34,7 +34,7 @@ pub fn game_over(
             .chain(messages.iter())
         {
             let position = consumable_positions.get(ent).unwrap();
-            free_consumable_positions.positions.push(position.clone());
+            free_consumable_positions.positions.push(*position);
             commands.entity(ent).despawn();
         }
         free_consumable_positions.shuffle();
