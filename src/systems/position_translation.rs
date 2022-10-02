@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::prelude::CONSUMABLE_SCALE_FACTOR;
 use crate::resources::*;
 use bevy::prelude::*;
 
@@ -27,10 +28,12 @@ pub fn consumable_position_translation(
     let window = windows.get_primary().unwrap();
     for (pos, mut transform) in q.iter_mut() {
         transform.translation = Vec3::new(
-            (pos.x * tile_size.0 * 2 + upper_left.x - window.width() as i32 / 2 + tile_size.0 / 2)
-                as f32,
-            (pos.y * tile_size.0 * 2 + upper_left.y - window.height() as i32 / 2 + tile_size.0 / 2)
-                as f32,
+            (pos.x * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.x
+                - window.width() as i32 / 2
+                + tile_size.0 / 2) as f32,
+            (pos.y * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.y
+                - window.height() as i32 / 2
+                + tile_size.0 / 2) as f32,
             1.0,
         )
     }
