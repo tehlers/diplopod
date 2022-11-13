@@ -4,10 +4,10 @@ use rand::thread_rng;
 
 use crate::components::{ConsumablePosition, Position};
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct DiplopodSegments(pub Vec<Entity>);
 
-#[derive(Clone)]
+#[derive(Clone, Resource)]
 pub struct FreeConsumablePositions {
     pub positions: Vec<ConsumablePosition>,
 }
@@ -42,19 +42,19 @@ impl FreeConsumablePositions {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct LastTailPosition(pub Option<Position>);
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct LastSpecialSpawn(pub u32);
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct ImmunityTime(pub u8);
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Resource)]
 pub struct TileSize(pub i32);
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Resource)]
 pub struct UpperLeft {
     pub x: i32,
     pub y: i32,

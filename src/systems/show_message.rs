@@ -22,7 +22,7 @@ pub fn show_message(
         };
 
         commands
-            .spawn_bundle(Text2dBundle {
+            .spawn(Text2dBundle {
                 text: Text::from_section(&show_message.text, text_style)
                     .with_alignment(text_alignment),
                 ..default()

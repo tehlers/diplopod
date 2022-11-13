@@ -45,17 +45,19 @@ fn main() {
     App::new()
         .insert_resource(Msaa { samples: 4 })
         .add_startup_system(setup::setup)
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: "Diplopod".to_string(),
+                width: 400.0,
+                height: 220.0,
+                ..default()
+            },
+            ..default()
+        }))
         .add_plugin(ShapePlugin)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food)
         .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_poison)
-        .insert_resource(WindowDescriptor {
-            title: "Diplopod".to_string(),
-            width: 400.0,
-            height: 220.0,
-            ..default()
-        })
         .insert_resource(TileSize::default())
         .insert_resource(UpperLeft::default())
         .insert_resource(DiplopodSegments::default())

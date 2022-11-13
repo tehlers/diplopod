@@ -15,7 +15,7 @@ pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegmen
 
 pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
     segments.0 = vec![commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 color: DIPLOPOD_COLOR,
                 ..default()
@@ -36,7 +36,7 @@ pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSeg
 
 pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> Entity {
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite { color, ..default() },
             ..default()
         })
@@ -94,7 +94,7 @@ fn spawn_random_food(
             None => break,
             Some(pos) => {
                 commands
-                    .spawn_bundle(GeometryBuilder::build_as(
+                    .spawn(GeometryBuilder::build_as(
                         &shape,
                         DrawMode::Outlined {
                             fill_mode: FillMode::color(FOOD_COLOR),
@@ -158,7 +158,7 @@ fn spawn_random_poison(
             None => break,
             Some(pos) => {
                 commands
-                    .spawn_bundle(GeometryBuilder::build_as(
+                    .spawn(GeometryBuilder::build_as(
                         &shape,
                         DrawMode::Outlined {
                             fill_mode: FillMode::color(POISON_FILL_COLOR),
@@ -189,7 +189,7 @@ fn spawn_random_superfood(
         let cross = path_builder.build();
 
         commands
-            .spawn_bundle(GeometryBuilder::build_as(
+            .spawn(GeometryBuilder::build_as(
                 &cross,
                 DrawMode::Stroke(StrokeMode::new(SUPERFOOD_COLOR, 7.5)),
                 Transform::default(),
@@ -215,7 +215,7 @@ fn spawn_random_antidote(
         let cross = path_builder.build();
 
         commands
-            .spawn_bundle(GeometryBuilder::build_as(
+            .spawn(GeometryBuilder::build_as(
                 &cross,
                 DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9)),
                 Transform::default(),
