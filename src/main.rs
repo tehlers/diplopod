@@ -97,7 +97,8 @@ fn main() {
                 ),
         )
         .add_system(game_over::game_over.after(Phase::Movement))
-        .add_system(size_scaling::resize_consumables)
+        .add_system(size_scaling::on_window_created)
+        .add_system(size_scaling::on_window_resized)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.075))
