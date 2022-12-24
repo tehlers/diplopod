@@ -97,8 +97,8 @@ fn main() {
                 ),
         )
         .add_system(game_over::game_over.after(Phase::Movement))
-        .add_system(size_scaling::on_window_created)
-        .add_system(size_scaling::on_window_resized)
+        .add_system(graphics::on_window_created)
+        .add_system(graphics::on_window_resized)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.075))
@@ -110,29 +110,21 @@ fn main() {
                         .after(Phase::Eat),
                 )
                 .with_system(growth::growth.label(Phase::Growth).after(Phase::Spawn))
-                .with_system(
-                    show_message::show_message
-                        .label(Phase::Spawn)
-                        .after(Phase::Eat),
-                )
-                .with_system(change_color::change_color),
+                .with_system(graphics::show_message.label(Phase::Spawn).after(Phase::Eat))
+                .with_system(graphics::change_color),
         )
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.2))
-                .with_system(
-                    fade_text::fade_text
-                        .label(Phase::Growth)
-                        .after(Phase::Spawn),
-                ),
+                .with_system(graphics::fade_text.label(Phase::Growth).after(Phase::Spawn)),
         )
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
             SystemSet::new()
-                .with_system(position_translation::position_translation)
-                .with_system(position_translation::consumable_position_translation)
-                .with_system(size_scaling::size_scaling)
-                .with_system(rotate_superfood::rotate_superfood),
+                .with_system(graphics::position_translation)
+                .with_system(graphics::consumable_position_translation)
+                .with_system(graphics::size_scaling)
+                .with_system(graphics::rotate_superfood),
         )
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
