@@ -55,9 +55,9 @@ fn main() {
             ..default()
         }))
         .add_plugin(ShapePlugin)
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_diplopod)
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_food)
-        .add_startup_system_to_stage(StartupStage::PostStartup, spawner::init_poison)
+        .add_startup_system_to_stage(StartupStage::PostStartup, game::init_diplopod)
+        .add_startup_system_to_stage(StartupStage::PostStartup, game::init_food)
+        .add_startup_system_to_stage(StartupStage::PostStartup, game::init_poison)
         .insert_resource(TileSize::default())
         .insert_resource(UpperLeft::default())
         .insert_resource(DiplopodSegments::default())
@@ -82,7 +82,7 @@ fn main() {
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(1.0))
                 .with_system(
-                    limit_immunity::limit_immunity
+                    game::limit_immunity
                         .label(Phase::Input)
                         .before(Phase::Movement),
                 ),
@@ -91,25 +91,25 @@ fn main() {
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.5))
                 .with_system(
-                    move_antidote::move_antidote
+                    game::move_antidote
                         .label(Phase::Input)
                         .before(Phase::Movement),
                 ),
         )
-        .add_system(game_over::game_over.after(Phase::Movement))
+        .add_system(game::game_over.after(Phase::Movement))
         .add_system(graphics::on_window_created)
         .add_system(graphics::on_window_resized)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(0.075))
-                .with_system(movement::movement.label(Phase::Movement))
-                .with_system(eat::eat.label(Phase::Eat).after(Phase::Movement))
+                .with_system(game::movement.label(Phase::Movement))
+                .with_system(game::eat.label(Phase::Eat).after(Phase::Movement))
                 .with_system(
-                    spawner::spawn_consumables
+                    game::spawn_consumables
                         .label(Phase::Spawn)
                         .after(Phase::Eat),
                 )
-                .with_system(growth::growth.label(Phase::Growth).after(Phase::Spawn))
+                .with_system(game::growth.label(Phase::Growth).after(Phase::Spawn))
                 .with_system(graphics::show_message.label(Phase::Spawn).after(Phase::Eat))
                 .with_system(graphics::change_color),
         )

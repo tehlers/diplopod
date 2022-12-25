@@ -1,19 +1,18 @@
-use crate::components::Size;
-use crate::components::*;
-use crate::events::SpawnConsumables;
-use crate::prelude::{
-    AMOUNT_OF_FOOD, AMOUNT_OF_POISON, ANTIDOTE_COLOR, ARENA_HEIGHT, ARENA_WIDTH, DIPLOPOD_COLOR,
-    FOOD_COLOR, POISON_FILL_COLOR, POISON_OUTLINE_COLOR, SPECIAL_SPAWN_INTERVAL, SUPERFOOD_COLOR,
-};
-use crate::resources::*;
+use rand::{thread_rng, Rng};
+
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
+
+use crate::components::*;
+use crate::events::*;
+use crate::prelude::*;
+use crate::resources::*;
 
 pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
     spawn_diplopod(&mut commands, &mut segments);
 }
 
-pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
+fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
     segments.0 = vec![commands
         .spawn(SpriteBundle {
             sprite: Sprite {
@@ -30,11 +29,11 @@ pub fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSeg
             x: ARENA_WIDTH / 2,
             y: ARENA_HEIGHT / 2,
         })
-        .insert(Size::square(1.0))
+        .insert(crate::components::Size::square(1.0))
         .id()];
 }
 
-pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> Entity {
+fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> Entity {
     commands
         .spawn(SpriteBundle {
             sprite: Sprite { color, ..default() },
@@ -42,7 +41,7 @@ pub fn spawn_segment(commands: &mut Commands, color: Color, position: Position) 
         })
         .insert(DiplopodSegment)
         .insert(position)
-        .insert(Size::square(1.0))
+        .insert(crate::components::Size::square(1.0))
         .id()
 }
 
@@ -54,7 +53,7 @@ pub fn init_food(
     spawn_food(&mut commands, &mut free_consumable_positions, &tile_size);
 }
 
-pub fn spawn_food(
+fn spawn_food(
     commands: &mut Commands,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
     tile_size: &Res<TileSize>,
@@ -118,7 +117,7 @@ pub fn init_poison(
     spawn_poison(&mut commands, &mut free_consumable_positions, &tile_size);
 }
 
-pub fn spawn_poison(
+fn spawn_poison(
     commands: &mut Commands,
     free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
     tile_size: &Res<TileSize>,
@@ -301,5 +300,222 @@ pub fn spawn_consumables(
                 &tile_size,
             );
         }
+    }
+}
+
+pub fn movement(
+    mut heads: Query<(Entity, &DiplopodHead)>,
+    mut positions: Query<&mut Position>,
+    segments: ResMut<DiplopodSegments>,
+    mut last_tail_position: ResMut<LastTailPosition>,
+    mut game_over_writer: EventWriter<GameOver>,
+) {
+    if let Some((head_entity, head)) = heads.iter_mut().next() {
+        let segment_positions = segments
+            .0
+            .iter()
+            .map(|e| *positions.get_mut(*e).unwrap())
+            .collect::<Vec<Position>>();
+
+        let mut head_pos = positions.get_mut(head_entity).unwrap();
+        head_pos.x += head.direction.x as i32;
+        head_pos.y += head.direction.y as i32;
+
+        if head_pos.x < 0
+            || head_pos.y < 0
+            || head_pos.x >= ARENA_WIDTH
+            || head_pos.y >= ARENA_HEIGHT
+        {
+            game_over_writer.send(GameOver);
+        }
+
+        if segment_positions.contains(&head_pos)
+            && (head.direction.x != 0.0 || head.direction.y != 0.0)
+        {
+            game_over_writer.send(GameOver);
+        }
+
+        segment_positions
+            .iter()
+            .zip(segments.0.iter().skip(1))
+            .for_each(|(pos, segment)| {
+                *positions.get_mut(*segment).unwrap() = *pos;
+            });
+
+        last_tail_position.0 = Some(*segment_positions.last().unwrap());
+    }
+}
+
+pub fn eat(
+    mut commands: Commands,
+    mut growth_writer: EventWriter<Growth>,
+    mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
+    mut game_over_writer: EventWriter<GameOver>,
+    mut show_message_writer: EventWriter<ShowMessage>,
+    food_positions: Query<(Entity, &ConsumablePosition), With<Food>>,
+    superfood_positions: Query<(Entity, &ConsumablePosition), With<Superfood>>,
+    poison_positions: Query<(Entity, &ConsumablePosition), With<Poison>>,
+    antidote_positions: Query<(Entity, &ConsumablePosition), With<Antidote>>,
+    head_positions: Query<&Position, With<DiplopodHead>>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    mut immunity_time: ResMut<ImmunityTime>,
+) {
+    for head_pos in head_positions.iter() {
+        for (ent, food_pos) in food_positions.iter() {
+            if *food_pos == head_pos.to_consumable_position() {
+                commands.entity(ent).despawn();
+                free_consumable_positions.positions.push(*food_pos);
+                free_consumable_positions.shuffle();
+                growth_writer.send(Growth(1));
+
+                spawn_consumables_writer.send(SpawnConsumables {
+                    regular: true,
+                    new_segments: 1,
+                });
+            }
+        }
+
+        for (ent, superfood_pos) in superfood_positions.iter() {
+            if *superfood_pos == head_pos.to_consumable_position() {
+                commands.entity(ent).despawn();
+                free_consumable_positions.positions.push(*superfood_pos);
+                free_consumable_positions.shuffle();
+                let new_segments = thread_rng().gen_range(2..10);
+                growth_writer.send(Growth(new_segments));
+
+                show_message_writer.send(ShowMessage {
+                    text: new_segments.to_string(),
+                    position: *superfood_pos,
+                });
+
+                spawn_consumables_writer.send(SpawnConsumables {
+                    regular: false,
+                    new_segments,
+                });
+            }
+        }
+
+        for (ent, antidote_pos) in antidote_positions.iter() {
+            if *antidote_pos == head_pos.to_consumable_position() {
+                commands.entity(ent).despawn();
+                free_consumable_positions.positions.push(*antidote_pos);
+                immunity_time.0 += 10;
+            }
+        }
+
+        for (ent, poison_pos) in poison_positions.iter() {
+            if *poison_pos == head_pos.to_consumable_position() {
+                if immunity_time.0 > 0 {
+                    commands.entity(ent).despawn();
+                    free_consumable_positions.positions.push(*poison_pos);
+                    free_consumable_positions.shuffle();
+                    growth_writer.send(Growth(1));
+                } else {
+                    game_over_writer.send(GameOver);
+                }
+            }
+        }
+    }
+}
+
+pub fn growth(
+    mut commands: Commands,
+    last_tail_position: Res<LastTailPosition>,
+    mut segments: ResMut<DiplopodSegments>,
+    mut growth_reader: EventReader<Growth>,
+    immunity_time: Res<ImmunityTime>,
+) {
+    if let Some(growth) = growth_reader.iter().next() {
+        for _ in 0..growth.0 {
+            segments.0.push(spawn_segment(
+                &mut commands,
+                if immunity_time.0 > 0 {
+                    ANTIDOTE_COLOR
+                } else {
+                    DIPLOPOD_COLOR
+                },
+                last_tail_position.0.unwrap(),
+            ));
+        }
+    }
+}
+
+pub fn move_antidote(
+    mut antidotes: Query<&mut ConsumablePosition, With<Antidote>>,
+    mut segment_positions: Query<&mut Position, With<DiplopodSegment>>,
+) {
+    for mut pos in antidotes.iter_mut() {
+        let mut new_pos = *pos;
+        match thread_rng().gen_range(0..4) {
+            0 => new_pos.x -= 1,
+            1 => new_pos.x += 1,
+            2 => new_pos.y -= 1,
+            3 => new_pos.y += 1,
+            _ => (),
+        }
+
+        if new_pos.x < 0
+            || new_pos.x >= CONSUMABLE_WIDTH
+            || new_pos.y < 0
+            || new_pos.y >= CONSUMABLE_HEIGHT
+            || segment_positions
+                .iter_mut()
+                .map(|p| p.to_consumable_position())
+                .any(|x| x == new_pos)
+        {
+            continue;
+        }
+
+        pos.x = new_pos.x;
+        pos.y = new_pos.y;
+    }
+}
+
+pub fn limit_immunity(mut immunity_time: ResMut<ImmunityTime>) {
+    if immunity_time.0 > 0 {
+        immunity_time.0 -= 1;
+    }
+}
+
+pub fn game_over(
+    mut commands: Commands,
+    mut reader: EventReader<GameOver>,
+    mut segments_res: ResMut<DiplopodSegments>,
+    food: Query<Entity, With<Food>>,
+    superfood: Query<Entity, With<Superfood>>,
+    poison: Query<Entity, With<Poison>>,
+    antidotes: Query<Entity, With<Antidote>>,
+    segments: Query<Entity, With<DiplopodSegment>>,
+    messages: Query<Entity, With<Text>>,
+    consumable_positions: Query<&ConsumablePosition>,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    mut last_special_spawn: ResMut<LastSpecialSpawn>,
+    mut immunity_time: ResMut<ImmunityTime>,
+    tile_size: Res<TileSize>,
+) {
+    if reader.iter().next().is_some() {
+        for ent in segments.iter() {
+            commands.entity(ent).despawn();
+        }
+
+        for ent in food
+            .iter()
+            .chain(poison.iter())
+            .chain(superfood.iter())
+            .chain(antidotes.iter())
+            .chain(messages.iter())
+        {
+            let position = consumable_positions.get(ent).unwrap();
+            free_consumable_positions.positions.push(*position);
+            commands.entity(ent).despawn();
+        }
+        free_consumable_positions.shuffle();
+
+        last_special_spawn.0 = 0;
+        immunity_time.0 = 0;
+
+        spawn_diplopod(&mut commands, &mut segments_res);
+        spawn_food(&mut commands, &mut free_consumable_positions, &tile_size);
+        spawn_poison(&mut commands, &mut free_consumable_positions, &tile_size);
     }
 }
