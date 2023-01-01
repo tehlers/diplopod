@@ -113,13 +113,14 @@ pub fn position_translation(
     tile_size: Res<TileSize>,
     upper_left: Res<UpperLeft>,
 ) {
-    let window = windows.get_primary().unwrap();
-    for (pos, mut transform) in q.iter_mut() {
-        transform.translation = Vec3::new(
-            (pos.x * tile_size.0 + upper_left.x - window.width() as i32 / 2) as f32,
-            (pos.y * tile_size.0 + upper_left.y - window.height() as i32 / 2) as f32,
-            0.0,
-        )
+    if let Some(window) = windows.get_primary() {
+        for (pos, mut transform) in q.iter_mut() {
+            transform.translation = Vec3::new(
+                (pos.x * tile_size.0 + upper_left.x - window.width() as i32 / 2) as f32,
+                (pos.y * tile_size.0 + upper_left.y - window.height() as i32 / 2) as f32,
+                0.0,
+            )
+        }
     }
 }
 
@@ -129,17 +130,18 @@ pub fn consumable_position_translation(
     tile_size: Res<TileSize>,
     upper_left: Res<UpperLeft>,
 ) {
-    let window = windows.get_primary().unwrap();
-    for (pos, mut transform) in q.iter_mut() {
-        transform.translation = Vec3::new(
-            (pos.x * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.x
-                - window.width() as i32 / 2
-                + tile_size.0 / 2) as f32,
-            (pos.y * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.y
-                - window.height() as i32 / 2
-                + tile_size.0 / 2) as f32,
-            1.0,
-        )
+    if let Some(window) = windows.get_primary() {
+        for (pos, mut transform) in q.iter_mut() {
+            transform.translation = Vec3::new(
+                (pos.x * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.x
+                    - window.width() as i32 / 2
+                    + tile_size.0 / 2) as f32,
+                (pos.y * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.y
+                    - window.height() as i32 / 2
+                    + tile_size.0 / 2) as f32,
+                1.0,
+            )
+        }
     }
 }
 
