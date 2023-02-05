@@ -32,6 +32,8 @@ pub fn gamepad(
     axes: Res<Axis<GamepadAxis>>,
     mut heads: Query<&mut DiplopodHead>,
 ) {
+    const TILT: f32 = 0.9;
+
     if let Some(mut head) = heads.iter_mut().next() {
         let mut direction = Vec2::ZERO;
 
@@ -39,11 +41,11 @@ pub fn gamepad(
             if let Some(left_stick_x) =
                 axes.get(GamepadAxis::new(gamepad, GamepadAxisType::LeftStickX))
             {
-                if left_stick_x <= -0.01 {
+                if left_stick_x <= -TILT {
                     direction = Vec2::new(-1.0, 0.0);
                 }
 
-                if left_stick_x >= 0.01 {
+                if left_stick_x >= TILT {
                     direction = Vec2::new(1.0, 0.0);
                 }
             }
@@ -51,11 +53,11 @@ pub fn gamepad(
             if let Some(left_stick_y) =
                 axes.get(GamepadAxis::new(gamepad, GamepadAxisType::LeftStickY))
             {
-                if left_stick_y <= -0.01 {
+                if left_stick_y <= -TILT {
                     direction = Vec2::new(direction.x, -1.0);
                 }
 
-                if left_stick_y >= 0.01 {
+                if left_stick_y >= TILT {
                     direction = Vec2::new(direction.x, 1.0);
                 }
             }
