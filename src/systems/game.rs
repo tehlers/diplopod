@@ -424,8 +424,12 @@ pub fn growth(
     mut segments: ResMut<DiplopodSegments>,
     mut growth_reader: EventReader<Growth>,
     immunity_time: Res<ImmunityTime>,
+    audio: Res<Audio>,
+    audio_eat: Res<AudioEat>,
 ) {
     if let Some(growth) = growth_reader.iter().next() {
+        audio.play(audio_eat.0.clone());
+
         for _ in 0..growth.0 {
             segments.0.push(spawn_segment(
                 &mut commands,

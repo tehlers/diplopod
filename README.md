@@ -7,3 +7,5 @@ A reimplementation of the classic snake clone '[Tausendfuß](https://archive.org
 ## Acknowledgements
 
 This game owes a lot of ideas to the tutorial [Creating a Snake Clone in Rust, with Bevy](https://mbuffett.com/posts/bevy-snake-tutorial/).
+
+Sound effects were obtained from https://www.zapsplat.com

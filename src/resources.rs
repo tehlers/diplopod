@@ -59,3 +59,6 @@ pub struct UpperLeft {
     pub x: i32,
     pub y: i32,
 }
+
+#[derive(Resource)]
+pub struct AudioEat(pub Handle<AudioSource>);
