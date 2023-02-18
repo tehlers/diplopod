@@ -1,5 +1,6 @@
 use rand::{thread_rng, Rng};
 
+use bevy::audio::AudioSink;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
@@ -361,6 +362,7 @@ pub fn eat(
     mut immunity_time: ResMut<ImmunityTime>,
     audio: Res<Audio>,
     sounds: Res<Sounds>,
+    audio_sinks: Res<Assets<AudioSink>>,
 ) {
     for head_pos in head_positions.iter() {
         for (ent, food_pos) in food_positions.iter() {
@@ -406,6 +408,11 @@ pub fn eat(
                 commands.entity(ent).despawn();
                 free_consumable_positions.positions.push(*antidote_pos);
                 immunity_time.0 += 10;
+
+                let handle = audio_sinks.get_handle(
+                    audio.play_with_settings(sounds.antidote.clone(), PlaybackSettings::LOOP),
+                );
+                commands.insert_resource(AntidoteSoundController(handle));
             }
         }
 
@@ -482,6 +489,24 @@ pub fn move_antidote(
 pub fn limit_immunity(mut immunity_time: ResMut<ImmunityTime>) {
     if immunity_time.0 > 0 {
         immunity_time.0 -= 1;
+    }
+}
+
+pub fn control_antidote_sound(
+    immunity_time: Res<ImmunityTime>,
+    audio_sinks: Res<Assets<AudioSink>>,
+    controller: Res<AntidoteSoundController>,
+) {
+    if immunity_time.0 > 2 {
+        // keep the sound
+    } else if immunity_time.0 > 0 {
+        if let Some(sink) = audio_sinks.get(&controller.0) {
+            sink.toggle();
+        }
+    } else {
+        if let Some(sink) = audio_sinks.get(&controller.0) {
+            sink.stop();
+        }
     }
 }
 

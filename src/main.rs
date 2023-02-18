@@ -111,7 +111,8 @@ fn main() {
                 )
                 .with_system(game::growth.label(Phase::Growth).after(Phase::Spawn))
                 .with_system(graphics::show_message.label(Phase::Spawn).after(Phase::Eat))
-                .with_system(graphics::change_color),
+                .with_system(graphics::change_color)
+                .with_system(game::control_antidote_sound),
         )
         .add_system_set(
             SystemSet::new()
