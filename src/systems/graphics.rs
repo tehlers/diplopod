@@ -9,7 +9,7 @@ use bevy_prototype_lyon::prelude::*;
 use crate::components::*;
 use crate::events::ShowMessage;
 use crate::prelude::*;
-use crate::resources::FontRegular;
+use crate::resources::Fonts;
 use crate::resources::ImmunityTime;
 use crate::TileSize;
 use crate::UpperLeft;
@@ -190,11 +190,11 @@ pub fn fade_text(mut commands: Commands, mut query: Query<(Entity, &mut Text, &m
 pub fn show_message(
     mut commands: Commands,
     mut show_message_reader: EventReader<ShowMessage>,
-    font: Res<FontRegular>,
+    fonts: Res<Fonts>,
 ) {
     if let Some(show_message) = show_message_reader.iter().next() {
         let text_style = TextStyle {
-            font: font.0.clone(),
+            font: fonts.regular.clone(),
             font_size: 36.0,
             color: Color::WHITE,
         };

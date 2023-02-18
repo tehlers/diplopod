@@ -1,13 +1,17 @@
 use bevy::prelude::*;
-use crate::resources::AudioEat;
-use crate::resources::FontRegular;
+use crate::resources::Sounds;
+use crate::resources::Fonts;
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
 
-    let eat = asset_server.load("audio/eat.ogg");
-    commands.insert_resource(AudioEat(eat));
+    let sounds = Sounds {
+        eat: asset_server.load("audio/eat.ogg"),
+    };
+    commands.insert_resource(sounds);
 
-    let font = asset_server.load("fonts/AllertaStencil-Regular.ttf");
-    commands.insert_resource(FontRegular(font));
+    let fonts = Fonts {
+        regular: asset_server.load("fonts/AllertaStencil-Regular.ttf"),
+    };
+    commands.insert_resource(fonts);
 }

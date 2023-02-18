@@ -61,7 +61,11 @@ pub struct UpperLeft {
 }
 
 #[derive(Resource)]
-pub struct AudioEat(pub Handle<AudioSource>);
+pub struct Sounds {
+    pub eat: Handle<AudioSource>,
+}
 
 #[derive(Resource)]
-pub struct FontRegular(pub Handle<Font>);
+pub struct Fonts {
+    pub regular: Handle<Font>,
+}
