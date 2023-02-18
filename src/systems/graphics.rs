@@ -9,6 +9,7 @@ use bevy_prototype_lyon::prelude::*;
 use crate::components::*;
 use crate::events::ShowMessage;
 use crate::prelude::*;
+use crate::resources::FontRegular;
 use crate::resources::ImmunityTime;
 use crate::TileSize;
 use crate::UpperLeft;
@@ -189,13 +190,11 @@ pub fn fade_text(mut commands: Commands, mut query: Query<(Entity, &mut Text, &m
 pub fn show_message(
     mut commands: Commands,
     mut show_message_reader: EventReader<ShowMessage>,
-    asset_server: Res<AssetServer>,
+    font: Res<FontRegular>,
 ) {
     if let Some(show_message) = show_message_reader.iter().next() {
-        let font = asset_server.load("fonts/AllertaStencil-Regular.ttf");
-
         let text_style = TextStyle {
-            font,
+            font: font.0.clone(),
             font_size: 36.0,
             color: Color::WHITE,
         };

@@ -62,3 +62,6 @@ pub struct UpperLeft {
 
 #[derive(Resource)]
 pub struct AudioEat(pub Handle<AudioSource>);
+
+#[derive(Resource)]
+pub struct FontRegular(pub Handle<Font>);
