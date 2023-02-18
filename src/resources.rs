@@ -62,7 +62,10 @@ pub struct UpperLeft {
 
 #[derive(Resource)]
 pub struct Sounds {
-    pub eat: Handle<AudioSource>,
+    pub eat_food: Handle<AudioSource>,
+    pub eat_poison: Handle<AudioSource>,
+    pub super_food: Handle<AudioSource>,
+    pub game_over: Handle<AudioSource>,
 }
 
 #[derive(Resource)]

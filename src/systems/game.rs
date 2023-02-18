@@ -359,6 +359,8 @@ pub fn eat(
     head_positions: Query<&Position, With<DiplopodHead>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut immunity_time: ResMut<ImmunityTime>,
+    audio: Res<Audio>,
+    sounds: Res<Sounds>,
 ) {
     for head_pos in head_positions.iter() {
         for (ent, food_pos) in food_positions.iter() {
@@ -372,6 +374,8 @@ pub fn eat(
                     regular: true,
                     new_segments: 1,
                 });
+
+                audio.play(sounds.eat_food.clone());
             }
         }
 
@@ -392,6 +396,8 @@ pub fn eat(
                     regular: false,
                     new_segments,
                 });
+
+                audio.play(sounds.super_food.clone());
             }
         }
 
@@ -410,6 +416,8 @@ pub fn eat(
                     free_consumable_positions.positions.push(*poison_pos);
                     free_consumable_positions.shuffle();
                     growth_writer.send(Growth(1));
+
+                    audio.play(sounds.eat_poison.clone());
                 } else {
                     game_over_writer.send(GameOver);
                 }
@@ -424,12 +432,8 @@ pub fn growth(
     mut segments: ResMut<DiplopodSegments>,
     mut growth_reader: EventReader<Growth>,
     immunity_time: Res<ImmunityTime>,
-    audio: Res<Audio>,
-    sounds: Res<Sounds>,
 ) {
     if let Some(growth) = growth_reader.iter().next() {
-        audio.play(sounds.eat.clone());
-
         for _ in 0..growth.0 {
             segments.0.push(spawn_segment(
                 &mut commands,
@@ -496,8 +500,12 @@ pub fn game_over(
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     mut immunity_time: ResMut<ImmunityTime>,
     tile_size: Res<TileSize>,
+    audio: Res<Audio>,
+    sounds: Res<Sounds>,
 ) {
     if reader.iter().next().is_some() {
+        audio.play(sounds.game_over.clone());
+
         for ent in segments.iter() {
             commands.entity(ent).despawn();
         }
