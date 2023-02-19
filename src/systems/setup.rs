@@ -8,6 +8,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let sounds = Sounds {
         eat_food: asset_server.load("audio/eat_food.ogg"),
         eat_poison: asset_server.load("audio/eat_poison.ogg"),
+        special_spawn: asset_server.load("audio/special_spawn.ogg"),
         super_food: asset_server.load("audio/super_food.ogg"),
         antidote: asset_server.load("audio/antidote.ogg"),
         game_over: asset_server.load("audio/game_over.ogg"),

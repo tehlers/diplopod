@@ -237,6 +237,8 @@ pub fn spawn_consumables(
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     tile_size: Res<TileSize>,
+    audio: Res<Audio>,
+    sounds: Res<Sounds>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.iter().next() {
         let segment_positions = segments
@@ -300,6 +302,8 @@ pub fn spawn_consumables(
                 &mut free_consumable_positions,
                 &tile_size,
             );
+
+            audio.play(sounds.special_spawn.clone());
         }
     }
 }

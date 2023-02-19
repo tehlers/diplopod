@@ -68,6 +68,7 @@ pub struct AntidoteSoundController(pub Option<Handle<AudioSink>>);
 pub struct Sounds {
     pub eat_food: Handle<AudioSource>,
     pub eat_poison: Handle<AudioSource>,
+    pub special_spawn: Handle<AudioSource>,
     pub super_food: Handle<AudioSource>,
     pub antidote: Handle<AudioSource>,
     pub game_over: Handle<AudioSource>,
