@@ -2,7 +2,7 @@ use crate::resources::Fonts;
 use crate::resources::Sounds;
 use bevy::prelude::*;
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut windows: ResMut<Windows>) {
     commands.spawn(Camera2dBundle::default());
 
     let sounds = Sounds {
@@ -19,4 +19,8 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         regular: asset_server.load("fonts/AllertaStencil-Regular.ttf"),
     };
     commands.insert_resource(fonts);
+
+    if let Some(window) = windows.get_primary_mut() {
+        window.set_cursor_visibility(false);
+    }
 }
