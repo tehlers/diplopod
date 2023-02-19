@@ -1,15 +1,8 @@
-use crate::resources::AntidoteSoundController;
 use crate::resources::Fonts;
 use crate::resources::Sounds;
-use bevy::audio::AudioSink;
 use bevy::prelude::*;
 
-pub fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    audio: Res<Audio>,
-    audio_sinks: Res<Assets<AudioSink>>,
-) {
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
 
     let sounds = Sounds {
@@ -19,13 +12,6 @@ pub fn setup(
         antidote: asset_server.load("audio/antidote.ogg"),
         game_over: asset_server.load("audio/game_over.ogg"),
     };
-
-    let handle = audio_sinks.get_handle(audio.play_with_settings(
-        sounds.antidote.clone(),
-        PlaybackSettings::ONCE.with_volume(0.0),
-    ));
-    commands.insert_resource(AntidoteSoundController(handle));
-
     commands.insert_resource(sounds);
 
     let fonts = Fonts {

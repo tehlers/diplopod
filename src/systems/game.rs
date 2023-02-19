@@ -412,7 +412,7 @@ pub fn eat(
                 let handle = audio_sinks.get_handle(
                     audio.play_with_settings(sounds.antidote.clone(), PlaybackSettings::LOOP),
                 );
-                commands.insert_resource(AntidoteSoundController(handle));
+                commands.insert_resource(AntidoteSoundController(Option::Some(handle)));
             }
         }
 
@@ -500,12 +500,16 @@ pub fn control_antidote_sound(
     if immunity_time.0 > 2 {
         // keep the sound
     } else if immunity_time.0 > 0 {
-        if let Some(sink) = audio_sinks.get(&controller.0) {
-            sink.toggle();
+        if let Some(handle) = &controller.0 {
+            if let Some(sink) = audio_sinks.get(handle) {
+                sink.toggle();
+            }
         }
     } else {
-        if let Some(sink) = audio_sinks.get(&controller.0) {
-            sink.stop();
+        if let Some(handle) = &controller.0 {
+            if let Some(sink) = audio_sinks.get(handle) {
+                sink.stop();
+            }
         }
     }
 }

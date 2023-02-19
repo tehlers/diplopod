@@ -62,7 +62,7 @@ pub struct UpperLeft {
 }
 
 #[derive(Resource)]
-pub struct AntidoteSoundController(pub Handle<AudioSink>);
+pub struct AntidoteSoundController(pub Option<Handle<AudioSink>>);
 
 #[derive(Resource)]
 pub struct Sounds {

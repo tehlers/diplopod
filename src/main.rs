@@ -68,6 +68,7 @@ fn main() {
             CONSUMABLE_WIDTH as i32,
             CONSUMABLE_HEIGHT as i32,
         ))
+        .insert_resource(AntidoteSoundController(Option::None))
         .add_system(
             player_input::keyboard
                 .label(Phase::Input)
