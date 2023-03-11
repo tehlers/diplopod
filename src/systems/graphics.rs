@@ -1,6 +1,7 @@
 use std::cmp;
 
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 use bevy::window::WindowCreated;
 use bevy::window::WindowResized;
 
@@ -25,24 +26,25 @@ pub fn size_scaling(
 
 pub fn on_window_created(
     mut reader: EventReader<WindowCreated>,
-    windows: Res<Windows>,
+    windows: Query<&Window, With<PrimaryWindow>>,
     paths: ParamSet<(
         Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
         Query<&mut Path, With<Superfood>>,
-        Query<(&mut Path, &mut DrawMode), With<Antidote>>,
+        Query<(&mut Path, &mut Stroke), With<Antidote>>,
     )>,
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
 ) {
     if reader.iter().next().is_some() {
-        let window = windows.primary();
-        resize_consumables(
-            window.width() as i32,
-            window.height() as i32,
-            paths,
-            tile_size,
-            upper_left,
-        );
+        if let Ok(window) = windows.get_single() {
+            resize_consumables(
+                window.width() as i32,
+                window.height() as i32,
+                paths,
+                tile_size,
+                upper_left,
+            );
+        }
     }
 }
 
@@ -51,7 +53,7 @@ pub fn on_window_resized(
     paths: ParamSet<(
         Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
         Query<&mut Path, With<Superfood>>,
-        Query<(&mut Path, &mut DrawMode), With<Antidote>>,
+        Query<(&mut Path, &mut Stroke), With<Antidote>>,
     )>,
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
@@ -73,7 +75,7 @@ fn resize_consumables(
     mut paths: ParamSet<(
         Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
         Query<&mut Path, With<Superfood>>,
-        Query<(&mut Path, &mut DrawMode), With<Antidote>>,
+        Query<(&mut Path, &mut Stroke), With<Antidote>>,
     )>,
     mut tile_size: ResMut<TileSize>,
     mut upper_left: ResMut<UpperLeft>,
@@ -102,19 +104,19 @@ fn resize_consumables(
         *path = ShapePath::build_as(&cross);
     }
 
-    for (mut path, mut draw_mode) in paths.p2().iter_mut() {
+    for (mut path, mut stroke) in paths.p2().iter_mut() {
         *path = ShapePath::build_as(&cross);
-        *draw_mode = DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9));
+        *stroke = Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9);
     }
 }
 
 pub fn position_translation(
-    windows: Res<Windows>,
+    windows: Query<&Window, With<PrimaryWindow>>,
     mut q: Query<(&Position, &mut Transform)>,
     tile_size: Res<TileSize>,
     upper_left: Res<UpperLeft>,
 ) {
-    if let Some(window) = windows.get_primary() {
+    if let Ok(window) = windows.get_single() {
         for (pos, mut transform) in q.iter_mut() {
             transform.translation = Vec3::new(
                 (pos.x * tile_size.0 + upper_left.x - window.width() as i32 / 2) as f32,
@@ -126,12 +128,12 @@ pub fn position_translation(
 }
 
 pub fn consumable_position_translation(
-    windows: Res<Windows>,
+    windows: Query<&Window, With<PrimaryWindow>>,
     mut q: Query<(&ConsumablePosition, &mut Transform)>,
     tile_size: Res<TileSize>,
     upper_left: Res<UpperLeft>,
 ) {
-    if let Some(window) = windows.get_primary() {
+    if let Ok(window) = windows.get_single() {
         for (pos, mut transform) in q.iter_mut() {
             transform.translation = Vec3::new(
                 (pos.x * tile_size.0 * CONSUMABLE_SCALE_FACTOR + upper_left.x
@@ -199,15 +201,10 @@ pub fn show_message(
             color: Color::WHITE,
         };
 
-        let text_alignment = TextAlignment {
-            vertical: VerticalAlign::Center,
-            horizontal: HorizontalAlign::Center,
-        };
-
         commands
             .spawn(Text2dBundle {
                 text: Text::from_section(&show_message.text, text_style)
-                    .with_alignment(text_alignment),
+                    .with_alignment(TextAlignment::Center),
                 ..default()
             })
             .insert(show_message.position)

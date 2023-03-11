@@ -94,13 +94,13 @@ fn spawn_random_food(
             None => break,
             Some(pos) => {
                 commands
-                    .spawn(GeometryBuilder::build_as(
-                        &shape,
-                        DrawMode::Outlined {
-                            fill_mode: FillMode::color(FOOD_COLOR),
-                            outline_mode: StrokeMode::color(FOOD_COLOR),
+                    .spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&shape),
+                            ..default()
                         },
-                        Transform::default(),
+                        Fill::color(FOOD_COLOR),
+                        Stroke::color(FOOD_COLOR),
                     ))
                     .insert(Food)
                     .insert(pos);
@@ -158,13 +158,13 @@ fn spawn_random_poison(
             None => break,
             Some(pos) => {
                 commands
-                    .spawn(GeometryBuilder::build_as(
-                        &shape,
-                        DrawMode::Outlined {
-                            fill_mode: FillMode::color(POISON_FILL_COLOR),
-                            outline_mode: StrokeMode::new(POISON_OUTLINE_COLOR, 7.0),
+                    .spawn((
+                        ShapeBundle {
+                            path: GeometryBuilder::build_as(&shape),
+                            ..default()
                         },
-                        Transform::default(),
+                        Fill::color(POISON_FILL_COLOR),
+                        Stroke::new(POISON_OUTLINE_COLOR, 7.),
                     ))
                     .insert(Poison)
                     .insert(pos);
@@ -189,10 +189,12 @@ fn spawn_random_superfood(
         let cross = path_builder.build();
 
         commands
-            .spawn(GeometryBuilder::build_as(
-                &cross,
-                DrawMode::Stroke(StrokeMode::new(SUPERFOOD_COLOR, 7.5)),
-                Transform::default(),
+            .spawn((
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&cross),
+                    ..default()
+                },
+                Stroke::new(SUPERFOOD_COLOR, 7.5),
             ))
             .insert(Superfood)
             .insert(pos);
@@ -215,10 +217,12 @@ fn spawn_random_antidote(
         let cross = path_builder.build();
 
         commands
-            .spawn(GeometryBuilder::build_as(
-                &cross,
-                DrawMode::Stroke(StrokeMode::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9)),
-                Transform::default(),
+            .spawn((
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&cross),
+                    ..default()
+                },
+                Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9),
             ))
             .insert(Antidote)
             .insert(pos);

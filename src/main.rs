@@ -4,7 +4,8 @@ mod resources;
 mod systems;
 
 use bevy::prelude::*;
-use bevy::time::FixedTimestep;
+use bevy::time::common_conditions::on_timer;
+use bevy::utils::Duration;
 use bevy_prototype_lyon::prelude::*;
 use events::*;
 use prelude::*;
@@ -32,7 +33,7 @@ mod prelude {
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 }
 
-#[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum Phase {
     Input,
     Movement,
@@ -43,21 +44,20 @@ pub enum Phase {
 
 fn main() {
     App::new()
-        .insert_resource(Msaa { samples: 4 })
+        .insert_resource(Msaa::Sample4)
         .add_startup_system(setup::setup)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
-                title: "Diplopod".to_string(),
-                width: 400.0,
-                height: 220.0,
+            primary_window: Some(Window {
+                title: "Diplopod".into(),
+                resolution: (400., 220.).into(),
                 ..default()
-            },
+            }),
             ..default()
         }))
         .add_plugin(ShapePlugin)
-        .add_startup_system_to_stage(StartupStage::PostStartup, game::init_diplopod)
-        .add_startup_system_to_stage(StartupStage::PostStartup, game::init_food)
-        .add_startup_system_to_stage(StartupStage::PostStartup, game::init_poison)
+        .add_startup_system(game::init_diplopod.in_base_set(StartupSet::PostStartup))
+        .add_startup_system(game::init_food.in_base_set(StartupSet::PostStartup))
+        .add_startup_system(game::init_poison.in_base_set(StartupSet::PostStartup))
         .insert_resource(TileSize::default())
         .insert_resource(UpperLeft::default())
         .insert_resource(DiplopodSegments::default())
@@ -69,65 +69,67 @@ fn main() {
             CONSUMABLE_HEIGHT as i32,
         ))
         .insert_resource(AntidoteSoundController(Option::None))
+        .insert_resource(FixedTime::new_from_secs(0.075))
         .add_system(
             player_input::keyboard
-                .label(Phase::Input)
+                .in_set(Phase::Input)
                 .before(Phase::Movement),
         )
         .add_system(
             player_input::gamepad
-                .label(Phase::Input)
+                .in_set(Phase::Input)
                 .before(Phase::Movement),
         )
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(1.0))
-                .with_system(
-                    game::limit_immunity
-                        .label(Phase::Input)
-                        .before(Phase::Movement),
-                ),
+        .add_system(
+            game::limit_immunity
+                .in_set(Phase::Input)
+                .before(Phase::Movement)
+                .run_if(on_timer(Duration::from_secs(1))),
         )
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(0.5))
-                .with_system(
-                    game::move_antidote
-                        .label(Phase::Input)
-                        .before(Phase::Movement),
-                ),
+        .add_system(
+            game::move_antidote
+                .in_set(Phase::Input)
+                .before(Phase::Movement)
+                .run_if(on_timer(Duration::from_millis(500))),
         )
         .add_system(game::game_over.after(Phase::Movement))
         .add_system(graphics::on_window_created)
         .add_system(graphics::on_window_resized)
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(0.075))
-                .with_system(game::movement.label(Phase::Movement))
-                .with_system(game::eat.label(Phase::Eat).after(Phase::Movement))
-                .with_system(
-                    game::spawn_consumables
-                        .label(Phase::Spawn)
-                        .after(Phase::Eat),
-                )
-                .with_system(game::growth.label(Phase::Growth).after(Phase::Spawn))
-                .with_system(graphics::show_message.label(Phase::Spawn).after(Phase::Eat))
-                .with_system(graphics::change_color)
-                .with_system(game::control_antidote_sound),
+        .add_systems((
+            game::movement
+                .in_set(Phase::Movement)
+                .in_schedule(CoreSchedule::FixedUpdate),
+            game::eat
+                .in_set(Phase::Eat)
+                .after(Phase::Movement)
+                .in_schedule(CoreSchedule::FixedUpdate),
+            game::spawn_consumables
+                .in_set(Phase::Spawn)
+                .after(Phase::Eat)
+                .in_schedule(CoreSchedule::FixedUpdate),
+            game::growth
+                .in_set(Phase::Growth)
+                .after(Phase::Spawn)
+                .in_schedule(CoreSchedule::FixedUpdate),
+            graphics::show_message
+                .in_set(Phase::Spawn)
+                .after(Phase::Eat)
+                .in_schedule(CoreSchedule::FixedUpdate),
+            graphics::change_color.in_schedule(CoreSchedule::FixedUpdate),
+            game::control_antidote_sound.in_schedule(CoreSchedule::FixedUpdate),
+        ))
+        .add_system(
+            graphics::fade_text
+                .in_set(Phase::Growth)
+                .after(Phase::Spawn)
+                .run_if(on_timer(Duration::from_millis(200))),
         )
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(0.2))
-                .with_system(graphics::fade_text.label(Phase::Growth).after(Phase::Spawn)),
-        )
-        .add_system_set_to_stage(
-            CoreStage::PostUpdate,
-            SystemSet::new()
-                .with_system(graphics::position_translation)
-                .with_system(graphics::consumable_position_translation)
-                .with_system(graphics::size_scaling)
-                .with_system(graphics::rotate_superfood),
-        )
+        .add_systems((
+            graphics::position_translation.in_base_set(CoreSet::PostUpdate),
+            graphics::consumable_position_translation.in_base_set(CoreSet::PostUpdate),
+            graphics::size_scaling.in_base_set(CoreSet::PostUpdate),
+            graphics::rotate_superfood.in_base_set(CoreSet::PostUpdate),
+        ))
         .insert_resource(ClearColor(Color::BLACK))
         .add_event::<GameOver>()
         .add_event::<Growth>()

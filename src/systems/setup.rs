@@ -1,8 +1,13 @@
 use crate::resources::Fonts;
 use crate::resources::Sounds;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut windows: ResMut<Windows>) {
+pub fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+) {
     commands.spawn(Camera2dBundle::default());
 
     let sounds = Sounds {
@@ -20,7 +25,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut windows
     };
     commands.insert_resource(fonts);
 
-    if let Some(window) = windows.get_primary_mut() {
-        window.set_cursor_visibility(false);
+    if let Ok(mut window) = windows.get_single_mut() {
+        window.cursor.visible = false;
     }
 }
