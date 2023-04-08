@@ -49,64 +49,72 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(ShapePlugin)
         .add_startup_system(setup::setup)
-        .add_startup_systems((game::init_diplopod, game::init_food, game::init_poison))
-        .add_systems((graphics::on_window_created, graphics::on_window_resized))
-        .add_systems(
-            (
-                player_input::keyboard,
-                player_input::gamepad,
-                game::move_antidote.run_if(on_timer(Duration::from_millis(500))),
-            )
-                .in_set(Phase::Input),
-        )
-        .add_systems(
-            (
-                game::movement.after(Phase::Input).in_set(Phase::Movement),
-                game::eat,
-                game::spawn_consumables,
-                graphics::show_message,
-                game::growth,
-            )
-                .chain()
-                .in_schedule(CoreSchedule::FixedUpdate),
-        )
-        .add_systems(
-            (graphics::change_color, game::control_antidote_sound)
-                .in_schedule(CoreSchedule::FixedUpdate),
-        )
-        .add_systems((
-            game::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
-            graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
-        ))
-        .add_systems(
-            (
-                graphics::position_translation,
-                graphics::consumable_position_translation,
-                graphics::size_scaling,
-                graphics::rotate_superfood,
-            )
-                .in_base_set(CoreSet::PostUpdate),
-        )
-        .add_system(game::game_over.after(Phase::Movement))
-        .insert_resource(Msaa::Sample4)
-        .insert_resource(TileSize::default())
-        .insert_resource(UpperLeft::default())
-        .insert_resource(DiplopodSegments::default())
-        .insert_resource(LastTailPosition::default())
-        .insert_resource(LastSpecialSpawn::default())
-        .insert_resource(ImmunityTime::default())
-        .insert_resource(FreeConsumablePositions::new(
-            CONSUMABLE_WIDTH as i32,
-            CONSUMABLE_HEIGHT as i32,
-        ))
-        .insert_resource(AntidoteSoundController(Option::None))
-        .insert_resource(FixedTime::new_from_secs(0.075))
-        .insert_resource(ClearColor(Color::BLACK))
-        .add_event::<GameOver>()
-        .add_event::<Growth>()
-        .add_event::<SpawnConsumables>()
-        .add_event::<ShowMessage>()
+        .add_plugin(GamePlugin)
         .run();
+}
+
+struct GamePlugin;
+
+impl Plugin for GamePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugin(ShapePlugin)
+            .add_startup_systems((game::init_diplopod, game::init_food, game::init_poison))
+            .add_systems((graphics::on_window_created, graphics::on_window_resized))
+            .add_systems(
+                (
+                    player_input::keyboard,
+                    player_input::gamepad,
+                    game::move_antidote.run_if(on_timer(Duration::from_millis(500))),
+                )
+                    .in_set(Phase::Input),
+            )
+            .add_systems(
+                (
+                    game::movement.after(Phase::Input).in_set(Phase::Movement),
+                    game::eat,
+                    game::spawn_consumables,
+                    graphics::show_message,
+                    game::growth,
+                )
+                    .chain()
+                    .in_schedule(CoreSchedule::FixedUpdate),
+            )
+            .add_systems(
+                (graphics::change_color, game::control_antidote_sound)
+                    .in_schedule(CoreSchedule::FixedUpdate),
+            )
+            .add_systems((
+                game::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
+                graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
+            ))
+            .add_systems(
+                (
+                    graphics::position_translation,
+                    graphics::consumable_position_translation,
+                    graphics::size_scaling,
+                    graphics::rotate_superfood,
+                )
+                    .in_base_set(CoreSet::PostUpdate),
+            )
+            .add_system(game::game_over.after(Phase::Movement))
+            .insert_resource(Msaa::Sample4)
+            .insert_resource(TileSize::default())
+            .insert_resource(UpperLeft::default())
+            .insert_resource(DiplopodSegments::default())
+            .insert_resource(LastTailPosition::default())
+            .insert_resource(LastSpecialSpawn::default())
+            .insert_resource(ImmunityTime::default())
+            .insert_resource(FreeConsumablePositions::new(
+                CONSUMABLE_WIDTH as i32,
+                CONSUMABLE_HEIGHT as i32,
+            ))
+            .insert_resource(AntidoteSoundController(Option::None))
+            .insert_resource(FixedTime::new_from_secs(0.075))
+            .insert_resource(ClearColor(Color::BLACK))
+            .add_event::<GameOver>()
+            .add_event::<Growth>()
+            .add_event::<SpawnConsumables>()
+            .add_event::<ShowMessage>();
+    }
 }
