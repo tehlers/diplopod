@@ -11,10 +11,21 @@ pub struct DiplopodSegments(pub Vec<Entity>);
 #[derive(Clone, Resource)]
 pub struct FreeConsumablePositions {
     pub positions: Vec<ConsumablePosition>,
+    width: i32,
+    height: i32,
 }
 
 impl FreeConsumablePositions {
     pub fn new(width: i32, height: i32) -> Self {
+        let positions = Self::new_positions(width, height);
+        Self {
+            positions,
+            width,
+            height,
+        }
+    }
+
+    fn new_positions(width: i32, height: i32) -> Vec<ConsumablePosition> {
         let mut positions = Vec::new();
 
         for x in 0..width {
@@ -25,7 +36,7 @@ impl FreeConsumablePositions {
 
         positions.shuffle(&mut thread_rng());
 
-        Self { positions }
+        return positions;
     }
 
     pub fn shuffle(&mut self) {
@@ -40,6 +51,10 @@ impl FreeConsumablePositions {
         for position in positions {
             self.remove(position);
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.positions = Self::new_positions(self.width, self.height);
     }
 }
 
@@ -78,3 +93,9 @@ pub struct Sounds {
 pub struct Fonts {
     pub regular: Handle<Font>,
 }
+
+#[derive(Default, Resource)]
+pub struct Highscore(pub u16);
+
+#[derive(Default, Resource)]
+pub struct Lastscore(pub u16);

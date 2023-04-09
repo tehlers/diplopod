@@ -12,6 +12,7 @@ use crate::events::ShowMessage;
 use crate::prelude::*;
 use crate::resources::Fonts;
 use crate::resources::ImmunityTime;
+use crate::OnGameScreen;
 use crate::TileSize;
 use crate::UpperLeft;
 
@@ -208,6 +209,7 @@ pub fn show_message(
                 ..default()
             })
             .insert(show_message.position)
+            .insert(OnGameScreen)
             .insert(FadingText(1.0));
     }
 }

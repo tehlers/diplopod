@@ -1,5 +1,7 @@
 use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
 
+use crate::resources::{Highscore, Lastscore};
+
 use super::{despawn_screen, Fonts, GameState};
 
 pub struct HighscoresPlugin;
@@ -33,7 +35,12 @@ fn keyboard(
     }
 }
 
-fn setup_highscores(mut commands: Commands, fonts: Res<Fonts>) {
+fn setup_highscores(
+    mut commands: Commands,
+    fonts: Res<Fonts>,
+    highscore: Res<Highscore>,
+    lastscore: Res<Lastscore>,
+) {
     let title_text_style = TextStyle {
         font: fonts.regular.clone(),
         font_size: 128.0,
@@ -94,11 +101,22 @@ fn setup_highscores(mut commands: Commands, fonts: Res<Fonts>) {
 
                     parent.spawn(
                         TextBundle::from_section(
-                            "Nothing here yet - please press any key!",
-                            highscore_text_style,
+                            format!("Highscore: {}", &highscore.0),
+                            highscore_text_style.clone(),
                         )
                         .with_style(Style {
-                            margin: UiRect::all(Val::Px(50.0)),
+                            margin: UiRect::all(Val::Px(25.0)),
+                            ..default()
+                        }),
+                    );
+
+                    parent.spawn(
+                        TextBundle::from_section(
+                            format!("Your last score was: {}", &lastscore.0),
+                            highscore_text_style.clone(),
+                        )
+                        .with_style(Style {
+                            margin: UiRect::all(Val::Px(25.0)),
                             ..default()
                         }),
                     );

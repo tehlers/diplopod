@@ -60,8 +60,13 @@ fn main() {
         .add_plugin(GamePlugin)
         .insert_resource(Msaa::Sample4)
         .insert_resource(ClearColor(Color::BLACK))
+        .insert_resource(Lastscore::default())
+        .insert_resource(Highscore::default())
         .run();
 }
+
+#[derive(Component)]
+pub struct OnGameScreen;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum Phase {
@@ -127,6 +132,7 @@ impl Plugin for GamePlugin {
                     .after(Phase::Movement)
                     .in_set(OnUpdate(GameState::Game)),
             )
+            .add_system(despawn_screen::<OnGameScreen>.in_schedule(OnExit(GameState::Game)))
             .insert_resource(TileSize::default())
             .insert_resource(UpperLeft::default())
             .insert_resource(DiplopodSegments::default())

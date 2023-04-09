@@ -9,6 +9,7 @@ use crate::events::*;
 use crate::prelude::*;
 use crate::resources::*;
 use crate::GameState;
+use crate::OnGameScreen;
 
 pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
     spawn_diplopod(&mut commands, &mut segments);
@@ -32,6 +33,7 @@ fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegment
             y: ARENA_HEIGHT / 2,
         })
         .insert(crate::components::Size::square(1.0))
+        .insert(OnGameScreen)
         .id()];
 }
 
@@ -44,6 +46,7 @@ fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> E
         .insert(DiplopodSegment)
         .insert(position)
         .insert(crate::components::Size::square(1.0))
+        .insert(OnGameScreen)
         .id()
 }
 
@@ -104,6 +107,7 @@ fn spawn_random_food(
                         Stroke::color(FOOD_COLOR),
                     ))
                     .insert(Food)
+                    .insert(OnGameScreen)
                     .insert(pos);
                 free_consumable_positions.remove(&pos);
             }
@@ -168,6 +172,7 @@ fn spawn_random_poison(
                         Stroke::new(POISON_OUTLINE_COLOR, 7.),
                     ))
                     .insert(Poison)
+                    .insert(OnGameScreen)
                     .insert(pos);
                 free_consumable_positions.remove(&pos);
             }
@@ -198,6 +203,7 @@ fn spawn_random_superfood(
                 Stroke::new(SUPERFOOD_COLOR, 7.5),
             ))
             .insert(Superfood)
+            .insert(OnGameScreen)
             .insert(pos);
         free_consumable_positions.remove(&pos);
     }
@@ -226,6 +232,7 @@ fn spawn_random_antidote(
                 Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9),
             ))
             .insert(Antidote)
+            .insert(OnGameScreen)
             .insert(pos);
         free_consumable_positions.remove(&pos);
     }
@@ -524,41 +531,30 @@ pub fn control_antidote_sound(
 }
 
 pub fn game_over(
-    mut commands: Commands,
     mut reader: EventReader<GameOver>,
-    food: Query<Entity, With<Food>>,
-    superfood: Query<Entity, With<Superfood>>,
-    poison: Query<Entity, With<Poison>>,
-    antidotes: Query<Entity, With<Antidote>>,
     segments: Query<Entity, With<DiplopodSegment>>,
-    messages: Query<Entity, With<Text>>,
-    consumable_positions: Query<&ConsumablePosition>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     mut immunity_time: ResMut<ImmunityTime>,
     audio: Res<Audio>,
     sounds: Res<Sounds>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut lastscore: ResMut<Lastscore>,
+    mut highscore: ResMut<Highscore>,
 ) {
     if reader.iter().next().is_some() {
         audio.play(sounds.game_over.clone());
 
-        for ent in segments.iter() {
-            commands.entity(ent).despawn();
+        lastscore.0 = 0;
+        for _ in segments.iter() {
+            lastscore.0 += 1;
         }
 
-        for ent in food
-            .iter()
-            .chain(poison.iter())
-            .chain(superfood.iter())
-            .chain(antidotes.iter())
-            .chain(messages.iter())
-        {
-            let position = consumable_positions.get(ent).unwrap();
-            free_consumable_positions.positions.push(*position);
-            commands.entity(ent).despawn();
+        if lastscore.0 > highscore.0 {
+            highscore.0 = lastscore.0;
         }
-        free_consumable_positions.shuffle();
+
+        free_consumable_positions.reset();
 
         last_special_spawn.0 = 0;
         immunity_time.0 = 0;
