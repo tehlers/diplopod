@@ -1,5 +1,7 @@
 mod components;
 mod events;
+mod highscores;
+mod menu;
 mod resources;
 mod systems;
 
@@ -33,10 +35,12 @@ mod prelude {
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 }
 
-#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum Phase {
-    Input,
-    Movement,
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+enum GameState {
+    #[default]
+    Menu,
+    Game,
+    Highscores,
 }
 
 fn main() {
@@ -50,8 +54,19 @@ fn main() {
             ..default()
         }))
         .add_startup_system(setup::setup)
+        .add_state::<GameState>()
+        .add_plugin(menu::MenuPlugin)
+        .add_plugin(highscores::HighscoresPlugin)
         .add_plugin(GamePlugin)
+        .insert_resource(Msaa::Sample4)
+        .insert_resource(ClearColor(Color::BLACK))
         .run();
+}
+
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub enum Phase {
+    Input,
+    Movement,
 }
 
 struct GamePlugin;
@@ -59,7 +74,10 @@ struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(ShapePlugin)
-            .add_startup_systems((game::init_diplopod, game::init_food, game::init_poison))
+            .add_systems(
+                (game::init_diplopod, game::init_food, game::init_poison)
+                    .in_schedule(OnEnter(GameState::Game)),
+            )
             .add_systems((graphics::on_window_created, graphics::on_window_resized))
             .add_systems(
                 (
@@ -67,7 +85,8 @@ impl Plugin for GamePlugin {
                     player_input::gamepad,
                     game::move_antidote.run_if(on_timer(Duration::from_millis(500))),
                 )
-                    .in_set(Phase::Input),
+                    .in_set(Phase::Input)
+                    .in_set(OnUpdate(GameState::Game)),
             )
             .add_systems(
                 (
@@ -78,16 +97,21 @@ impl Plugin for GamePlugin {
                     game::growth,
                 )
                     .chain()
+                    .in_set(OnUpdate(GameState::Game))
                     .in_schedule(CoreSchedule::FixedUpdate),
             )
             .add_systems(
                 (graphics::change_color, game::control_antidote_sound)
+                    .in_set(OnUpdate(GameState::Game))
                     .in_schedule(CoreSchedule::FixedUpdate),
             )
-            .add_systems((
-                game::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
-                graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
-            ))
+            .add_systems(
+                (
+                    game::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
+                    graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
+                )
+                    .in_set(OnUpdate(GameState::Game)),
+            )
             .add_systems(
                 (
                     graphics::position_translation,
@@ -95,10 +119,14 @@ impl Plugin for GamePlugin {
                     graphics::size_scaling,
                     graphics::rotate_superfood,
                 )
-                    .in_base_set(CoreSet::PostUpdate),
+                    .after(Phase::Movement)
+                    .in_set(OnUpdate(GameState::Game)),
             )
-            .add_system(game::game_over.after(Phase::Movement))
-            .insert_resource(Msaa::Sample4)
+            .add_system(
+                game::game_over
+                    .after(Phase::Movement)
+                    .in_set(OnUpdate(GameState::Game)),
+            )
             .insert_resource(TileSize::default())
             .insert_resource(UpperLeft::default())
             .insert_resource(DiplopodSegments::default())
@@ -111,10 +139,16 @@ impl Plugin for GamePlugin {
             ))
             .insert_resource(AntidoteSoundController(Option::None))
             .insert_resource(FixedTime::new_from_secs(0.075))
-            .insert_resource(ClearColor(Color::BLACK))
             .add_event::<GameOver>()
             .add_event::<Growth>()
             .add_event::<SpawnConsumables>()
             .add_event::<ShowMessage>();
+    }
+}
+
+// Generic system that takes a component as a parameter, and will despawn all entities with that component
+fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
+    for entity in &to_despawn {
+        commands.entity(entity).despawn_recursive();
     }
 }
