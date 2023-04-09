@@ -8,6 +8,7 @@ use crate::components::*;
 use crate::events::*;
 use crate::prelude::*;
 use crate::resources::*;
+use crate::GameState;
 
 pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
     spawn_diplopod(&mut commands, &mut segments);
@@ -525,7 +526,6 @@ pub fn control_antidote_sound(
 pub fn game_over(
     mut commands: Commands,
     mut reader: EventReader<GameOver>,
-    mut segments_res: ResMut<DiplopodSegments>,
     food: Query<Entity, With<Food>>,
     superfood: Query<Entity, With<Superfood>>,
     poison: Query<Entity, With<Poison>>,
@@ -536,9 +536,9 @@ pub fn game_over(
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     mut immunity_time: ResMut<ImmunityTime>,
-    tile_size: Res<TileSize>,
     audio: Res<Audio>,
     sounds: Res<Sounds>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
     if reader.iter().next().is_some() {
         audio.play(sounds.game_over.clone());
@@ -563,8 +563,6 @@ pub fn game_over(
         last_special_spawn.0 = 0;
         immunity_time.0 = 0;
 
-        spawn_diplopod(&mut commands, &mut segments_res);
-        spawn_food(&mut commands, &mut free_consumable_positions, &tile_size);
-        spawn_poison(&mut commands, &mut free_consumable_positions, &tile_size);
+        game_state.set(GameState::Highscores);
     }
 }

@@ -36,7 +36,7 @@ mod prelude {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-enum GameState {
+pub enum GameState {
     #[default]
     Menu,
     Game,
