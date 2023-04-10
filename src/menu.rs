@@ -1,5 +1,7 @@
 use bevy::{app::AppExit, prelude::*};
 
+use crate::prelude::TITLE;
+
 use super::{despawn_screen, Fonts, GameState};
 
 pub struct MenuPlugin;
@@ -137,7 +139,7 @@ fn setup_menu(mut commands: Commands, fonts: Res<Fonts>, selected: Res<Selected>
                 })
                 .with_children(|parent| {
                     parent.spawn(
-                        TextBundle::from_section("Diplopod", title_text_style).with_style(Style {
+                        TextBundle::from_section(TITLE, title_text_style).with_style(Style {
                             margin: UiRect::all(Val::Px(50.0)),
                             ..default()
                         }),

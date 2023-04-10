@@ -3,6 +3,7 @@ use bevy::utils::Duration;
 use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
 
 use crate::game::resources::{Highscore, Lastscore};
+use crate::prelude::TITLE;
 
 use super::{despawn_screen, Fonts, GameState};
 
@@ -108,7 +109,7 @@ fn setup_highscore(
                 })
                 .with_children(|parent| {
                     parent.spawn(
-                        TextBundle::from_section("Diplopod", title_text_style).with_style(Style {
+                        TextBundle::from_section(TITLE, title_text_style).with_style(Style {
                             margin: UiRect::all(Val::Px(50.0)),
                             ..default()
                         }),

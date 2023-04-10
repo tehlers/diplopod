@@ -5,9 +5,12 @@ mod menu;
 use bevy::prelude::*;
 use game::resources::*;
 use game::systems::*;
+use prelude::TITLE;
 
 mod prelude {
     use bevy::prelude::Color;
+
+    pub const TITLE: &str = "diplopod";
 
     pub const CONSUMABLE_WIDTH: i32 = 39;
     pub const CONSUMABLE_HEIGHT: i32 = 21;
@@ -39,7 +42,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Diplopod".into(),
+                title: TITLE.into(),
                 resolution: (400., 220.).into(),
                 ..default()
             }),
