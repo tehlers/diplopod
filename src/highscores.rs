@@ -1,45 +1,69 @@
+use bevy::time::common_conditions::on_timer;
+use bevy::utils::Duration;
 use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
 
 use crate::resources::{Highscore, Lastscore};
 
 use super::{despawn_screen, Fonts, GameState};
 
+/// Adds a screen that shows the highscore of the current session and
+/// the score of the last game.
 pub struct HighscoresPlugin;
 
 const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
 const HEADLINE_COLOR: Color = Color::GRAY;
 const HIGHSCORE_COLOR: Color = Color::WHITE;
+const INITIAL_DELAY_SECONDS: u8 = 2;
 
 #[derive(Component)]
 struct OnHighscoresScreen;
+
+#[derive(Default, Resource)]
+pub struct InitialDelay(pub u8);
 
 impl Plugin for HighscoresPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(setup_highscores.in_schedule(OnEnter(GameState::Highscores)))
             .add_system(keyboard.in_set(OnUpdate(GameState::Highscores)))
+            .add_system(reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))))
             .add_system(
                 despawn_screen::<OnHighscoresScreen>.in_schedule(OnExit(GameState::Highscores)),
-            );
+            )
+            .init_resource::<InitialDelay>();
     }
 }
 
+/// Reduces the initial delay of the screen that ensures that keyboard events are not processed
+/// immediately after game over.
+fn reduce_initial_delay(mut initial_delay: ResMut<InitialDelay>) {
+    if initial_delay.0 > 0 {
+        initial_delay.0 -= 1;
+    }
+}
+
+/// Forwards to the menu when any key is pressed after an initial delay.
 fn keyboard(
     mut keyboard_event: EventReader<KeyboardInput>,
     mut game_state: ResMut<NextState<GameState>>,
+    initial_delay: Res<InitialDelay>,
 ) {
     for ev in keyboard_event.iter() {
-        match ev.state {
-            ButtonState::Released => game_state.set(GameState::Menu),
-            ButtonState::Pressed => (),
+        if initial_delay.0 == 0 {
+            match ev.state {
+                ButtonState::Released => game_state.set(GameState::Menu),
+                ButtonState::Pressed => (),
+            }
         }
     }
 }
 
+/// Creates the UI of the highscore screen.
 fn setup_highscores(
     mut commands: Commands,
     fonts: Res<Fonts>,
     highscore: Res<Highscore>,
     lastscore: Res<Lastscore>,
+    mut initial_delay: ResMut<InitialDelay>,
 ) {
     let title_text_style = TextStyle {
         font: fonts.regular.clone(),
@@ -122,4 +146,6 @@ fn setup_highscores(
                     );
                 });
         });
+
+    initial_delay.0 = INITIAL_DELAY_SECONDS;
 }
