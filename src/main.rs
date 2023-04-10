@@ -1,18 +1,10 @@
-mod components;
-mod events;
+mod game;
 mod highscores;
 mod menu;
-mod resources;
-mod systems;
 
 use bevy::prelude::*;
-use bevy::time::common_conditions::on_timer;
-use bevy::utils::Duration;
-use bevy_prototype_lyon::prelude::*;
-use events::*;
-use prelude::*;
-use resources::*;
-use systems::*;
+use game::resources::*;
+use game::systems::*;
 
 mod prelude {
     use bevy::prelude::Color;
@@ -57,99 +49,12 @@ fn main() {
         .add_state::<GameState>()
         .add_plugin(menu::MenuPlugin)
         .add_plugin(highscores::HighscoresPlugin)
-        .add_plugin(GamePlugin)
+        .add_plugin(game::GamePlugin)
         .insert_resource(Msaa::Sample4)
         .insert_resource(ClearColor(Color::BLACK))
         .insert_resource(Lastscore::default())
         .insert_resource(Highscore::default())
         .run();
-}
-
-#[derive(Component)]
-pub struct OnGameScreen;
-
-#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum Phase {
-    Input,
-    Movement,
-}
-
-struct GamePlugin;
-
-impl Plugin for GamePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugin(ShapePlugin)
-            .add_systems(
-                (game::init_diplopod, game::init_food, game::init_poison)
-                    .in_schedule(OnEnter(GameState::Game)),
-            )
-            .add_systems((graphics::on_window_created, graphics::on_window_resized))
-            .add_systems(
-                (
-                    player_input::keyboard,
-                    player_input::gamepad,
-                    game::move_antidote.run_if(on_timer(Duration::from_millis(500))),
-                )
-                    .in_set(Phase::Input)
-                    .in_set(OnUpdate(GameState::Game)),
-            )
-            .add_systems(
-                (
-                    game::movement.after(Phase::Input).in_set(Phase::Movement),
-                    game::eat,
-                    game::spawn_consumables,
-                    graphics::show_message,
-                    game::growth,
-                )
-                    .chain()
-                    .in_set(OnUpdate(GameState::Game))
-                    .in_schedule(CoreSchedule::FixedUpdate),
-            )
-            .add_systems(
-                (graphics::change_color, game::control_antidote_sound)
-                    .in_set(OnUpdate(GameState::Game))
-                    .in_schedule(CoreSchedule::FixedUpdate),
-            )
-            .add_systems(
-                (
-                    game::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
-                    graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
-                )
-                    .in_set(OnUpdate(GameState::Game)),
-            )
-            .add_systems(
-                (
-                    graphics::position_translation,
-                    graphics::consumable_position_translation,
-                    graphics::size_scaling,
-                    graphics::rotate_superfood,
-                )
-                    .after(Phase::Movement)
-                    .in_set(OnUpdate(GameState::Game)),
-            )
-            .add_system(
-                game::game_over
-                    .after(Phase::Movement)
-                    .in_set(OnUpdate(GameState::Game)),
-            )
-            .add_system(despawn_screen::<OnGameScreen>.in_schedule(OnExit(GameState::Game)))
-            .insert_resource(TileSize::default())
-            .insert_resource(UpperLeft::default())
-            .insert_resource(DiplopodSegments::default())
-            .insert_resource(LastTailPosition::default())
-            .insert_resource(LastSpecialSpawn::default())
-            .insert_resource(ImmunityTime::default())
-            .insert_resource(FreeConsumablePositions::new(
-                CONSUMABLE_WIDTH as i32,
-                CONSUMABLE_HEIGHT as i32,
-            ))
-            .insert_resource(AntidoteSoundController(Option::None))
-            .insert_resource(FixedTime::new_from_secs(0.075))
-            .add_event::<GameOver>()
-            .add_event::<Growth>()
-            .add_event::<SpawnConsumables>()
-            .add_event::<ShowMessage>();
-    }
 }
 
 // Generic system that takes a component as a parameter, and will despawn all entities with that component

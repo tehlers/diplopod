@@ -2,7 +2,7 @@ use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
 use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
 
-use crate::resources::{Highscore, Lastscore};
+use crate::game::resources::{Highscore, Lastscore};
 
 use super::{despawn_screen, Fonts, GameState};
 

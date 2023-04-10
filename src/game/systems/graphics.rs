@@ -7,17 +7,17 @@ use bevy::window::WindowResized;
 
 use bevy_prototype_lyon::prelude::*;
 
-use crate::components::*;
-use crate::events::ShowMessage;
+use crate::game::components::*;
+use crate::game::events::ShowMessage;
+use crate::game::resources::Fonts;
+use crate::game::resources::ImmunityTime;
+use crate::game::OnGameScreen;
 use crate::prelude::*;
-use crate::resources::Fonts;
-use crate::resources::ImmunityTime;
-use crate::OnGameScreen;
 use crate::TileSize;
 use crate::UpperLeft;
 
 pub fn size_scaling(
-    mut q: Query<(&crate::components::Size, &mut Transform)>,
+    mut q: Query<(&crate::game::components::Size, &mut Transform)>,
     tile_size: Res<TileSize>,
 ) {
     for (_, mut transform) in q.iter_mut() {

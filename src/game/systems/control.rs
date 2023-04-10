@@ -4,12 +4,12 @@ use bevy::audio::AudioSink;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
-use crate::components::*;
-use crate::events::*;
+use crate::game::components::*;
+use crate::game::events::*;
+use crate::game::resources::*;
+use crate::game::OnGameScreen;
 use crate::prelude::*;
-use crate::resources::*;
 use crate::GameState;
-use crate::OnGameScreen;
 
 pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
     spawn_diplopod(&mut commands, &mut segments);
@@ -32,7 +32,7 @@ fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegment
             x: ARENA_WIDTH / 2,
             y: ARENA_HEIGHT / 2,
         })
-        .insert(crate::components::Size::square(1.0))
+        .insert(crate::game::components::Size::square(1.0))
         .insert(OnGameScreen)
         .id()];
 }
@@ -45,7 +45,7 @@ fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> E
         })
         .insert(DiplopodSegment)
         .insert(position)
-        .insert(crate::components::Size::square(1.0))
+        .insert(crate::game::components::Size::square(1.0))
         .insert(OnGameScreen)
         .id()
 }

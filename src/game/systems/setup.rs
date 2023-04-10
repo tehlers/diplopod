@@ -1,5 +1,5 @@
-use crate::resources::Fonts;
-use crate::resources::Sounds;
+use crate::game::resources::Fonts;
+use crate::game::resources::Sounds;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 

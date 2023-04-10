@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use crate::components::{ConsumablePosition, Position};
+use crate::game::components::{ConsumablePosition, Position};
 
 #[derive(Default, Resource)]
 pub struct DiplopodSegments(pub Vec<Entity>);

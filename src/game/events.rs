@@ -1,4 +1,4 @@
-use crate::components::ConsumablePosition;
+use crate::game::components::ConsumablePosition;
 
 pub struct GameOver;
 

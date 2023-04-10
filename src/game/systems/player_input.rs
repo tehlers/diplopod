@@ -1,4 +1,4 @@
-use crate::components::*;
+use crate::game::components::*;
 use bevy::prelude::*;
 
 pub fn keyboard(keyboard_input: Res<Input<KeyCode>>, mut heads: Query<&mut DiplopodHead>) {
