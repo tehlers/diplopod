@@ -1,5 +1,5 @@
 mod game;
-mod highscores;
+mod highscore;
 mod menu;
 
 use bevy::prelude::*;
@@ -32,7 +32,7 @@ pub enum GameState {
     #[default]
     Menu,
     Game,
-    Highscores,
+    Highscore,
 }
 
 fn main() {
@@ -48,7 +48,7 @@ fn main() {
         .add_startup_system(setup::setup)
         .add_state::<GameState>()
         .add_plugin(menu::MenuPlugin)
-        .add_plugin(highscores::HighscoresPlugin)
+        .add_plugin(highscore::HighscorePlugin)
         .add_plugin(game::GamePlugin)
         .insert_resource(Msaa::Sample4)
         .insert_resource(ClearColor(Color::BLACK))

@@ -559,6 +559,6 @@ pub fn game_over(
         last_special_spawn.0 = 0;
         immunity_time.0 = 0;
 
-        game_state.set(GameState::Highscores);
+        game_state.set(GameState::Highscore);
     }
 }

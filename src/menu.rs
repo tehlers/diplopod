@@ -25,7 +25,7 @@ struct OnMenuScreen;
 pub enum MenuButton {
     #[default]
     Play,
-    Highscores,
+    Highscore,
     Quit,
 }
 
@@ -33,15 +33,15 @@ impl MenuButton {
     fn previous(&self) -> Self {
         match *self {
             MenuButton::Play => MenuButton::Quit,
-            MenuButton::Highscores => MenuButton::Play,
-            MenuButton::Quit => MenuButton::Highscores,
+            MenuButton::Highscore => MenuButton::Play,
+            MenuButton::Quit => MenuButton::Highscore,
         }
     }
 
     fn next(&self) -> Self {
         match *self {
-            MenuButton::Play => MenuButton::Highscores,
-            MenuButton::Highscores => MenuButton::Quit,
+            MenuButton::Play => MenuButton::Highscore,
+            MenuButton::Highscore => MenuButton::Quit,
             MenuButton::Quit => MenuButton::Play,
         }
     }
@@ -72,7 +72,7 @@ fn keyboard(
     if keyboard_input.any_just_released([KeyCode::Return, KeyCode::Space]) {
         match &selected.0 {
             MenuButton::Play => game_state.set(GameState::Game),
-            MenuButton::Highscores => game_state.set(GameState::Highscores),
+            MenuButton::Highscore => game_state.set(GameState::Highscore),
             MenuButton::Quit => app_exit_events.send(AppExit),
         }
     }
@@ -163,15 +163,15 @@ fn setup_menu(mut commands: Commands, fonts: Res<Fonts>, selected: Res<Selected>
                                 style: button_style.clone(),
                                 background_color: background_color(
                                     &selected.0,
-                                    &MenuButton::Highscores,
+                                    &MenuButton::Highscore,
                                 ),
                                 ..default()
                             },
-                            MenuButton::Highscores,
+                            MenuButton::Highscore,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
-                                "Highscores",
+                                "Highscore",
                                 button_text_style.clone(),
                             ));
                         });

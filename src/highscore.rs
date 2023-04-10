@@ -8,7 +8,7 @@ use super::{despawn_screen, Fonts, GameState};
 
 /// Adds a screen that shows the highscore of the current session and
 /// the score of the last game.
-pub struct HighscoresPlugin;
+pub struct HighscorePlugin;
 
 const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
 const HEADLINE_COLOR: Color = Color::GRAY;
@@ -16,18 +16,18 @@ const HIGHSCORE_COLOR: Color = Color::WHITE;
 const INITIAL_DELAY_SECONDS: u8 = 2;
 
 #[derive(Component)]
-struct OnHighscoresScreen;
+struct OnHighscoreScreen;
 
 #[derive(Default, Resource)]
 pub struct InitialDelay(pub u8);
 
-impl Plugin for HighscoresPlugin {
+impl Plugin for HighscorePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(setup_highscores.in_schedule(OnEnter(GameState::Highscores)))
-            .add_system(keyboard.in_set(OnUpdate(GameState::Highscores)))
+        app.add_system(setup_highscore.in_schedule(OnEnter(GameState::Highscore)))
+            .add_system(keyboard.in_set(OnUpdate(GameState::Highscore)))
             .add_system(reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))))
             .add_system(
-                despawn_screen::<OnHighscoresScreen>.in_schedule(OnExit(GameState::Highscores)),
+                despawn_screen::<OnHighscoreScreen>.in_schedule(OnExit(GameState::Highscore)),
             )
             .init_resource::<InitialDelay>();
     }
@@ -58,7 +58,7 @@ fn keyboard(
 }
 
 /// Creates the UI of the highscore screen.
-fn setup_highscores(
+fn setup_highscore(
     mut commands: Commands,
     fonts: Res<Fonts>,
     highscore: Res<Highscore>,
@@ -94,7 +94,7 @@ fn setup_highscores(
                 },
                 ..default()
             },
-            OnHighscoresScreen,
+            OnHighscoreScreen,
         ))
         .with_children(|parent| {
             parent
@@ -115,7 +115,7 @@ fn setup_highscores(
                     );
 
                     parent.spawn(
-                        TextBundle::from_section("Highscores", headline_text_style).with_style(
+                        TextBundle::from_section("Highscore", headline_text_style).with_style(
                             Style {
                                 margin: UiRect::all(Val::Px(50.0)),
                                 ..default()
