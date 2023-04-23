@@ -26,6 +26,7 @@ impl Plugin for HighscorePlugin {
     fn build(&self, app: &mut App) {
         app.add_system(setup_highscore.in_schedule(OnEnter(GameState::Highscore)))
             .add_system(keyboard.in_set(OnUpdate(GameState::Highscore)))
+            .add_system(gamepad.in_set(OnUpdate(GameState::Highscore)))
             .add_system(reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))))
             .add_system(
                 despawn_screen::<OnHighscoreScreen>.in_schedule(OnExit(GameState::Highscore)),
@@ -53,6 +54,25 @@ fn keyboard(
             match ev.state {
                 ButtonState::Released => game_state.set(GameState::Menu),
                 ButtonState::Pressed => (),
+            }
+        }
+    }
+}
+
+/// Forwards to the menu when the A key of the gamepad is pressed after an initial delay.
+pub fn gamepad(
+    gamepads: Res<Gamepads>,
+    buttons: Res<Input<GamepadButton>>,
+    mut game_state: ResMut<NextState<GameState>>,
+    initial_delay: Res<InitialDelay>,
+) {
+    if initial_delay.0 == 0 {
+        for gamepad in gamepads.iter() {
+            if buttons.just_released(GamepadButton {
+                gamepad,
+                button_type: GamepadButtonType::South,
+            }) {
+                game_state.set(GameState::Menu);
             }
         }
     }

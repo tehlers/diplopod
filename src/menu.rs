@@ -10,6 +10,7 @@ impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(setup_menu.in_schedule(OnEnter(GameState::Menu)))
             .add_system(keyboard.in_set(OnUpdate(GameState::Menu)))
+            .add_system(gamepad.in_set(OnUpdate(GameState::Menu)))
             .add_system(despawn_screen::<OnMenuScreen>.in_schedule(OnExit(GameState::Menu)))
             .insert_resource(Selected::default());
     }
@@ -76,6 +77,46 @@ fn keyboard(
             MenuButton::Play => game_state.set(GameState::Game),
             MenuButton::Highscore => game_state.set(GameState::Highscore),
             MenuButton::Quit => app_exit_events.send(AppExit),
+        }
+    }
+}
+
+pub fn gamepad(
+    gamepads: Res<Gamepads>,
+    buttons: Res<Input<GamepadButton>>,
+    mut selected: ResMut<Selected>,
+    query: Query<(&mut BackgroundColor, &MenuButton)>,
+    mut game_state: ResMut<NextState<GameState>>,
+    mut app_exit_events: EventWriter<AppExit>,
+) {
+    for gamepad in gamepads.iter() {
+        if buttons.just_released(GamepadButton {
+            gamepad,
+            button_type: GamepadButtonType::DPadUp,
+        }) {
+            selected.0 = selected.0.previous();
+            update_selected_button(&selected.into(), query);
+            return;
+        }
+
+        if buttons.just_released(GamepadButton {
+            gamepad,
+            button_type: GamepadButtonType::DPadDown,
+        }) {
+            selected.0 = selected.0.next();
+            update_selected_button(&selected.into(), query);
+            return;
+        }
+
+        if buttons.just_released(GamepadButton {
+            gamepad,
+            button_type: GamepadButtonType::South,
+        }) {
+            match &selected.0 {
+                MenuButton::Play => game_state.set(GameState::Game),
+                MenuButton::Highscore => game_state.set(GameState::Highscore),
+                MenuButton::Quit => app_exit_events.send(AppExit),
+            }
         }
     }
 }
