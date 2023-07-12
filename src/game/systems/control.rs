@@ -1,6 +1,5 @@
 use rand::{thread_rng, Rng};
 
-use bevy::audio::AudioSink;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
@@ -249,7 +248,6 @@ pub fn spawn_consumables(
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     tile_size: Res<TileSize>,
-    audio: Res<Audio>,
     sounds: Res<Sounds>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.iter().next() {
@@ -315,7 +313,10 @@ pub fn spawn_consumables(
                 &tile_size,
             );
 
-            audio.play(sounds.special_spawn.clone());
+            commands.spawn(AudioBundle {
+                source: sounds.special_spawn.clone(),
+                ..default()
+            });
         }
     }
 }
@@ -376,9 +377,7 @@ pub fn eat(
     head_positions: Query<&Position, With<DiplopodHead>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut immunity_time: ResMut<ImmunityTime>,
-    audio: Res<Audio>,
     sounds: Res<Sounds>,
-    audio_sinks: Res<Assets<AudioSink>>,
 ) {
     for head_pos in head_positions.iter() {
         for (ent, food_pos) in food_positions.iter() {
@@ -393,7 +392,10 @@ pub fn eat(
                     new_segments: 1,
                 });
 
-                audio.play(sounds.eat_food.clone());
+                commands.spawn(AudioBundle {
+                    source: sounds.eat_food.clone(),
+                    ..default()
+                });
             }
         }
 
@@ -415,7 +417,10 @@ pub fn eat(
                     new_segments,
                 });
 
-                audio.play(sounds.super_food.clone());
+                commands.spawn(AudioBundle {
+                    source: sounds.super_food.clone(),
+                    ..default()
+                });
             }
         }
 
@@ -425,10 +430,13 @@ pub fn eat(
                 free_consumable_positions.positions.push(*antidote_pos);
                 immunity_time.0 += 10;
 
-                let handle = audio_sinks.get_handle(
-                    audio.play_with_settings(sounds.antidote.clone(), PlaybackSettings::LOOP),
-                );
-                commands.insert_resource(AntidoteSoundController(Option::Some(handle)));
+                commands.spawn((
+                    AudioBundle {
+                        source: sounds.antidote.clone(),
+                        settings: PlaybackSettings::LOOP,
+                    },
+                    AntidoteSound,
+                ));
             }
         }
 
@@ -440,7 +448,10 @@ pub fn eat(
                     free_consumable_positions.shuffle();
                     growth_writer.send(Growth(1));
 
-                    audio.play(sounds.eat_poison.clone());
+                    commands.spawn(AudioBundle {
+                        source: sounds.eat_poison.clone(),
+                        ..default()
+                    });
                 } else {
                     game_over_writer.send(GameOver);
                 }
@@ -509,41 +520,41 @@ pub fn limit_immunity(mut immunity_time: ResMut<ImmunityTime>) {
 }
 
 pub fn control_antidote_sound(
+    mut commands: Commands,
     immunity_time: Res<ImmunityTime>,
-    audio_sinks: Res<Assets<AudioSink>>,
-    controller: Res<AntidoteSoundController>,
+    query_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
 ) {
     if immunity_time.0 > 2 {
         // keep the sound
     } else if immunity_time.0 > 0 {
-        if let Some(handle) = &controller.0 {
-            if let Some(sink) = audio_sinks.get(handle) {
-                sink.toggle();
-            }
+        if let Ok(sink) = query_sound.get_single() {
+            sink.0.toggle();
         }
     } else {
-        if let Some(handle) = &controller.0 {
-            if let Some(sink) = audio_sinks.get(handle) {
-                sink.stop();
-            }
+        if let Ok(sink) = query_sound.get_single() {
+            sink.0.stop();
+            commands.entity(sink.1).despawn();
         }
     }
 }
 
 pub fn game_over(
+    mut commands: Commands,
     mut reader: EventReader<GameOver>,
     segments: Query<Entity, With<DiplopodSegment>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     mut immunity_time: ResMut<ImmunityTime>,
-    audio: Res<Audio>,
     sounds: Res<Sounds>,
     mut game_state: ResMut<NextState<GameState>>,
     mut lastscore: ResMut<Lastscore>,
     mut highscore: ResMut<Highscore>,
 ) {
     if reader.iter().next().is_some() {
-        audio.play(sounds.game_over.clone());
+        commands.spawn(AudioBundle {
+            source: sounds.game_over.clone(),
+            ..default()
+        });
 
         lastscore.0 = 0;
         for _ in segments.iter() {

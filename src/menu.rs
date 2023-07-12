@@ -8,10 +8,12 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(setup_menu.in_schedule(OnEnter(GameState::Menu)))
-            .add_system(keyboard.in_set(OnUpdate(GameState::Menu)))
-            .add_system(gamepad.in_set(OnUpdate(GameState::Menu)))
-            .add_system(despawn_screen::<OnMenuScreen>.in_schedule(OnExit(GameState::Menu)))
+        app.add_systems(OnEnter(GameState::Menu), setup_menu)
+            .add_systems(
+                Update,
+                (gamepad, keyboard).run_if(in_state(GameState::Menu)),
+            )
+            .add_systems(OnExit(GameState::Menu), despawn_screen::<OnMenuScreen>)
             .insert_resource(Selected::default());
     }
 }
@@ -136,7 +138,8 @@ fn update_selected_button(
 
 fn setup_menu(mut commands: Commands, fonts: Res<Fonts>, selected: Res<Selected>) {
     let button_style = Style {
-        size: Size::new(Val::Px(320.0), Val::Px(65.0)),
+        width: Val::Px(320.0),
+        height: Val::Px(65.0),
         margin: UiRect::all(Val::Px(20.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
@@ -159,7 +162,7 @@ fn setup_menu(mut commands: Commands, fonts: Res<Fonts>, selected: Res<Selected>
         .spawn((
             NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    width: Val::Percent(100.0),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()

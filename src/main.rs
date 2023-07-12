@@ -48,11 +48,13 @@ fn main() {
             }),
             ..default()
         }))
-        .add_startup_system(setup::setup)
+        .add_systems(Startup, setup::setup)
         .add_state::<GameState>()
-        .add_plugin(menu::MenuPlugin)
-        .add_plugin(highscore::HighscorePlugin)
-        .add_plugin(game::GamePlugin)
+        .add_plugins((
+            menu::MenuPlugin,
+            highscore::HighscorePlugin,
+            game::GamePlugin,
+        ))
         .insert_resource(Msaa::Sample4)
         .insert_resource(ClearColor(Color::BLACK))
         .insert_resource(Lastscore::default())

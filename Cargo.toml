@@ -14,7 +14,7 @@ opt-level = 1
 opt-level = 3
 
 [dependencies.bevy]
-version = "0.10.1"
+version = "0.11.0"
 default-features = false
 features = [
   # Bevy functionality:
@@ -73,5 +73,5 @@ features = [
 ]
 
 [dependencies]
-bevy_prototype_lyon = "0.8.0"
+bevy_prototype_lyon = "0.9.0"
 rand = "0.8.4"

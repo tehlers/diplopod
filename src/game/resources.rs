@@ -1,4 +1,3 @@
-use bevy::audio::AudioSink;
 use bevy::prelude::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -75,9 +74,6 @@ pub struct UpperLeft {
     pub x: i32,
     pub y: i32,
 }
-
-#[derive(Resource)]
-pub struct AntidoteSoundController(pub Option<Handle<AudioSink>>);
 
 #[derive(Resource)]
 pub struct Sounds {

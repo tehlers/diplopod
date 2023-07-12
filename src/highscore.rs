@@ -24,12 +24,18 @@ pub struct InitialDelay(pub u8);
 
 impl Plugin for HighscorePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(setup_highscore.in_schedule(OnEnter(GameState::Highscore)))
-            .add_system(keyboard.in_set(OnUpdate(GameState::Highscore)))
-            .add_system(gamepad.in_set(OnUpdate(GameState::Highscore)))
-            .add_system(reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))))
-            .add_system(
-                despawn_screen::<OnHighscoreScreen>.in_schedule(OnExit(GameState::Highscore)),
+        app.add_systems(OnEnter(GameState::Highscore), setup_highscore)
+            .add_systems(
+                Update,
+                (gamepad, keyboard).run_if(in_state(GameState::Highscore)),
+            )
+            .add_systems(
+                Update,
+                reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))),
+            )
+            .add_systems(
+                OnExit(GameState::Highscore),
+                despawn_screen::<OnHighscoreScreen>,
             )
             .init_resource::<InitialDelay>();
     }
@@ -108,7 +114,8 @@ fn setup_highscore(
         .spawn((
             NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
