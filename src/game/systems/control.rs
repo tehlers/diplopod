@@ -522,18 +522,18 @@ pub fn limit_immunity(mut immunity_time: ResMut<ImmunityTime>) {
 pub fn control_antidote_sound(
     mut commands: Commands,
     immunity_time: Res<ImmunityTime>,
-    query_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
+    antidote_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
 ) {
     if immunity_time.0 > 2 {
         // keep the sound
     } else if immunity_time.0 > 0 {
-        if let Ok(sink) = query_sound.get_single() {
-            sink.0.toggle();
+        if let Ok(sound) = antidote_sound.get_single() {
+            sound.0.toggle();
         }
     } else {
-        if let Ok(sink) = query_sound.get_single() {
-            sink.0.stop();
-            commands.entity(sink.1).despawn();
+        if let Ok(sound) = antidote_sound.get_single() {
+            sound.0.stop();
+            commands.entity(sound.1).despawn();
         }
     }
 }
@@ -549,8 +549,14 @@ pub fn game_over(
     mut game_state: ResMut<NextState<GameState>>,
     mut lastscore: ResMut<Lastscore>,
     mut highscore: ResMut<Highscore>,
+    antidote_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
 ) {
     if reader.iter().next().is_some() {
+        if let Ok(sound) = antidote_sound.get_single() {
+            sound.0.stop();
+            commands.entity(sound.1).despawn();
+        }
+
         commands.spawn(AudioBundle {
             source: sounds.game_over.clone(),
             ..default()
