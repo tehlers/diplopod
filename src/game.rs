@@ -38,60 +38,48 @@ impl Plugin for GamePlugin {
             )
             .add_systems(
                 Update,
-                (graphics::on_window_created, graphics::on_window_resized),
-            )
-            .add_systems(
-                Update,
                 (
-                    player_input::keyboard,
-                    player_input::gamepad,
-                    control::move_antidote.run_if(on_timer(Duration::from_millis(500))),
-                )
-                    .in_set(Phase::Input)
-                    .run_if(in_state(GameState::Game)),
+                    (graphics::on_window_created, graphics::on_window_resized),
+                    (
+                        player_input::keyboard,
+                        player_input::gamepad,
+                        control::move_antidote.run_if(on_timer(Duration::from_millis(500))),
+                    )
+                        .in_set(Phase::Input)
+                        .run_if(in_state(GameState::Game)),
+                    (
+                        graphics::position_translation,
+                        graphics::consumable_position_translation,
+                        graphics::size_scaling,
+                        graphics::rotate_superfood,
+                    )
+                        .after(Phase::Movement)
+                        .run_if(in_state(GameState::Game)),
+                    (
+                        control::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
+                        graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
+                    )
+                        .run_if(in_state(GameState::Game)),
+                    control::game_over
+                        .after(Phase::Movement)
+                        .run_if(in_state(GameState::Game)),
+                ),
             )
             .add_systems(
                 FixedUpdate,
                 (
-                    control::movement
-                        .after(Phase::Input)
-                        .in_set(Phase::Movement),
-                    control::eat,
-                    control::spawn_consumables,
-                    graphics::show_message,
-                    control::growth,
+                    (
+                        control::movement
+                            .after(Phase::Input)
+                            .in_set(Phase::Movement),
+                        control::eat,
+                        control::spawn_consumables,
+                        graphics::show_message,
+                        control::growth,
+                    )
+                        .chain(),
+                    (graphics::change_color, control::control_antidote_sound),
                 )
-                    .chain()
-                    .run_if(in_state(GameState::Game)),
-            )
-            .add_systems(
-                FixedUpdate,
-                (graphics::change_color, control::control_antidote_sound)
-                    .run_if(in_state(GameState::Game)),
-            )
-            .add_systems(
-                Update,
-                (
-                    control::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
-                    graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
-                )
-                    .run_if(in_state(GameState::Game)),
-            )
-            .add_systems(
-                Update,
-                (
-                    graphics::position_translation,
-                    graphics::consumable_position_translation,
-                    graphics::size_scaling,
-                    graphics::rotate_superfood,
-                )
-                    .after(Phase::Movement)
-                    .run_if(in_state(GameState::Game)),
-            )
-            .add_systems(
-                Update,
-                control::game_over
-                    .after(Phase::Movement)
                     .run_if(in_state(GameState::Game)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)

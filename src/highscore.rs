@@ -27,16 +27,17 @@ impl Plugin for HighscorePlugin {
         app.add_systems(OnEnter(GameState::Highscore), setup_highscore)
             .add_systems(
                 Update,
-                (gamepad, keyboard).run_if(in_state(GameState::Highscore)),
-            )
-            .add_systems(
-                Update,
-                reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))),
+                (
+                    (gamepad, keyboard).run_if(in_state(GameState::Highscore)),
+                    reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))),
+                ),
             )
             .add_systems(
                 OnExit(GameState::Highscore),
                 despawn_screen::<OnHighscoreScreen>,
             )
+            .insert_resource(Lastscore::default())
+            .insert_resource(Highscore::default())
             .init_resource::<InitialDelay>();
     }
 }
