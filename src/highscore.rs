@@ -5,7 +5,7 @@ use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
 use crate::game::resources::{Highscore, Lastscore};
 use crate::prelude::TITLE;
 
-use super::{despawn_screen, Fonts, GameState};
+use super::{despawn_screen, GameState};
 
 /// Adds a screen that shows the highscore of the current session and
 /// the score of the last game.
@@ -81,28 +81,23 @@ pub fn gamepad(
 }
 
 /// Creates the UI of the highscore screen.
-fn setup_highscore(
-    mut commands: Commands,
-    fonts: Res<Fonts>,
-    highscore: Res<Highscore>,
-    lastscore: Res<Lastscore>,
-) {
+fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore: Res<Lastscore>) {
     let title_text_style = TextStyle {
-        font: fonts.regular.clone(),
         font_size: 128.0,
         color: TITLE_COLOR,
+        ..default()
     };
 
     let headline_text_style = TextStyle {
-        font: fonts.regular.clone(),
         font_size: 64.0,
         color: HEADLINE_COLOR,
+        ..default()
     };
 
     let highscore_text_style = TextStyle {
-        font: fonts.regular.clone(),
         font_size: 64.0,
         color: HIGHSCORE_COLOR,
+        ..default()
     };
 
     commands

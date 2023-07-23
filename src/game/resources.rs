@@ -86,9 +86,7 @@ pub struct Sounds {
 }
 
 #[derive(Resource)]
-pub struct Fonts {
-    pub regular: Handle<Font>,
-}
+pub struct DefaultFontHandle(pub Handle<Font>);
 
 #[derive(Default, Resource)]
 pub struct Highscore(pub u16);

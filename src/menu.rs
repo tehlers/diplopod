@@ -2,7 +2,7 @@ use bevy::{app::AppExit, prelude::*};
 
 use crate::prelude::TITLE;
 
-use super::{despawn_screen, Fonts, GameState};
+use super::{despawn_screen, GameState};
 
 pub struct MenuPlugin;
 
@@ -136,7 +136,7 @@ fn update_selected_button(
     }
 }
 
-fn setup_menu(mut commands: Commands, fonts: Res<Fonts>, selected: Res<Selected>) {
+fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
     let button_style = Style {
         width: Val::Px(320.0),
         height: Val::Px(65.0),
@@ -147,15 +147,15 @@ fn setup_menu(mut commands: Commands, fonts: Res<Fonts>, selected: Res<Selected>
     };
 
     let button_text_style = TextStyle {
-        font: fonts.regular.clone(),
         font_size: 64.0,
         color: BUTTON_TEXT_COLOR,
+        ..default()
     };
 
     let title_text_style = TextStyle {
-        font: fonts.regular.clone(),
         font_size: 128.0,
         color: TITLE_COLOR,
+        ..default()
     };
 
     commands
