@@ -62,7 +62,8 @@ impl Plugin for GamePlugin {
                         .run_if(in_state(GameState::Game)),
                     control::game_over
                         .after(Phase::Movement)
-                        .run_if(in_state(GameState::Game)),
+                        .run_if(in_state(GameState::Game))
+                        .run_if(on_event::<GameOver>()),
                 ),
             )
             .add_systems(
@@ -73,9 +74,9 @@ impl Plugin for GamePlugin {
                             .after(Phase::Input)
                             .in_set(Phase::Movement),
                         control::eat,
-                        control::spawn_consumables,
+                        control::spawn_consumables.run_if(on_event::<SpawnConsumables>()),
                         graphics::show_message,
-                        control::growth,
+                        control::growth.run_if(on_event::<Growth>()),
                     )
                         .chain(),
                     (graphics::change_color, control::control_antidote_sound),
