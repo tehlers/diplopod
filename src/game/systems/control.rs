@@ -315,7 +315,7 @@ pub fn spawn_consumables(
 
             commands.spawn(AudioBundle {
                 source: sounds.special_spawn.clone(),
-                ..default()
+                settings: PlaybackSettings::DESPAWN,
             });
         }
     }
@@ -394,7 +394,7 @@ pub fn eat(
 
                 commands.spawn(AudioBundle {
                     source: sounds.eat_food.clone(),
-                    ..default()
+                    settings: PlaybackSettings::DESPAWN,
                 });
             }
         }
@@ -419,7 +419,7 @@ pub fn eat(
 
                 commands.spawn(AudioBundle {
                     source: sounds.super_food.clone(),
-                    ..default()
+                    settings: PlaybackSettings::DESPAWN,
                 });
             }
         }
@@ -450,7 +450,7 @@ pub fn eat(
 
                     commands.spawn(AudioBundle {
                         source: sounds.eat_poison.clone(),
-                        ..default()
+                        settings: PlaybackSettings::DESPAWN,
                     });
                 } else {
                     game_over_writer.send(GameOver);
@@ -559,7 +559,7 @@ pub fn game_over(
 
         commands.spawn(AudioBundle {
             source: sounds.game_over.clone(),
-            ..default()
+            settings: PlaybackSettings::DESPAWN,
         });
 
         lastscore.0 = 0;
