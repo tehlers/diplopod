@@ -14,13 +14,13 @@ pub struct HighscorePlugin;
 const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
 const HEADLINE_COLOR: Color = Color::GRAY;
 const HIGHSCORE_COLOR: Color = Color::WHITE;
-const INITIAL_DELAY_SECONDS: u8 = 2;
+const INITIAL_DELAY_MILLISECONDS: u64 = 500;
 
 #[derive(Component)]
 struct OnHighscoreScreen;
 
 #[derive(Default, Resource)]
-pub struct InitialDelay(pub u8);
+pub struct InitialDelay;
 
 impl Plugin for HighscorePlugin {
     fn build(&self, app: &mut App) {
@@ -28,8 +28,12 @@ impl Plugin for HighscorePlugin {
             .add_systems(
                 Update,
                 (
-                    (gamepad, keyboard).run_if(in_state(GameState::Highscore)),
-                    reduce_initial_delay.run_if(on_timer(Duration::from_secs(1))),
+                    (gamepad, keyboard)
+                        .run_if(in_state(GameState::Highscore))
+                        .run_if(not(resource_exists::<InitialDelay>())),
+                    remove_initial_delay
+                        .run_if(on_timer(Duration::from_millis(INITIAL_DELAY_MILLISECONDS)))
+                        .run_if(resource_exists::<InitialDelay>()),
                 ),
             )
             .add_systems(
@@ -37,31 +41,25 @@ impl Plugin for HighscorePlugin {
                 despawn_screen::<OnHighscoreScreen>,
             )
             .insert_resource(Lastscore::default())
-            .insert_resource(Highscore::default())
-            .init_resource::<InitialDelay>();
+            .insert_resource(Highscore::default());
     }
 }
 
-/// Reduces the initial delay of the screen that ensures that keyboard events are not processed
+/// Removes the initial delay of the screen that ensures that keyboard and gamepad events are not processed
 /// immediately after game over.
-fn reduce_initial_delay(mut initial_delay: ResMut<InitialDelay>) {
-    if initial_delay.0 > 0 {
-        initial_delay.0 -= 1;
-    }
+fn remove_initial_delay(mut commands: Commands) {
+    commands.remove_resource::<InitialDelay>();
 }
 
 /// Forwards to the menu when any key is pressed after an initial delay.
 fn keyboard(
     mut keyboard_event: EventReader<KeyboardInput>,
     mut game_state: ResMut<NextState<GameState>>,
-    initial_delay: Res<InitialDelay>,
 ) {
     for ev in keyboard_event.iter() {
-        if initial_delay.0 == 0 {
-            match ev.state {
-                ButtonState::Released => game_state.set(GameState::Menu),
-                ButtonState::Pressed => (),
-            }
+        match ev.state {
+            ButtonState::Released => game_state.set(GameState::Menu),
+            ButtonState::Pressed => (),
         }
     }
 }
@@ -71,16 +69,13 @@ pub fn gamepad(
     gamepads: Res<Gamepads>,
     buttons: Res<Input<GamepadButton>>,
     mut game_state: ResMut<NextState<GameState>>,
-    initial_delay: Res<InitialDelay>,
 ) {
-    if initial_delay.0 == 0 {
-        for gamepad in gamepads.iter() {
-            if buttons.just_released(GamepadButton {
-                gamepad,
-                button_type: GamepadButtonType::South,
-            }) {
-                game_state.set(GameState::Menu);
-            }
+    for gamepad in gamepads.iter() {
+        if buttons.just_released(GamepadButton {
+            gamepad,
+            button_type: GamepadButtonType::South,
+        }) {
+            game_state.set(GameState::Menu);
         }
     }
 }
@@ -91,7 +86,6 @@ fn setup_highscore(
     fonts: Res<Fonts>,
     highscore: Res<Highscore>,
     lastscore: Res<Lastscore>,
-    mut initial_delay: ResMut<InitialDelay>,
 ) {
     let title_text_style = TextStyle {
         font: fonts.regular.clone(),
@@ -176,5 +170,5 @@ fn setup_highscore(
                 });
         });
 
-    initial_delay.0 = INITIAL_DELAY_SECONDS;
+    commands.init_resource::<InitialDelay>();
 }
