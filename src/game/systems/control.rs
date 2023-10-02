@@ -1,3 +1,4 @@
+use bevy_prototype_lyon::shapes::Rectangle;
 use rand::{thread_rng, Rng};
 
 use bevy::prelude::*;
@@ -47,6 +48,75 @@ fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> E
         .insert(crate::game::components::Size::square(1.0))
         .insert(OnGameScreen)
         .id()
+}
+
+pub fn init_wall(
+    mut commands: Commands,
+    mut free_consumable_positions: ResMut<FreeConsumablePositions>,
+    tile_size: Res<TileSize>,
+) {
+    let shape = shapes::Rectangle {
+        extents: Vec2::splat(tile_size.0 as f32 * 2.0),
+        origin: shapes::RectangleOrigin::Center,
+    };
+
+    for x in 0..CONSUMABLE_WIDTH + 1 {
+        spawn_wall(
+            &mut commands,
+            &mut free_consumable_positions,
+            ConsumablePosition { x, y: 0 },
+            &shape,
+        );
+        spawn_wall(
+            &mut commands,
+            &mut free_consumable_positions,
+            ConsumablePosition {
+                x,
+                y: CONSUMABLE_HEIGHT,
+            },
+            &shape,
+        );
+    }
+
+    for y in 1..CONSUMABLE_HEIGHT {
+        spawn_wall(
+            &mut commands,
+            &mut free_consumable_positions,
+            ConsumablePosition { x: 0, y },
+            &shape,
+        );
+        spawn_wall(
+            &mut commands,
+            &mut free_consumable_positions,
+            ConsumablePosition {
+                x: CONSUMABLE_WIDTH,
+                y,
+            },
+            &shape,
+        );
+    }
+}
+
+fn spawn_wall(
+    commands: &mut Commands,
+    free_consumable_positions: &mut ResMut<FreeConsumablePositions>,
+    pos: ConsumablePosition,
+    shape: &Rectangle,
+) {
+    commands
+        .spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(shape),
+                ..default()
+            },
+            Fill::color(WALL_COLOR),
+            Stroke::color(WALL_COLOR),
+        ))
+        .insert(Wall)
+        .insert(OnGameScreen)
+        .insert(pos);
+
+    free_consumable_positions.remove(&pos);
 }
 
 pub fn init_food(
@@ -339,14 +409,6 @@ pub fn movement(
         head_pos.x += head.direction.x as i32;
         head_pos.y += head.direction.y as i32;
 
-        if head_pos.x < 0
-            || head_pos.y < 0
-            || head_pos.x >= ARENA_WIDTH
-            || head_pos.y >= ARENA_HEIGHT
-        {
-            game_over_writer.send(GameOver);
-        }
-
         if segment_positions.contains(&head_pos)
             && (head.direction.x != 0.0 || head.direction.y != 0.0)
         {
@@ -375,6 +437,7 @@ pub fn eat(
     poison_positions: Query<(Entity, &ConsumablePosition), With<Poison>>,
     antidote_positions: Query<(Entity, &ConsumablePosition), With<Antidote>>,
     head_positions: Query<&Position, With<DiplopodHead>>,
+    wall_positions: Query<(Entity, &ConsumablePosition), With<Wall>>,
     mut free_consumable_positions: ResMut<FreeConsumablePositions>,
     mut immunity_time: ResMut<ImmunityTime>,
     sounds: Res<Sounds>,
@@ -457,6 +520,12 @@ pub fn eat(
                 }
             }
         }
+
+        for (_ent, wall_pos) in wall_positions.iter() {
+            if *wall_pos == head_pos.to_consumable_position() {
+                game_over_writer.send(GameOver);
+            }
+        }
     }
 }
 
@@ -496,9 +565,9 @@ pub fn move_antidote(
             _ => (),
         }
 
-        if new_pos.x < 0
+        if new_pos.x < 1
             || new_pos.x >= CONSUMABLE_WIDTH
-            || new_pos.y < 0
+            || new_pos.y < 1
             || new_pos.y >= CONSUMABLE_HEIGHT
             || segment_positions
                 .iter_mut()

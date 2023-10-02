@@ -31,6 +31,7 @@ pub fn on_window_created(
         Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
         Query<&mut Path, With<Superfood>>,
         Query<(&mut Path, &mut Stroke), With<Antidote>>,
+        Query<&mut Path, With<Wall>>,
     )>,
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
@@ -54,6 +55,7 @@ pub fn on_window_resized(
         Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
         Query<&mut Path, With<Superfood>>,
         Query<(&mut Path, &mut Stroke), With<Antidote>>,
+        Query<&mut Path, With<Wall>>,
     )>,
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
@@ -76,6 +78,7 @@ fn resize_consumables(
         Query<&mut Path, Or<(With<Food>, With<Poison>)>>,
         Query<&mut Path, With<Superfood>>,
         Query<(&mut Path, &mut Stroke), With<Antidote>>,
+        Query<&mut Path, With<Wall>>,
     )>,
     mut tile_size: ResMut<TileSize>,
     mut upper_left: ResMut<UpperLeft>,
@@ -83,6 +86,8 @@ fn resize_consumables(
     tile_size.0 = cmp::min(width / ARENA_WIDTH, height / ARENA_HEIGHT);
     upper_left.x = (width - ARENA_WIDTH * tile_size.0) / 2;
     upper_left.y = (height - ARENA_HEIGHT * tile_size.0) / 2;
+
+    // Resize food and poison
 
     let shape = shapes::Circle {
         radius: tile_size.0 as f32,
@@ -92,6 +97,8 @@ fn resize_consumables(
     for mut path in paths.p0().iter_mut() {
         *path = ShapePath::build_as(&shape);
     }
+
+    // Resize superfood
 
     let mut path_builder = PathBuilder::new();
     path_builder.move_to(-tile_size.0 as f32 * Vec2::X);
@@ -104,9 +111,22 @@ fn resize_consumables(
         *path = ShapePath::build_as(&cross);
     }
 
+    // Resize antidote
+
     for (mut path, mut stroke) in paths.p2().iter_mut() {
         *path = ShapePath::build_as(&cross);
         *stroke = Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9);
+    }
+
+    // Resize walls
+
+    let shape = shapes::Rectangle {
+        extents: Vec2::splat(tile_size.0 as f32 * 2.0),
+        origin: shapes::RectangleOrigin::Center,
+    };
+
+    for mut path in paths.p3().iter_mut() {
+        *path = ShapePath::build_as(&shape);
     }
 }
 

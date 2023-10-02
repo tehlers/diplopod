@@ -47,6 +47,9 @@ pub struct ConsumablePosition {
 }
 
 #[derive(Component)]
+pub struct Wall;
+
+#[derive(Component)]
 pub struct Food;
 
 #[derive(Component)]

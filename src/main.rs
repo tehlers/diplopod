@@ -12,17 +12,18 @@ mod prelude {
 
     pub const TITLE: &str = "diplopod";
 
-    pub const CONSUMABLE_WIDTH: i32 = 39;
-    pub const CONSUMABLE_HEIGHT: i32 = 21;
+    pub const CONSUMABLE_WIDTH: i32 = 39 + 1;
+    pub const CONSUMABLE_HEIGHT: i32 = 21 + 1;
     pub const CONSUMABLE_SCALE_FACTOR: i32 = 2;
-    pub const ARENA_WIDTH: i32 = CONSUMABLE_WIDTH * CONSUMABLE_SCALE_FACTOR;
-    pub const ARENA_HEIGHT: i32 = CONSUMABLE_HEIGHT * CONSUMABLE_SCALE_FACTOR;
+    pub const ARENA_WIDTH: i32 = (CONSUMABLE_WIDTH + 1) * CONSUMABLE_SCALE_FACTOR;
+    pub const ARENA_HEIGHT: i32 = (CONSUMABLE_HEIGHT + 1) * CONSUMABLE_SCALE_FACTOR;
     pub const AMOUNT_OF_FOOD: u32 = 16;
     pub const AMOUNT_OF_POISON: u32 = 17;
     pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 
     pub const DIPLOPOD_COLOR: Color = Color::ORANGE;
     pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
+    pub const WALL_COLOR: Color = Color::DARK_GRAY;
     pub const FOOD_COLOR: Color = Color::GREEN;
     pub const SUPERFOOD_COLOR: Color = Color::BLUE;
     pub const POISON_OUTLINE_COLOR: Color = Color::RED;

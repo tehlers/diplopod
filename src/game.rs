@@ -32,9 +32,11 @@ impl Plugin for GamePlugin {
                 OnEnter(GameState::Game),
                 (
                     control::init_diplopod,
+                    control::init_wall,
                     control::init_food,
                     control::init_poison,
-                ),
+                )
+                    .chain(),
             )
             .add_systems(
                 Update,
