@@ -29,6 +29,8 @@ mod prelude {
     pub const POISON_OUTLINE_COLOR: Color = Color::RED;
     pub const POISON_FILL_COLOR: Color = Color::BLACK;
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
+
+    pub const RADIUS_FACTOR: f32 = 0.9;
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

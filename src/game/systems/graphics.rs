@@ -90,7 +90,7 @@ fn resize_consumables(
     // Resize food and poison
 
     let shape = shapes::Circle {
-        radius: tile_size.0 as f32,
+        radius: tile_size.0 as f32 * RADIUS_FACTOR,
         center: Vec2::new(0., 0.),
     };
 

@@ -158,7 +158,7 @@ fn spawn_random_food(
     tile_size: &Res<TileSize>,
 ) {
     let shape = shapes::Circle {
-        radius: tile_size.0 as f32,
+        radius: tile_size.0 as f32 * RADIUS_FACTOR,
         center: Vec2::new(0., 0.),
     };
 
@@ -223,7 +223,7 @@ fn spawn_random_poison(
     tile_size: &Res<TileSize>,
 ) {
     let shape = shapes::Circle {
-        radius: tile_size.0 as f32,
+        radius: tile_size.0 as f32 * RADIUS_FACTOR,
         center: Vec2::new(0., 0.),
     };
 
