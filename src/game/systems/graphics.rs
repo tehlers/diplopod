@@ -84,8 +84,8 @@ fn resize_consumables(
     mut upper_left: ResMut<UpperLeft>,
 ) {
     tile_size.0 = cmp::min(width / ARENA_WIDTH, height / ARENA_HEIGHT);
-    upper_left.x = (width - ARENA_WIDTH * tile_size.0) / 2;
-    upper_left.y = (height - ARENA_HEIGHT * tile_size.0) / 2;
+    upper_left.x = (width - (ARENA_WIDTH - 1) * tile_size.0) / 2;
+    upper_left.y = (height - (ARENA_HEIGHT - 1) * tile_size.0) / 2;
 
     // Resize food and poison
 
