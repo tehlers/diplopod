@@ -328,6 +328,7 @@ fn spawn_random_antidote(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_consumables(
     mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
@@ -447,6 +448,7 @@ pub fn movement(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn eat(
     mut commands: Commands,
     mut growth_writer: EventWriter<Growth>,
@@ -633,6 +635,7 @@ pub fn control_antidote_sound(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn game_over(
     mut commands: Commands,
     mut reader: EventReader<GameOver>,

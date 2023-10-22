@@ -15,6 +15,7 @@ use crate::prelude::*;
 use crate::TileSize;
 use crate::UpperLeft;
 
+#[allow(clippy::type_complexity)]
 pub fn on_window_created(
     mut reader: EventReader<WindowCreated>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -41,6 +42,7 @@ pub fn on_window_created(
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn on_window_resized(
     mut reader: EventReader<WindowResized>,
     paths: ParamSet<(
@@ -64,6 +66,7 @@ pub fn on_window_resized(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn resize_consumables(
     width: i32,
     height: i32,
