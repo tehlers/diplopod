@@ -627,11 +627,9 @@ pub fn control_antidote_sound(
         if let Ok(sound) = antidote_sound.get_single() {
             sound.0.toggle();
         }
-    } else {
-        if let Ok(sound) = antidote_sound.get_single() {
-            sound.0.stop();
-            commands.entity(sound.1).despawn();
-        }
+    } else if let Ok(sound) = antidote_sound.get_single() {
+        sound.0.stop();
+        commands.entity(sound.1).despawn();
     }
 }
 

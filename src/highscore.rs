@@ -88,10 +88,9 @@ fn read_highscore_from_file() -> Result<u16> {
 /// Save highscore to platform specific data directory (e.g.
 /// `$HOME/.local/share/diplopod/highscore`). Errors will be logged but otherwise ignored.
 fn save_highscore(highscore: Res<Highscore>) {
-    match write_highscore_to_file(highscore.0) {
-        Err(e) => warn!("{}", e),
-        _ => (),
-    };
+    if let Err(e) = write_highscore_to_file(highscore.0) {
+        warn!("{}", e)
+    }
 }
 
 /// Writes the highscore to the platform specific data directory. The file and all necessary

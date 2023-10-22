@@ -92,8 +92,8 @@ impl Plugin for GamePlugin {
             .insert_resource(LastSpecialSpawn::default())
             .insert_resource(ImmunityTime::default())
             .insert_resource(FreeConsumablePositions::new(
-                CONSUMABLE_WIDTH as i32,
-                CONSUMABLE_HEIGHT as i32,
+                CONSUMABLE_WIDTH,
+                CONSUMABLE_HEIGHT,
             ))
             .insert_resource(FixedTime::new_from_secs(0.075))
             .add_event::<GameOver>()
