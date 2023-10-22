@@ -11,19 +11,33 @@ use crate::game::OnGameScreen;
 use crate::prelude::*;
 use crate::GameState;
 
-pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
-    spawn_diplopod(&mut commands, &mut segments);
+pub fn init_diplopod(
+    mut commands: Commands,
+    mut segments: ResMut<DiplopodSegments>,
+    tile_size: Res<TileSize>,
+) {
+    spawn_diplopod(&mut commands, &mut segments, tile_size);
 }
 
-fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
+fn spawn_diplopod(
+    commands: &mut Commands,
+    segments: &mut ResMut<DiplopodSegments>,
+    tile_size: Res<TileSize>,
+) {
+    let shape = shapes::Rectangle {
+        extents: Vec2::splat(tile_size.0 as f32),
+        origin: shapes::RectangleOrigin::Center,
+    };
+
     segments.0 = vec![commands
-        .spawn(SpriteBundle {
-            sprite: Sprite {
-                color: DIPLOPOD_COLOR,
+        .spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shape),
                 ..default()
             },
-            ..default()
-        })
+            Fill::color(DIPLOPOD_COLOR),
+            Stroke::color(DIPLOPOD_COLOR),
+        ))
         .insert(DiplopodHead {
             direction: Vec2::ZERO,
         })
@@ -32,20 +46,27 @@ fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegment
             x: ARENA_WIDTH / 2,
             y: ARENA_HEIGHT / 2,
         })
-        .insert(crate::game::components::Size::square(1.0))
         .insert(OnGameScreen)
         .id()];
 }
 
-fn spawn_segment(commands: &mut Commands, color: Color, position: Position) -> Entity {
+fn spawn_segment(
+    commands: &mut Commands,
+    color: Color,
+    position: Position,
+    shape: &Rectangle,
+) -> Entity {
     commands
-        .spawn(SpriteBundle {
-            sprite: Sprite { color, ..default() },
-            ..default()
-        })
+        .spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(shape),
+                ..default()
+            },
+            Fill::color(color),
+            Stroke::color(color),
+        ))
         .insert(DiplopodSegment)
         .insert(position)
-        .insert(crate::game::components::Size::square(1.0))
         .insert(OnGameScreen)
         .id()
 }
@@ -535,7 +556,13 @@ pub fn growth(
     mut segments: ResMut<DiplopodSegments>,
     mut growth_reader: EventReader<Growth>,
     immunity_time: Res<ImmunityTime>,
+    tile_size: Res<TileSize>,
 ) {
+    let shape = shapes::Rectangle {
+        extents: Vec2::splat(tile_size.0 as f32),
+        origin: shapes::RectangleOrigin::Center,
+    };
+
     if let Some(growth) = growth_reader.iter().next() {
         for _ in 0..growth.0 {
             segments.0.push(spawn_segment(
@@ -546,6 +573,7 @@ pub fn growth(
                     DIPLOPOD_COLOR
                 },
                 last_tail_position.0.unwrap(),
+                &shape,
             ));
         }
     }

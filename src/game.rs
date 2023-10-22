@@ -52,7 +52,6 @@ impl Plugin for GamePlugin {
                     (
                         graphics::position_translation,
                         graphics::consumable_position_translation,
-                        graphics::size_scaling,
                         graphics::rotate_superfood,
                     )
                         .after(Phase::Movement)

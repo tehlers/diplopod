@@ -15,15 +15,6 @@ use crate::prelude::*;
 use crate::TileSize;
 use crate::UpperLeft;
 
-pub fn size_scaling(
-    mut q: Query<(&crate::game::components::Size, &mut Transform)>,
-    tile_size: Res<TileSize>,
-) {
-    for (_, mut transform) in q.iter_mut() {
-        transform.scale = Vec3::new(tile_size.0 as f32, tile_size.0 as f32, 1.0);
-    }
-}
-
 pub fn on_window_created(
     mut reader: EventReader<WindowCreated>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -32,6 +23,7 @@ pub fn on_window_created(
         Query<&mut Path, With<Superfood>>,
         Query<(&mut Path, &mut Stroke), With<Antidote>>,
         Query<&mut Path, With<Wall>>,
+        Query<&mut Path, With<DiplopodSegment>>,
     )>,
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
@@ -56,6 +48,7 @@ pub fn on_window_resized(
         Query<&mut Path, With<Superfood>>,
         Query<(&mut Path, &mut Stroke), With<Antidote>>,
         Query<&mut Path, With<Wall>>,
+        Query<&mut Path, With<DiplopodSegment>>,
     )>,
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
@@ -79,6 +72,7 @@ fn resize_consumables(
         Query<&mut Path, With<Superfood>>,
         Query<(&mut Path, &mut Stroke), With<Antidote>>,
         Query<&mut Path, With<Wall>>,
+        Query<&mut Path, With<DiplopodSegment>>,
     )>,
     mut tile_size: ResMut<TileSize>,
     mut upper_left: ResMut<UpperLeft>,
@@ -126,6 +120,17 @@ fn resize_consumables(
     };
 
     for mut path in paths.p3().iter_mut() {
+        *path = ShapePath::build_as(&shape);
+    }
+
+    // Resize diplopod segments
+
+    let shape = shapes::Rectangle {
+        extents: Vec2::splat(tile_size.0 as f32),
+        origin: shapes::RectangleOrigin::Center,
+    };
+
+    for mut path in paths.p4().iter_mut() {
         *path = ShapePath::build_as(&shape);
     }
 }
@@ -176,24 +181,28 @@ pub fn rotate_superfood(mut query: Query<&mut Transform, With<Superfood>>, time:
 }
 
 pub fn change_color(
-    mut query: Query<&mut Sprite, With<DiplopodSegment>>,
+    mut query: Query<(&mut Fill, &mut Stroke), With<DiplopodSegment>>,
     immunity_time: Res<ImmunityTime>,
 ) {
     if immunity_time.0 > 2 {
-        for mut sprite in query.iter_mut() {
-            sprite.color = DIPLOPOD_IMMUNE_COLOR;
+        for (mut fill, mut stroke) in query.iter_mut() {
+            fill.color = DIPLOPOD_IMMUNE_COLOR;
+            stroke.color = DIPLOPOD_IMMUNE_COLOR;
         }
     } else if immunity_time.0 > 0 {
-        for mut sprite in query.iter_mut() {
-            if sprite.color == DIPLOPOD_IMMUNE_COLOR {
-                sprite.color = DIPLOPOD_COLOR;
+        for (mut fill, mut stroke) in query.iter_mut() {
+            if fill.color == DIPLOPOD_IMMUNE_COLOR {
+                fill.color = DIPLOPOD_COLOR;
+                stroke.color = DIPLOPOD_COLOR;
             } else {
-                sprite.color = DIPLOPOD_IMMUNE_COLOR;
+                fill.color = DIPLOPOD_IMMUNE_COLOR;
+                stroke.color = DIPLOPOD_IMMUNE_COLOR;
             }
         }
     } else {
-        for mut sprite in query.iter_mut() {
-            sprite.color = DIPLOPOD_COLOR;
+        for (mut fill, mut stroke) in query.iter_mut() {
+            fill.color = DIPLOPOD_COLOR;
+            stroke.color = DIPLOPOD_COLOR;
         }
     }
 }
