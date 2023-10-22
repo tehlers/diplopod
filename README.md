@@ -9,3 +9,5 @@ https://user-images.githubusercontent.com/138790/224545845-c4918f03-1b6a-4e07-84
 This game owes a lot of ideas to the tutorial [Creating a Snake Clone in Rust, with Bevy](https://mbuffett.com/posts/bevy-snake-tutorial/).
 
 Sound effects were obtained from https://www.zapsplat.com
+
+The font used is '[Allerta Stencil](https://github.com/google/fonts/tree/main/ofl/allertastencil)'. It was published under the terms and conditions of the [OFL](assets/fonts/OFL.txt).
