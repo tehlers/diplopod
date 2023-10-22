@@ -11,3 +11,9 @@ This game owes a lot of ideas to the tutorial [Creating a Snake Clone in Rust, w
 Sound effects were obtained from https://www.zapsplat.com
 
 The font used is '[Allerta Stencil](https://github.com/google/fonts/tree/main/ofl/allertastencil)'. It was published under the terms and conditions of the [OFL](assets/fonts/OFL.txt).
+
+## License
+
+All code in this repository is licensed under the [MIT License](LICENSE-MIT).
+
+The assets included in this repository fall under different open licenses.
