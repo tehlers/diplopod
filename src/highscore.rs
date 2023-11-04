@@ -122,7 +122,7 @@ fn keyboard(
     mut keyboard_event: EventReader<KeyboardInput>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
-    for ev in keyboard_event.iter() {
+    for ev in keyboard_event.read() {
         match ev.state {
             ButtonState::Released => game_state.set(GameState::Menu),
             ButtonState::Pressed => (),

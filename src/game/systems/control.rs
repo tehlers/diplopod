@@ -342,7 +342,7 @@ pub fn spawn_consumables(
     tile_size: Res<TileSize>,
     sounds: Res<Sounds>,
 ) {
-    if let Some(spawn_event) = spawn_consumables_reader.iter().next() {
+    if let Some(spawn_event) = spawn_consumables_reader.read().next() {
         let segment_positions = segments
             .0
             .iter()
@@ -566,7 +566,7 @@ pub fn growth(
         origin: shapes::RectangleOrigin::Center,
     };
 
-    if let Some(growth) = growth_reader.iter().next() {
+    if let Some(growth) = growth_reader.read().next() {
         for _ in 0..growth.0 {
             segments.0.push(spawn_segment(
                 &mut commands,
@@ -649,7 +649,7 @@ pub fn game_over(
     mut lastscore: ResMut<Lastscore>,
     mut highscore: ResMut<Highscore>,
 ) {
-    if reader.iter().next().is_some() {
+    if reader.read().next().is_some() {
         commands.spawn(AudioBundle {
             source: sounds.game_over.clone(),
             settings: PlaybackSettings::DESPAWN,

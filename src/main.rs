@@ -44,19 +44,16 @@ pub enum GameState {
 
 fn main() {
     App::new()
-        .add_plugins(
-            DefaultPlugins
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: TITLE.into(),
-                        resolution: (1149., 645.).into(),
-                        ..default()
-                    }),
-                    ..default()
-                })
-                .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin),
-        )
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: TITLE.into(),
+                resolution: (1149., 645.).into(),
+                ..default()
+            }),
+            ..default()
+        }))
         .add_plugins((
+            EmbeddedAssetPlugin::default(),
             menu::MenuPlugin,
             highscore::HighscorePlugin,
             game::GamePlugin,

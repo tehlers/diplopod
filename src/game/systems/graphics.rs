@@ -29,7 +29,7 @@ pub fn on_window_created(
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
 ) {
-    if reader.iter().next().is_some() {
+    if reader.read().next().is_some() {
         if let Ok(window) = windows.get_single() {
             resize_consumables(
                 window.width() as i32,
@@ -55,7 +55,7 @@ pub fn on_window_resized(
     tile_size: ResMut<TileSize>,
     upper_left: ResMut<UpperLeft>,
 ) {
-    if let Some(resized) = reader.iter().next() {
+    if let Some(resized) = reader.read().next() {
         resize_consumables(
             resized.width as i32,
             resized.height as i32,
@@ -222,7 +222,7 @@ pub fn fade_text(mut commands: Commands, mut query: Query<(Entity, &mut Text, &m
 }
 
 pub fn show_message(mut commands: Commands, mut show_message_reader: EventReader<ShowMessage>) {
-    if let Some(show_message) = show_message_reader.iter().next() {
+    if let Some(show_message) = show_message_reader.read().next() {
         let text_style = TextStyle {
             font_size: 36.0,
             color: Color::WHITE,

@@ -95,7 +95,7 @@ impl Plugin for GamePlugin {
                 CONSUMABLE_WIDTH,
                 CONSUMABLE_HEIGHT,
             ))
-            .insert_resource(FixedTime::new_from_secs(0.075))
+            .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
             .add_event::<Growth>()
             .add_event::<SpawnConsumables>()

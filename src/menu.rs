@@ -163,6 +163,7 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
             NodeBundle {
                 style: Style {
                     width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
