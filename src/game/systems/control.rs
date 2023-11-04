@@ -522,6 +522,7 @@ pub fn eat(
                         settings: PlaybackSettings::LOOP,
                     },
                     AntidoteSound,
+                    OnGameScreen,
                 ));
             }
         }
@@ -647,14 +648,8 @@ pub fn game_over(
     mut game_state: ResMut<NextState<GameState>>,
     mut lastscore: ResMut<Lastscore>,
     mut highscore: ResMut<Highscore>,
-    antidote_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
 ) {
     if reader.iter().next().is_some() {
-        if let Ok(sound) = antidote_sound.get_single() {
-            sound.0.stop();
-            commands.entity(sound.1).despawn();
-        }
-
         commands.spawn(AudioBundle {
             source: sounds.game_over.clone(),
             settings: PlaybackSettings::DESPAWN,
