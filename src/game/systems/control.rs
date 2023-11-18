@@ -495,7 +495,7 @@ pub fn eat(
 
                 show_message_writer.send(ShowMessage {
                     text: new_segments.to_string(),
-                    position: *superfood_pos,
+                    position: head_pos.clone(),
                 });
 
                 spawn_consumables_writer.send(SpawnConsumables {
