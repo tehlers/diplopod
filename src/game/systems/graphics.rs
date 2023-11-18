@@ -233,6 +233,8 @@ pub fn show_message(mut commands: Commands, mut show_message_reader: EventReader
             .spawn(Text2dBundle {
                 text: Text::from_section(&show_message.text, text_style)
                     .with_alignment(TextAlignment::Center),
+                // ensure that the text is drawn above the diplopod
+                transform: Transform::from_translation(Vec3::Z),
                 ..default()
             })
             .insert(show_message.position)
