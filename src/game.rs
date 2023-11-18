@@ -45,22 +45,32 @@ impl Plugin for GamePlugin {
                     (
                         player_input::keyboard,
                         player_input::gamepad,
+                        player_input::pause,
                         control::move_antidote.run_if(on_timer(Duration::from_millis(500))),
                     )
                         .in_set(Phase::Input)
-                        .run_if(in_state(GameState::Game)),
+                        .run_if(in_state(GameState::Game))
+                        .run_if(not(resource_exists::<Paused>())),
+                    (player_input::unpause,)
+                        .in_set(Phase::Input)
+                        .run_if(in_state(GameState::Game))
+                        .run_if(resource_exists::<Paused>()),
                     (
                         graphics::position_translation,
                         graphics::consumable_position_translation,
-                        graphics::rotate_superfood,
                     )
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
+                    (graphics::rotate_superfood,)
+                        .after(Phase::Movement)
+                        .run_if(in_state(GameState::Game))
+                        .run_if(not(resource_exists::<Paused>())),
                     (
                         control::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
                         graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
                     )
-                        .run_if(in_state(GameState::Game)),
+                        .run_if(in_state(GameState::Game))
+                        .run_if(not(resource_exists::<Paused>())),
                     control::game_over
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game))
@@ -82,7 +92,8 @@ impl Plugin for GamePlugin {
                         .chain(),
                     (graphics::change_color, control::control_antidote_sound),
                 )
-                    .run_if(in_state(GameState::Game)),
+                    .run_if(in_state(GameState::Game))
+                    .run_if(not(resource_exists::<Paused>())),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .insert_resource(TileSize::default())

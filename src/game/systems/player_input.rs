@@ -1,4 +1,5 @@
 use crate::game::components::*;
+use crate::game::resources::Paused;
 use bevy::prelude::*;
 
 pub fn keyboard(keyboard_input: Res<Input<KeyCode>>, mut heads: Query<&mut DiplopodHead>) {
@@ -65,6 +66,34 @@ pub fn gamepad(
 
         if direction != Vec2::ZERO {
             head.direction = direction;
+        }
+    }
+}
+
+/// Pause game and all sounds when `Space` or `p` is pressed.
+pub fn pause(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut commands: Commands,
+    sounds: Query<&AudioSink>,
+) {
+    if keyboard_input.any_just_released([KeyCode::Space, KeyCode::P]) {
+        commands.init_resource::<Paused>();
+        for sound in sounds.iter() {
+            sound.pause();
+        }
+    }
+}
+
+/// Continue game and all sounds when `Space` or `p` is pressed.
+pub fn unpause(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut commands: Commands,
+    sounds: Query<&AudioSink>,
+) {
+    if keyboard_input.any_just_released([KeyCode::Space, KeyCode::P]) {
+        commands.remove_resource::<Paused>();
+        for sound in sounds.iter() {
+            sound.play();
         }
     }
 }

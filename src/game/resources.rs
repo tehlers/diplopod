@@ -93,3 +93,6 @@ pub struct Highscore(pub u16);
 
 #[derive(Default, Resource)]
 pub struct Lastscore(pub u16);
+
+#[derive(Default, Resource)]
+pub struct Paused;
