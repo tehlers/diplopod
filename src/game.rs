@@ -56,8 +56,8 @@ impl Plugin for GamePlugin {
                         .run_if(in_state(GameState::Game))
                         .run_if(resource_exists::<Paused>()),
                     (
+                        graphics::diplopod_position_translation,
                         graphics::position_translation,
-                        graphics::consumable_position_translation,
                     )
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
@@ -102,10 +102,7 @@ impl Plugin for GamePlugin {
             .insert_resource(LastTailPosition::default())
             .insert_resource(LastSpecialSpawn::default())
             .insert_resource(ImmunityTime::default())
-            .insert_resource(FreeConsumablePositions::new(
-                CONSUMABLE_WIDTH,
-                CONSUMABLE_HEIGHT,
-            ))
+            .insert_resource(FreePositions::new(CONSUMABLE_WIDTH, CONSUMABLE_HEIGHT))
             .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
             .add_event::<Growth>()

@@ -11,14 +11,14 @@ pub struct DiplopodHead {
 pub struct DiplopodSegment;
 
 #[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct Position {
+pub struct DiplopodPosition {
     pub x: i32,
     pub y: i32,
 }
 
-impl Position {
-    pub fn to_consumable_position(self) -> ConsumablePosition {
-        ConsumablePosition {
+impl DiplopodPosition {
+    pub fn to_position(self) -> Position {
+        Position {
             x: self.x / CONSUMABLE_SCALE_FACTOR,
             y: self.y / CONSUMABLE_SCALE_FACTOR,
         }
@@ -26,7 +26,7 @@ impl Position {
 }
 
 #[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct ConsumablePosition {
+pub struct Position {
     pub x: i32,
     pub y: i32,
 }

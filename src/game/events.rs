@@ -1,4 +1,4 @@
-use crate::game::components::Position;
+use crate::game::components::DiplopodPosition;
 use bevy::ecs::event::Event;
 
 #[derive(Event)]
@@ -16,5 +16,5 @@ pub struct SpawnConsumables {
 #[derive(Event)]
 pub struct ShowMessage {
     pub text: String,
-    pub position: Position,
+    pub position: DiplopodPosition,
 }

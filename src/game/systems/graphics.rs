@@ -138,9 +138,9 @@ fn resize_consumables(
     }
 }
 
-pub fn position_translation(
+pub fn diplopod_position_translation(
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut q: Query<(&Position, &mut Transform)>,
+    mut q: Query<(&DiplopodPosition, &mut Transform)>,
     tile_size: Res<TileSize>,
     upper_left: Res<UpperLeft>,
 ) {
@@ -155,9 +155,9 @@ pub fn position_translation(
     }
 }
 
-pub fn consumable_position_translation(
+pub fn position_translation(
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut q: Query<(&ConsumablePosition, &mut Transform)>,
+    mut q: Query<(&Position, &mut Transform)>,
     tile_size: Res<TileSize>,
     upper_left: Res<UpperLeft>,
 ) {
