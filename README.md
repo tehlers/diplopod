@@ -26,6 +26,8 @@ or install a binary with
 
     $ cargo install --path .
 
+The project contains a [justfile](https://just.systems/) that provides frequently used commands.
+
 ## Acknowledgements
 
 This game owes a lot of ideas to the tutorial "Creating a Snake Clone in Rust, with Bevy", which unfortunately is [no longer available](https://mbuffett.com/posts/bevy-snake-tutorial/).
