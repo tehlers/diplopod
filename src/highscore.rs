@@ -39,10 +39,10 @@ impl Plugin for HighscorePlugin {
                 (
                     (gamepad, keyboard)
                         .run_if(in_state(GameState::Highscore))
-                        .run_if(not(resource_exists::<InitialDelay>())),
+                        .run_if(not(resource_exists::<InitialDelay>)),
                     remove_initial_delay
                         .run_if(on_timer(Duration::from_millis(INITIAL_DELAY_MILLISECONDS)))
-                        .run_if(resource_exists::<InitialDelay>()),
+                        .run_if(resource_exists::<InitialDelay>),
                 ),
             )
             .add_systems(
@@ -52,7 +52,7 @@ impl Plugin for HighscorePlugin {
             .add_systems(
                 Update,
                 save_highscore.run_if(
-                    resource_changed::<Highscore>().and_then(not(resource_added::<Highscore>())),
+                    resource_changed::<Highscore>.and_then(not(resource_added::<Highscore>)),
                 ),
             )
             .insert_resource(load_highscore())
@@ -133,7 +133,7 @@ fn keyboard(
 /// Forwards to the menu when the A key of the gamepad is pressed after an initial delay.
 pub fn gamepad(
     gamepads: Res<Gamepads>,
-    buttons: Res<Input<GamepadButton>>,
+    buttons: Res<ButtonInput<GamepadButton>>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
     for gamepad in gamepads.iter() {

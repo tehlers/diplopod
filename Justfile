@@ -1,7 +1,7 @@
 default: run
 
 run:
-    cargo run --features bevy/dynamic_linking
+    cargo run
 
 format:
     cargo fmt

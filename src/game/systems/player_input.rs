@@ -2,23 +2,23 @@ use crate::game::components::*;
 use crate::game::resources::Paused;
 use bevy::prelude::*;
 
-pub fn keyboard(keyboard_input: Res<Input<KeyCode>>, mut heads: Query<&mut DiplopodHead>) {
+pub fn keyboard(keyboard_input: Res<ButtonInput<KeyCode>>, mut heads: Query<&mut DiplopodHead>) {
     if let Some(mut head) = heads.iter_mut().next() {
         let mut direction = Vec2::ZERO;
 
-        if keyboard_input.any_pressed([KeyCode::Left, KeyCode::A, KeyCode::H]) {
+        if keyboard_input.any_pressed([KeyCode::ArrowLeft, KeyCode::KeyA, KeyCode::KeyH]) {
             direction = Vec2::new(-1.0, 0.0);
         }
 
-        if keyboard_input.any_pressed([KeyCode::Right, KeyCode::D, KeyCode::L]) {
+        if keyboard_input.any_pressed([KeyCode::ArrowRight, KeyCode::KeyD, KeyCode::KeyL]) {
             direction = Vec2::new(1.0, 0.0);
         }
 
-        if keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::K]) {
+        if keyboard_input.any_pressed([KeyCode::ArrowUp, KeyCode::KeyW, KeyCode::KeyK]) {
             direction = Vec2::new(direction.x, 1.0);
         }
 
-        if keyboard_input.any_pressed([KeyCode::Down, KeyCode::S, KeyCode::J]) {
+        if keyboard_input.any_pressed([KeyCode::ArrowDown, KeyCode::KeyS, KeyCode::KeyJ]) {
             direction = Vec2::new(direction.x, -1.0);
         }
 
@@ -72,11 +72,11 @@ pub fn gamepad(
 
 /// Pause game and all sounds when `Space` or `p` is pressed.
 pub fn pause(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
     sounds: Query<&AudioSink>,
 ) {
-    if keyboard_input.any_just_released([KeyCode::Space, KeyCode::P]) {
+    if keyboard_input.any_just_released([KeyCode::Space, KeyCode::KeyP]) {
         commands.init_resource::<Paused>();
         for sound in sounds.iter() {
             sound.pause();
@@ -86,11 +86,11 @@ pub fn pause(
 
 /// Continue game and all sounds when `Space` or `p` is pressed.
 pub fn unpause(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
     sounds: Query<&AudioSink>,
 ) {
-    if keyboard_input.any_just_released([KeyCode::Space, KeyCode::P]) {
+    if keyboard_input.any_just_released([KeyCode::Space, KeyCode::KeyP]) {
         commands.remove_resource::<Paused>();
         for sound in sounds.iter() {
             sound.play();

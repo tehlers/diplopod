@@ -50,11 +50,11 @@ impl Plugin for GamePlugin {
                     )
                         .in_set(Phase::Input)
                         .run_if(in_state(GameState::Game))
-                        .run_if(not(resource_exists::<Paused>())),
+                        .run_if(not(resource_exists::<Paused>)),
                     (player_input::unpause,)
                         .in_set(Phase::Input)
                         .run_if(in_state(GameState::Game))
-                        .run_if(resource_exists::<Paused>()),
+                        .run_if(resource_exists::<Paused>),
                     (
                         graphics::diplopod_position_translation,
                         graphics::position_translation,
@@ -64,13 +64,13 @@ impl Plugin for GamePlugin {
                     (graphics::rotate_superfood,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game))
-                        .run_if(not(resource_exists::<Paused>())),
+                        .run_if(not(resource_exists::<Paused>)),
                     (
                         control::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
                         graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
                     )
                         .run_if(in_state(GameState::Game))
-                        .run_if(not(resource_exists::<Paused>())),
+                        .run_if(not(resource_exists::<Paused>)),
                     control::game_over
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game))
@@ -93,7 +93,7 @@ impl Plugin for GamePlugin {
                     (graphics::change_color, control::control_antidote_sound),
                 )
                     .run_if(in_state(GameState::Game))
-                    .run_if(not(resource_exists::<Paused>())),
+                    .run_if(not(resource_exists::<Paused>)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .insert_resource(TileSize::default())

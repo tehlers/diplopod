@@ -61,9 +61,9 @@ fn main() {
         .add_systems(Startup, setup::setup)
         .add_systems(
             Update,
-            setup::set_default_font.run_if(resource_exists::<DefaultFontHandle>()),
+            setup::set_default_font.run_if(resource_exists::<DefaultFontHandle>),
         )
-        .add_state::<GameState>()
+        .init_state::<GameState>()
         .insert_resource(Msaa::Sample4)
         .insert_resource(ClearColor(Color::BLACK))
         .run();

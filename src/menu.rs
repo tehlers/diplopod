@@ -56,36 +56,38 @@ impl MenuButton {
 pub struct Selected(pub MenuButton);
 
 fn keyboard(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut selected: ResMut<Selected>,
     mut game_state: ResMut<NextState<GameState>>,
     mut app_exit_events: EventWriter<AppExit>,
     query: Query<(&mut BackgroundColor, &MenuButton)>,
 ) {
-    if keyboard_input.any_just_released([KeyCode::Up, KeyCode::W, KeyCode::K]) {
+    if keyboard_input.any_just_released([KeyCode::ArrowUp, KeyCode::KeyW, KeyCode::KeyK]) {
         selected.0 = selected.0.previous();
         update_selected_button(&selected.into(), query);
         return;
     }
 
-    if keyboard_input.any_just_released([KeyCode::Down, KeyCode::S, KeyCode::J]) {
+    if keyboard_input.any_just_released([KeyCode::ArrowDown, KeyCode::KeyS, KeyCode::KeyJ]) {
         selected.0 = selected.0.next();
         update_selected_button(&selected.into(), query);
         return;
     }
 
-    if keyboard_input.any_just_released([KeyCode::Return, KeyCode::Space]) {
+    if keyboard_input.any_just_released([KeyCode::Enter, KeyCode::Space]) {
         match &selected.0 {
             MenuButton::Play => game_state.set(GameState::Game),
             MenuButton::Highscore => game_state.set(GameState::Highscore),
-            MenuButton::Quit => app_exit_events.send(AppExit),
+            MenuButton::Quit => {
+                app_exit_events.send(AppExit);
+            }
         }
     }
 }
 
 pub fn gamepad(
     gamepads: Res<Gamepads>,
-    buttons: Res<Input<GamepadButton>>,
+    buttons: Res<ButtonInput<GamepadButton>>,
     mut selected: ResMut<Selected>,
     query: Query<(&mut BackgroundColor, &MenuButton)>,
     mut game_state: ResMut<NextState<GameState>>,
@@ -117,7 +119,9 @@ pub fn gamepad(
             match &selected.0 {
                 MenuButton::Play => game_state.set(GameState::Game),
                 MenuButton::Highscore => game_state.set(GameState::Highscore),
-                MenuButton::Quit => app_exit_events.send(AppExit),
+                MenuButton::Quit => {
+                    app_exit_events.send(AppExit);
+                }
             }
         }
     }
