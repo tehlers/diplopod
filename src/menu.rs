@@ -27,40 +27,40 @@ const BUTTON_SELECTED_BACKGROUND_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
 struct OnMenuScreen;
 
 #[derive(Component, Default, Debug, PartialEq)]
-pub enum MenuButton {
+pub enum MainMenuButton {
     #[default]
     Play,
     Highscore,
     Quit,
 }
 
-impl MenuButton {
+impl MainMenuButton {
     fn previous(&self) -> Self {
         match *self {
-            MenuButton::Play => MenuButton::Quit,
-            MenuButton::Highscore => MenuButton::Play,
-            MenuButton::Quit => MenuButton::Highscore,
+            MainMenuButton::Play => MainMenuButton::Quit,
+            MainMenuButton::Highscore => MainMenuButton::Play,
+            MainMenuButton::Quit => MainMenuButton::Highscore,
         }
     }
 
     fn next(&self) -> Self {
         match *self {
-            MenuButton::Play => MenuButton::Highscore,
-            MenuButton::Highscore => MenuButton::Quit,
-            MenuButton::Quit => MenuButton::Play,
+            MainMenuButton::Play => MainMenuButton::Highscore,
+            MainMenuButton::Highscore => MainMenuButton::Quit,
+            MainMenuButton::Quit => MainMenuButton::Play,
         }
     }
 }
 
 #[derive(Default, Resource, Debug)]
-pub struct Selected(pub MenuButton);
+pub struct Selected(pub MainMenuButton);
 
 fn keyboard(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut selected: ResMut<Selected>,
     mut game_state: ResMut<NextState<GameState>>,
     mut app_exit_events: EventWriter<AppExit>,
-    query: Query<(&mut BackgroundColor, &MenuButton)>,
+    query: Query<(&mut BackgroundColor, &MainMenuButton)>,
 ) {
     if keyboard_input.any_just_released([KeyCode::ArrowUp, KeyCode::KeyW, KeyCode::KeyK]) {
         selected.0 = selected.0.previous();
@@ -76,9 +76,9 @@ fn keyboard(
 
     if keyboard_input.any_just_released([KeyCode::Enter, KeyCode::Space]) {
         match &selected.0 {
-            MenuButton::Play => game_state.set(GameState::Game),
-            MenuButton::Highscore => game_state.set(GameState::Highscore),
-            MenuButton::Quit => {
+            MainMenuButton::Play => game_state.set(GameState::Game),
+            MainMenuButton::Highscore => game_state.set(GameState::Highscore),
+            MainMenuButton::Quit => {
                 app_exit_events.send(AppExit);
             }
         }
@@ -89,7 +89,7 @@ pub fn gamepad(
     gamepads: Res<Gamepads>,
     buttons: Res<ButtonInput<GamepadButton>>,
     mut selected: ResMut<Selected>,
-    query: Query<(&mut BackgroundColor, &MenuButton)>,
+    query: Query<(&mut BackgroundColor, &MainMenuButton)>,
     mut game_state: ResMut<NextState<GameState>>,
     mut app_exit_events: EventWriter<AppExit>,
 ) {
@@ -117,9 +117,9 @@ pub fn gamepad(
             button_type: GamepadButtonType::South,
         }) {
             match &selected.0 {
-                MenuButton::Play => game_state.set(GameState::Game),
-                MenuButton::Highscore => game_state.set(GameState::Highscore),
-                MenuButton::Quit => {
+                MainMenuButton::Play => game_state.set(GameState::Game),
+                MainMenuButton::Highscore => game_state.set(GameState::Highscore),
+                MainMenuButton::Quit => {
                     app_exit_events.send(AppExit);
                 }
             }
@@ -129,7 +129,7 @@ pub fn gamepad(
 
 fn update_selected_button(
     selected: &Res<Selected>,
-    mut query: Query<(&mut BackgroundColor, &MenuButton)>,
+    mut query: Query<(&mut BackgroundColor, &MainMenuButton)>,
 ) {
     for (mut background_color, action) in &mut query {
         if &selected.0 == action {
@@ -198,10 +198,13 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                         .spawn((
                             ButtonBundle {
                                 style: button_style.clone(),
-                                background_color: background_color(&selected.0, &MenuButton::Play),
+                                background_color: background_color(
+                                    &selected.0,
+                                    &MainMenuButton::Play,
+                                ),
                                 ..default()
                             },
-                            MenuButton::Play,
+                            MainMenuButton::Play,
                         ))
                         .with_children(|parent| {
                             parent
@@ -214,11 +217,11 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style.clone(),
                                 background_color: background_color(
                                     &selected.0,
-                                    &MenuButton::Highscore,
+                                    &MainMenuButton::Highscore,
                                 ),
                                 ..default()
                             },
-                            MenuButton::Highscore,
+                            MainMenuButton::Highscore,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
@@ -231,10 +234,13 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                         .spawn((
                             ButtonBundle {
                                 style: button_style,
-                                background_color: background_color(&selected.0, &MenuButton::Quit),
+                                background_color: background_color(
+                                    &selected.0,
+                                    &MainMenuButton::Quit,
+                                ),
                                 ..default()
                             },
-                            MenuButton::Quit,
+                            MainMenuButton::Quit,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section("Quit", button_text_style));
@@ -242,7 +248,7 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                 });
         });
 
-    fn background_color(selected: &MenuButton, button: &MenuButton) -> BackgroundColor {
+    fn background_color(selected: &MainMenuButton, button: &MainMenuButton) -> BackgroundColor {
         if selected == button {
             return BUTTON_SELECTED_BACKGROUND_COLOR.into();
         }
