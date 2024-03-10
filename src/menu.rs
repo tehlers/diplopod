@@ -1,4 +1,4 @@
-use bevy::{app::AppExit, prelude::*};
+use bevy::{a11y::accesskit::AutoComplete, app::AppExit, prelude::*};
 
 use crate::prelude::TITLE;
 

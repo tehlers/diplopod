@@ -4,6 +4,8 @@ use crate::prelude::TITLE;
 
 use super::{despawn_screen, GameState};
 
+use super::game::OnGameScreen;
+
 pub struct OverPlugin;
 
 impl Plugin for OverPlugin {
@@ -13,7 +15,14 @@ impl Plugin for OverPlugin {
                 Update,
                 (gamepad, keyboard).run_if(in_state(GameState::Over)),
             )
-            .add_systems(OnExit(GameState::Over), despawn_screen::<OnOverScreen>)
+            .add_systems(
+                OnExit(GameState::Over),
+                (
+                    despawn_screen::<OnOverScreen>,
+                    despawn_screen::<OnGameScreen>,
+                )
+                    .chain(),
+            )
             .insert_resource(Selected::default());
     }
 }
@@ -163,8 +172,8 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
         .spawn((
             NodeBundle {
                 style: Style {
-                    width: Val::Percent(30.0),
-                    height: Val::Percent(30.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
