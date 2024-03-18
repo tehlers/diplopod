@@ -33,6 +33,11 @@ mod prelude {
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 
     pub const RADIUS_FACTOR: f32 = 0.9;
+
+    pub const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
+    pub const BUTTON_TEXT_COLOR: Color = Color::GRAY;
+    pub const BUTTON_BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
+    pub const BUTTON_SELECTED_BACKGROUND_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

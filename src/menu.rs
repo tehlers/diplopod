@@ -1,6 +1,6 @@
 use bevy::{a11y::accesskit::AutoComplete, app::AppExit, prelude::*};
 
-use crate::prelude::TITLE;
+use crate::prelude::*;
 
 use super::{despawn_screen, GameState};
 
@@ -17,11 +17,6 @@ impl Plugin for MenuPlugin {
             .insert_resource(Selected::default());
     }
 }
-
-const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
-const BUTTON_TEXT_COLOR: Color = Color::GRAY;
-const BUTTON_BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
-const BUTTON_SELECTED_BACKGROUND_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
 
 #[derive(Component)]
 struct OnMenuScreen;
