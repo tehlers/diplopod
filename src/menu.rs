@@ -30,6 +30,7 @@ struct OnMenuScreen;
 pub enum MainMenuButton {
     #[default]
     Play,
+    Setting,
     Highscore,
     Quit,
 }
@@ -38,14 +39,16 @@ impl MainMenuButton {
     fn previous(&self) -> Self {
         match *self {
             MainMenuButton::Play => MainMenuButton::Quit,
-            MainMenuButton::Highscore => MainMenuButton::Play,
+            MainMenuButton::Setting => MainMenuButton::Play,
+            MainMenuButton::Highscore => MainMenuButton::Setting,
             MainMenuButton::Quit => MainMenuButton::Highscore,
         }
     }
 
     fn next(&self) -> Self {
         match *self {
-            MainMenuButton::Play => MainMenuButton::Highscore,
+            MainMenuButton::Play => MainMenuButton::Setting,
+            MainMenuButton::Setting => MainMenuButton::Highscore,
             MainMenuButton::Highscore => MainMenuButton::Quit,
             MainMenuButton::Quit => MainMenuButton::Play,
         }
@@ -77,6 +80,7 @@ fn keyboard(
     if keyboard_input.any_just_released([KeyCode::Enter, KeyCode::Space]) {
         match &selected.0 {
             MainMenuButton::Play => game_state.set(GameState::Game),
+            MainMenuButton::Setting => game_state.set(GameState::Setting),
             MainMenuButton::Highscore => game_state.set(GameState::Highscore),
             MainMenuButton::Quit => {
                 app_exit_events.send(AppExit);
@@ -118,6 +122,7 @@ pub fn gamepad(
         }) {
             match &selected.0 {
                 MainMenuButton::Play => game_state.set(GameState::Game),
+                MainMenuButton::Setting => game_state.set(GameState::Setting),
                 MainMenuButton::Highscore => game_state.set(GameState::Highscore),
                 MainMenuButton::Quit => {
                     app_exit_events.send(AppExit);
@@ -211,6 +216,24 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 .spawn(TextBundle::from_section("Play", button_text_style.clone()));
                         });
 
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: button_style.clone(),
+                                background_color: background_color(
+                                    &selected.0,
+                                    &MainMenuButton::Highscore,
+                                ),
+                                ..default()
+                            },
+                            MainMenuButton::Setting,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Setting",
+                                button_text_style.clone(),
+                            ));
+                        });
                     parent
                         .spawn((
                             ButtonBundle {

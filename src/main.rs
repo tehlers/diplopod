@@ -39,6 +39,7 @@ mod prelude {
 pub enum GameState {
     #[default]
     Menu,
+    Setting,
     Game,
     Highscore,
     Over,
