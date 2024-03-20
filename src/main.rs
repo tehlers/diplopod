@@ -1,6 +1,7 @@
 mod game;
 mod highscore;
 mod menu;
+mod over_menu;
 
 use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
@@ -40,6 +41,7 @@ pub enum GameState {
     Menu,
     Game,
     Highscore,
+    Over,
 }
 
 fn main() {
@@ -55,6 +57,7 @@ fn main() {
         .add_plugins((
             EmbeddedAssetPlugin::default(),
             menu::MenuPlugin,
+            over_menu::OverPlugin,
             highscore::HighscorePlugin,
             game::GamePlugin,
         ))
