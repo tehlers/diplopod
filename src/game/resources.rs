@@ -96,6 +96,3 @@ pub struct Lastscore(pub u16);
 
 #[derive(Default, Resource)]
 pub struct Paused;
-
-#[derive(Default, Resource)]
-pub struct FixedTime(pub Time<Fixed>);
