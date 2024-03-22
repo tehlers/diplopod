@@ -1,6 +1,8 @@
 mod game;
 mod highscore;
 mod menu;
+mod over_menu;
+mod setting_menu;
 
 use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
@@ -32,14 +34,29 @@ mod prelude {
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 
     pub const RADIUS_FACTOR: f32 = 0.9;
+
+    pub const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
+    pub const BUTTON_TEXT_COLOR: Color = Color::GRAY;
+    pub const BUTTON_BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
+    pub const BUTTON_SELECTED_BACKGROUND_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
+
+    pub const GAME_LEVEL6: f64 = 0.035;
+    // pub const GAME_LEVEL5: f64 = 0.04;
+    // pub const GAME_LEVEL4: f64 = 0.06;
+    pub const GAME_LEVEL3: f64 = 0.065;
+    // pub const GAME_LEVEL2: f64 = 0.07;
+    // pub const GAME_LEVEL1: f64 = 0.085;
+    pub const GAME_LEVEL0: f64 = 0.09;
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
     #[default]
     Menu,
+    Setting,
     Game,
     Highscore,
+    Over,
 }
 
 fn main() {
@@ -55,8 +72,10 @@ fn main() {
         .add_plugins((
             EmbeddedAssetPlugin::default(),
             menu::MenuPlugin,
+            over_menu::OverPlugin,
             highscore::HighscorePlugin,
             game::GamePlugin,
+            setting_menu::SettingPlugin,
         ))
         .add_systems(Startup, setup::setup)
         .add_systems(
