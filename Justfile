@@ -22,3 +22,6 @@ install:
 
 uninstall:
     cargo uninstall diplopod
+
+clean:
+    cargo clean
