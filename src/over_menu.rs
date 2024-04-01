@@ -4,61 +4,66 @@ use crate::prelude::*;
 
 use super::{despawn_screen, GameState};
 
-pub struct MenuPlugin;
+use super::game::OnGameScreen;
 
-impl Plugin for MenuPlugin {
+pub struct OverPlugin;
+
+impl Plugin for OverPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), setup_menu)
+        app.add_systems(OnEnter(GameState::Over), setup_menu)
             .add_systems(
                 Update,
-                (gamepad, keyboard).run_if(in_state(GameState::Menu)),
+                (gamepad, keyboard).run_if(in_state(GameState::Over)),
             )
-            .add_systems(OnExit(GameState::Menu), despawn_screen::<OnMenuScreen>)
+            .add_systems(
+                OnExit(GameState::Over),
+                (
+                    despawn_screen::<OnOverScreen>,
+                    despawn_screen::<OnGameScreen>,
+                )
+                    .chain(),
+            )
             .insert_resource(Selected::default());
     }
 }
 
 #[derive(Component)]
-pub struct OnMenuScreen;
+struct OnOverScreen;
 
 #[derive(Component, Default, Debug, PartialEq)]
-pub enum MainMenuButton {
+pub enum OverMenuButton {
     #[default]
-    Play,
-    Setting,
+    Resume,
     Highscore,
-    Quit,
+    Back,
 }
 
-impl MainMenuButton {
+impl OverMenuButton {
     fn previous(&self) -> Self {
         match *self {
-            MainMenuButton::Play => MainMenuButton::Quit,
-            MainMenuButton::Setting => MainMenuButton::Play,
-            MainMenuButton::Highscore => MainMenuButton::Setting,
-            MainMenuButton::Quit => MainMenuButton::Highscore,
+            OverMenuButton::Resume => OverMenuButton::Back,
+            OverMenuButton::Highscore => OverMenuButton::Resume,
+            OverMenuButton::Back => OverMenuButton::Highscore,
         }
     }
 
     fn next(&self) -> Self {
         match *self {
-            MainMenuButton::Play => MainMenuButton::Setting,
-            MainMenuButton::Setting => MainMenuButton::Highscore,
-            MainMenuButton::Highscore => MainMenuButton::Quit,
-            MainMenuButton::Quit => MainMenuButton::Play,
+            OverMenuButton::Resume => OverMenuButton::Highscore,
+            OverMenuButton::Highscore => OverMenuButton::Back,
+            OverMenuButton::Back => OverMenuButton::Resume,
         }
     }
 }
 
 #[derive(Default, Resource, Debug)]
-pub struct Selected(pub MainMenuButton);
+pub struct Selected(pub OverMenuButton);
 
 fn keyboard(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut selected: ResMut<Selected>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut app_exit_events: EventWriter<AppExit>,
-    query: Query<(&mut BackgroundColor, &MainMenuButton)>,
+    query: Query<(&mut BackgroundColor, &OverMenuButton)>,
 ) {
     if keyboard_input.any_just_released([KeyCode::ArrowUp, KeyCode::KeyW, KeyCode::KeyK]) {
         selected.0 = selected.0.previous();
@@ -74,12 +79,9 @@ fn keyboard(
 
     if keyboard_input.any_just_released([KeyCode::Enter, KeyCode::Space]) {
         match &selected.0 {
-            MainMenuButton::Play => game_state.set(GameState::Game),
-            MainMenuButton::Setting => game_state.set(GameState::Setting),
-            MainMenuButton::Highscore => game_state.set(GameState::Highscore),
-            MainMenuButton::Quit => {
-                app_exit_events.send(AppExit);
-            }
+            OverMenuButton::Resume => game_state.set(GameState::Game),
+            OverMenuButton::Highscore => game_state.set(GameState::Highscore),
+            OverMenuButton::Back => game_state.set(GameState::Menu),
         }
     }
 }
@@ -88,7 +90,7 @@ pub fn gamepad(
     gamepads: Res<Gamepads>,
     buttons: Res<ButtonInput<GamepadButton>>,
     mut selected: ResMut<Selected>,
-    query: Query<(&mut BackgroundColor, &MainMenuButton)>,
+    query: Query<(&mut BackgroundColor, &OverMenuButton)>,
     mut game_state: ResMut<NextState<GameState>>,
     mut app_exit_events: EventWriter<AppExit>,
 ) {
@@ -116,10 +118,9 @@ pub fn gamepad(
             button_type: GamepadButtonType::South,
         }) {
             match &selected.0 {
-                MainMenuButton::Play => game_state.set(GameState::Game),
-                MainMenuButton::Setting => game_state.set(GameState::Setting),
-                MainMenuButton::Highscore => game_state.set(GameState::Highscore),
-                MainMenuButton::Quit => {
+                OverMenuButton::Resume => game_state.set(GameState::Game),
+                OverMenuButton::Highscore => game_state.set(GameState::Highscore),
+                OverMenuButton::Back => {
                     app_exit_events.send(AppExit);
                 }
             }
@@ -129,7 +130,7 @@ pub fn gamepad(
 
 fn update_selected_button(
     selected: &Res<Selected>,
-    mut query: Query<(&mut BackgroundColor, &MainMenuButton)>,
+    mut query: Query<(&mut BackgroundColor, &OverMenuButton)>,
 ) {
     for (mut background_color, action) in &mut query {
         if &selected.0 == action {
@@ -174,7 +175,7 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                 },
                 ..default()
             },
-            OnMenuScreen,
+            OnOverScreen,
         ))
         .with_children(|parent| {
             parent
@@ -200,15 +201,17 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style.clone(),
                                 background_color: background_color(
                                     &selected.0,
-                                    &MainMenuButton::Play,
+                                    &OverMenuButton::Resume,
                                 ),
                                 ..default()
                             },
-                            MainMenuButton::Play,
+                            OverMenuButton::Resume,
                         ))
                         .with_children(|parent| {
-                            parent
-                                .spawn(TextBundle::from_section("Play", button_text_style.clone()));
+                            parent.spawn(TextBundle::from_section(
+                                "Resume",
+                                button_text_style.clone(),
+                            ));
                         });
 
                     parent
@@ -217,29 +220,11 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style.clone(),
                                 background_color: background_color(
                                     &selected.0,
-                                    &MainMenuButton::Highscore,
+                                    &OverMenuButton::Highscore,
                                 ),
                                 ..default()
                             },
-                            MainMenuButton::Setting,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                "Setting",
-                                button_text_style.clone(),
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: button_style.clone(),
-                                background_color: background_color(
-                                    &selected.0,
-                                    &MainMenuButton::Highscore,
-                                ),
-                                ..default()
-                            },
-                            MainMenuButton::Highscore,
+                            OverMenuButton::Highscore,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
@@ -254,19 +239,19 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style,
                                 background_color: background_color(
                                     &selected.0,
-                                    &MainMenuButton::Quit,
+                                    &OverMenuButton::Back,
                                 ),
                                 ..default()
                             },
-                            MainMenuButton::Quit,
+                            OverMenuButton::Back,
                         ))
                         .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section("Quit", button_text_style));
+                            parent.spawn(TextBundle::from_section("Back", button_text_style));
                         });
                 });
         });
 
-    fn background_color(selected: &MainMenuButton, button: &MainMenuButton) -> BackgroundColor {
+    fn background_color(selected: &OverMenuButton, button: &OverMenuButton) -> BackgroundColor {
         if selected == button {
             return BUTTON_SELECTED_BACKGROUND_COLOR.into();
         }

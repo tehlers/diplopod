@@ -3,7 +3,7 @@ pub mod events;
 pub mod resources;
 pub mod systems;
 
-use crate::despawn_screen;
+// use crate::despawn_screen;
 use crate::prelude::*;
 use crate::GameState;
 use bevy::prelude::*;
@@ -95,7 +95,6 @@ impl Plugin for GamePlugin {
                     .run_if(in_state(GameState::Game))
                     .run_if(not(resource_exists::<Paused>)),
             )
-            .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .insert_resource(TileSize::default())
             .insert_resource(UpperLeft::default())
             .insert_resource(DiplopodSegments::default())
@@ -103,7 +102,7 @@ impl Plugin for GamePlugin {
             .insert_resource(LastSpecialSpawn::default())
             .insert_resource(ImmunityTime::default())
             .insert_resource(FreePositions::new(CONSUMABLE_WIDTH, CONSUMABLE_HEIGHT))
-            .insert_resource(Time::<Fixed>::from_seconds(0.075))
+            .insert_resource(Time::<Fixed>::from_seconds(0.035))
             .add_event::<GameOver>()
             .add_event::<Growth>()
             .add_event::<SpawnConsumables>()

@@ -1,64 +1,61 @@
-use bevy::{app::AppExit, prelude::*};
-
+use super::despawn_screen;
+use super::GameState;
 use crate::prelude::*;
+use bevy::prelude::*;
+pub struct SettingPlugin;
 
-use super::{despawn_screen, GameState};
-
-pub struct MenuPlugin;
-
-impl Plugin for MenuPlugin {
+impl Plugin for SettingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), setup_menu)
+        app.add_systems(OnEnter(GameState::Setting), setup_setting)
             .add_systems(
                 Update,
-                (gamepad, keyboard).run_if(in_state(GameState::Menu)),
+                (gamepad, keyboard).run_if(in_state(GameState::Setting)),
             )
-            .add_systems(OnExit(GameState::Menu), despawn_screen::<OnMenuScreen>)
+            .add_systems(
+                OnExit(GameState::Setting),
+                despawn_screen::<OnSettingScreen>,
+            )
             .insert_resource(Selected::default());
     }
 }
 
 #[derive(Component)]
-pub struct OnMenuScreen;
+struct OnSettingScreen;
 
 #[derive(Component, Default, Debug, PartialEq)]
-pub enum MainMenuButton {
+pub enum SettingMenuButton {
     #[default]
-    Play,
-    Setting,
-    Highscore,
-    Quit,
+    Level0,
+    Level1,
+    Level2,
 }
 
-impl MainMenuButton {
+impl SettingMenuButton {
     fn previous(&self) -> Self {
         match *self {
-            MainMenuButton::Play => MainMenuButton::Quit,
-            MainMenuButton::Setting => MainMenuButton::Play,
-            MainMenuButton::Highscore => MainMenuButton::Setting,
-            MainMenuButton::Quit => MainMenuButton::Highscore,
+            SettingMenuButton::Level0 => SettingMenuButton::Level2,
+            SettingMenuButton::Level1 => SettingMenuButton::Level0,
+            SettingMenuButton::Level2 => SettingMenuButton::Level1,
         }
     }
-
     fn next(&self) -> Self {
         match *self {
-            MainMenuButton::Play => MainMenuButton::Setting,
-            MainMenuButton::Setting => MainMenuButton::Highscore,
-            MainMenuButton::Highscore => MainMenuButton::Quit,
-            MainMenuButton::Quit => MainMenuButton::Play,
+            SettingMenuButton::Level0 => SettingMenuButton::Level1,
+            SettingMenuButton::Level1 => SettingMenuButton::Level2,
+            SettingMenuButton::Level2 => SettingMenuButton::Level0,
         }
     }
 }
 
 #[derive(Default, Resource, Debug)]
-pub struct Selected(pub MainMenuButton);
+pub struct Selected(pub SettingMenuButton);
 
 fn keyboard(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut selected: ResMut<Selected>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut app_exit_events: EventWriter<AppExit>,
-    query: Query<(&mut BackgroundColor, &MainMenuButton)>,
+    mut fixed_time: ResMut<Time<Fixed>>,
+    query: Query<(&mut BackgroundColor, &SettingMenuButton)>,
 ) {
     if keyboard_input.any_just_released([KeyCode::ArrowUp, KeyCode::KeyW, KeyCode::KeyK]) {
         selected.0 = selected.0.previous();
@@ -74,11 +71,17 @@ fn keyboard(
 
     if keyboard_input.any_just_released([KeyCode::Enter, KeyCode::Space]) {
         match &selected.0 {
-            MainMenuButton::Play => game_state.set(GameState::Game),
-            MainMenuButton::Setting => game_state.set(GameState::Setting),
-            MainMenuButton::Highscore => game_state.set(GameState::Highscore),
-            MainMenuButton::Quit => {
-                app_exit_events.send(AppExit);
+            SettingMenuButton::Level0 => {
+                fixed_time.set_timestep_seconds(GAME_LEVEL0);
+                game_state.set(GameState::Menu);
+            }
+            SettingMenuButton::Level1 => {
+                fixed_time.set_timestep_seconds(GAME_LEVEL3);
+                game_state.set(GameState::Menu);
+            }
+            SettingMenuButton::Level2 => {
+                fixed_time.set_timestep_seconds(GAME_LEVEL6);
+                game_state.set(GameState::Menu);
             }
         }
     }
@@ -88,9 +91,9 @@ pub fn gamepad(
     gamepads: Res<Gamepads>,
     buttons: Res<ButtonInput<GamepadButton>>,
     mut selected: ResMut<Selected>,
-    query: Query<(&mut BackgroundColor, &MainMenuButton)>,
+    query: Query<(&mut BackgroundColor, &SettingMenuButton)>,
+    mut fixed_time: ResMut<Time<Fixed>>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut app_exit_events: EventWriter<AppExit>,
 ) {
     for gamepad in gamepads.iter() {
         if buttons.just_released(GamepadButton {
@@ -116,11 +119,17 @@ pub fn gamepad(
             button_type: GamepadButtonType::South,
         }) {
             match &selected.0 {
-                MainMenuButton::Play => game_state.set(GameState::Game),
-                MainMenuButton::Setting => game_state.set(GameState::Setting),
-                MainMenuButton::Highscore => game_state.set(GameState::Highscore),
-                MainMenuButton::Quit => {
-                    app_exit_events.send(AppExit);
+                SettingMenuButton::Level0 => {
+                    fixed_time.set_timestep_seconds(GAME_LEVEL0);
+                    game_state.set(GameState::Menu);
+                }
+                SettingMenuButton::Level1 => {
+                    fixed_time.set_timestep_seconds(GAME_LEVEL3);
+                    game_state.set(GameState::Menu);
+                }
+                SettingMenuButton::Level2 => {
+                    fixed_time.set_timestep_seconds(GAME_LEVEL6);
+                    game_state.set(GameState::Menu);
                 }
             }
         }
@@ -129,7 +138,7 @@ pub fn gamepad(
 
 fn update_selected_button(
     selected: &Res<Selected>,
-    mut query: Query<(&mut BackgroundColor, &MainMenuButton)>,
+    mut query: Query<(&mut BackgroundColor, &SettingMenuButton)>,
 ) {
     for (mut background_color, action) in &mut query {
         if &selected.0 == action {
@@ -139,8 +148,7 @@ fn update_selected_button(
         }
     }
 }
-
-fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
+fn setup_setting(mut commands: Commands, selected: Res<Selected>) {
     let button_style = Style {
         width: Val::Px(320.0),
         height: Val::Px(65.0),
@@ -174,7 +182,7 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                 },
                 ..default()
             },
-            OnMenuScreen,
+            OnSettingScreen,
         ))
         .with_children(|parent| {
             parent
@@ -200,15 +208,17 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style.clone(),
                                 background_color: background_color(
                                     &selected.0,
-                                    &MainMenuButton::Play,
+                                    &SettingMenuButton::Level0,
                                 ),
                                 ..default()
                             },
-                            MainMenuButton::Play,
+                            SettingMenuButton::Level0,
                         ))
                         .with_children(|parent| {
-                            parent
-                                .spawn(TextBundle::from_section("Play", button_text_style.clone()));
+                            parent.spawn(TextBundle::from_section(
+                                "Level 0",
+                                button_text_style.clone(),
+                            ));
                         });
 
                     parent
@@ -217,33 +227,15 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style.clone(),
                                 background_color: background_color(
                                     &selected.0,
-                                    &MainMenuButton::Highscore,
+                                    &SettingMenuButton::Level1,
                                 ),
                                 ..default()
                             },
-                            MainMenuButton::Setting,
+                            SettingMenuButton::Level1,
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
-                                "Setting",
-                                button_text_style.clone(),
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: button_style.clone(),
-                                background_color: background_color(
-                                    &selected.0,
-                                    &MainMenuButton::Highscore,
-                                ),
-                                ..default()
-                            },
-                            MainMenuButton::Highscore,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                "Highscore",
+                                "Level 1",
                                 button_text_style.clone(),
                             ));
                         });
@@ -254,19 +246,22 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                                 style: button_style,
                                 background_color: background_color(
                                     &selected.0,
-                                    &MainMenuButton::Quit,
+                                    &SettingMenuButton::Level2,
                                 ),
                                 ..default()
                             },
-                            MainMenuButton::Quit,
+                            SettingMenuButton::Level2,
                         ))
                         .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section("Quit", button_text_style));
+                            parent.spawn(TextBundle::from_section("Level 2", button_text_style));
                         });
                 });
         });
 
-    fn background_color(selected: &MainMenuButton, button: &MainMenuButton) -> BackgroundColor {
+    fn background_color(
+        selected: &SettingMenuButton,
+        button: &SettingMenuButton,
+    ) -> BackgroundColor {
         if selected == button {
             return BUTTON_SELECTED_BACKGROUND_COLOR.into();
         }
