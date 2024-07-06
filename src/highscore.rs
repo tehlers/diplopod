@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 use anyhow::Result;
+use bevy::color::palettes::css::ANTIQUE_WHITE;
 use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
 use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
@@ -16,8 +17,8 @@ use super::{despawn_screen, GameState};
 /// the score of the last game.
 pub struct HighscorePlugin;
 
-const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
-const HEADLINE_COLOR: Color = Color::GRAY;
+const TITLE_COLOR: Color = Color::Srgba(ANTIQUE_WHITE);
+const HEADLINE_COLOR: Color = Color::srgb(0.5, 0.5, 0.5);
 const HIGHSCORE_COLOR: Color = Color::WHITE;
 const INITIAL_DELAY_MILLISECONDS: u64 = 500;
 

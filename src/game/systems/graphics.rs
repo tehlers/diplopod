@@ -212,7 +212,7 @@ pub fn change_color(
 
 pub fn fade_text(mut commands: Commands, mut query: Query<(Entity, &mut Text, &mut FadingText)>) {
     for (entity, mut text, mut fading_text) in query.iter_mut() {
-        text.sections[0].style.color.set_a(fading_text.0);
+        text.sections[0].style.color.set_alpha(fading_text.0);
         fading_text.0 -= 0.1;
 
         if fading_text.0 <= 0.0 {

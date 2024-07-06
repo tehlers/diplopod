@@ -1,4 +1,4 @@
-use bevy::{app::AppExit, prelude::*};
+use bevy::{app::AppExit, color::palettes::css::ANTIQUE_WHITE, prelude::*};
 
 use crate::prelude::TITLE;
 
@@ -18,10 +18,10 @@ impl Plugin for MenuPlugin {
     }
 }
 
-const TITLE_COLOR: Color = Color::ANTIQUE_WHITE;
-const BUTTON_TEXT_COLOR: Color = Color::GRAY;
-const BUTTON_BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
-const BUTTON_SELECTED_BACKGROUND_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
+const TITLE_COLOR: Color = Color::Srgba(ANTIQUE_WHITE);
+const BUTTON_TEXT_COLOR: Color = Color::srgb(0.5, 0.5, 0.5);
+const BUTTON_BACKGROUND_COLOR: Color = Color::srgb(0.15, 0.15, 0.15);
+const BUTTON_SELECTED_BACKGROUND_COLOR: Color = Color::srgb(0.25, 0.25, 0.25);
 
 #[derive(Component)]
 struct OnMenuScreen;
@@ -79,7 +79,7 @@ fn keyboard(
             MenuButton::Play => game_state.set(GameState::Game),
             MenuButton::Highscore => game_state.set(GameState::Highscore),
             MenuButton::Quit => {
-                app_exit_events.send(AppExit);
+                app_exit_events.send(AppExit::Success);
             }
         }
     }
@@ -120,7 +120,7 @@ pub fn gamepad(
                 MenuButton::Play => game_state.set(GameState::Game),
                 MenuButton::Highscore => game_state.set(GameState::Highscore),
                 MenuButton::Quit => {
-                    app_exit_events.send(AppExit);
+                    app_exit_events.send(AppExit::Success);
                 }
             }
         }

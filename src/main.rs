@@ -9,7 +9,10 @@ use game::systems::*;
 use prelude::TITLE;
 
 mod prelude {
-    use bevy::prelude::Color;
+    use bevy::{
+        color::palettes::css::{BLUE, ORANGE, RED},
+        prelude::Color,
+    };
 
     pub const TITLE: &str = "diplopod";
 
@@ -22,12 +25,12 @@ mod prelude {
     pub const AMOUNT_OF_POISON: u32 = 17;
     pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 
-    pub const DIPLOPOD_COLOR: Color = Color::ORANGE;
+    pub const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
     pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
-    pub const WALL_COLOR: Color = Color::DARK_GRAY;
-    pub const FOOD_COLOR: Color = Color::GREEN;
-    pub const SUPERFOOD_COLOR: Color = Color::BLUE;
-    pub const POISON_OUTLINE_COLOR: Color = Color::RED;
+    pub const WALL_COLOR: Color = Color::srgb(0.25, 0.25, 0.25);
+    pub const FOOD_COLOR: Color = Color::srgb(0.0, 1.0, 0.0);
+    pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
+    pub const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
     pub const POISON_FILL_COLOR: Color = Color::BLACK;
     pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 
@@ -44,16 +47,16 @@ pub enum GameState {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: TITLE.into(),
-                resolution: (1149., 645.).into(),
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: TITLE.into(),
+                    resolution: (1149., 645.).into(),
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }))
-        .add_plugins((
-            EmbeddedAssetPlugin::default(),
+            EmbeddedAssetPlugin::default(), // does not work anymore in this game since Bevy 0.13.1
             menu::MenuPlugin,
             highscore::HighscorePlugin,
             game::GamePlugin,
