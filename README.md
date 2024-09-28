@@ -20,7 +20,7 @@ If you are using Linux, you should also check the [official Bevy Linux dependenc
 
 Once you have installed all dependencies, you can start the game (as a debug build) with
 
-    $ cargo run --features bevy/dynamic_linking
+    $ cargo run
 
 or install a binary with
 
@@ -30,7 +30,7 @@ The project contains a [justfile](https://just.systems/) that provides frequentl
 
 ## Acknowledgements
 
-This game owes a lot of ideas to the tutorial "Creating a Snake Clone in Rust, with Bevy", which unfortunately is [no longer available](https://mbuffett.com/posts/bevy-snake-tutorial/).
+This game owes a lot of ideas to the tutorial ["Creating a Snake Clone in Rust, with Bevy"](https://mbuffett.com/posts/bevy-snake-tutorial/).
 
 Sound effects were obtained from https://www.zapsplat.com
 
