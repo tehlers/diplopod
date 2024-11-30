@@ -8,7 +8,7 @@ pub fn setup(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 
     let sounds = Sounds {
         eat_food: asset_server.load("audio/eat_food.ogg"),
@@ -24,7 +24,7 @@ pub fn setup(
     commands.insert_resource(DefaultFontHandle(font));
 
     if let Ok(mut window) = windows.get_single_mut() {
-        window.cursor.visible = false;
+        window.cursor_options.visible = false;
     }
 }
 
@@ -34,7 +34,7 @@ pub fn set_default_font(
     default_font_handle: Res<DefaultFontHandle>,
 ) {
     if let Some(font) = fonts.remove(&default_font_handle.0) {
-        fonts.insert(&TextStyle::default().font, font);
+        fonts.insert(&TextFont::default().font, font);
         commands.remove_resource::<DefaultFontHandle>();
     }
 }

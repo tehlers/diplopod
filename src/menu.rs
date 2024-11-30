@@ -86,36 +86,26 @@ fn keyboard(
 }
 
 pub fn gamepad(
-    gamepads: Res<Gamepads>,
-    buttons: Res<ButtonInput<GamepadButton>>,
+    gamepads: Query<&Gamepad>,
     mut selected: ResMut<Selected>,
     query: Query<(&mut BackgroundColor, &MenuButton)>,
     mut game_state: ResMut<NextState<GameState>>,
     mut app_exit_events: EventWriter<AppExit>,
 ) {
     for gamepad in gamepads.iter() {
-        if buttons.just_released(GamepadButton {
-            gamepad,
-            button_type: GamepadButtonType::DPadUp,
-        }) {
+        if gamepad.just_released(GamepadButton::DPadUp) {
             selected.0 = selected.0.previous();
             update_selected_button(&selected.into(), query);
             return;
         }
 
-        if buttons.just_released(GamepadButton {
-            gamepad,
-            button_type: GamepadButtonType::DPadDown,
-        }) {
+        if gamepad.just_released(GamepadButton::DPadDown) {
             selected.0 = selected.0.next();
             update_selected_button(&selected.into(), query);
             return;
         }
 
-        if buttons.just_released(GamepadButton {
-            gamepad,
-            button_type: GamepadButtonType::South,
-        }) {
+        if gamepad.just_released(GamepadButton::South) {
             match &selected.0 {
                 MenuButton::Play => game_state.set(GameState::Game),
                 MenuButton::Highscore => game_state.set(GameState::Highscore),
@@ -141,103 +131,100 @@ fn update_selected_button(
 }
 
 fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
-    let button_style = Style {
-        width: Val::Px(320.0),
+    let button_node = Node {
+        width: Val::Px(340.0),
         height: Val::Px(65.0),
         margin: UiRect::all(Val::Px(20.0)),
+        padding: UiRect::all(Val::Px(45.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
     };
 
-    let button_text_style = TextStyle {
-        font_size: 64.0,
-        color: BUTTON_TEXT_COLOR,
-        ..default()
-    };
-
-    let title_text_style = TextStyle {
-        font_size: 128.0,
-        color: TITLE_COLOR,
-        ..default()
-    };
-
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
             OnMenuScreen,
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
+                .spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle::from_section(TITLE, title_text_style).with_style(Style {
+                    parent.spawn((
+                        Text::new(TITLE),
+                        TextFont {
+                            font_size: 128.0,
+                            ..default()
+                        },
+                        TextColor(TITLE_COLOR),
+                        Node {
                             margin: UiRect::all(Val::Px(50.0)),
                             ..default()
-                        }),
-                    );
+                        },
+                    ));
 
                     parent
                         .spawn((
-                            ButtonBundle {
-                                style: button_style.clone(),
-                                background_color: background_color(&selected.0, &MenuButton::Play),
-                                ..default()
-                            },
+                            Button,
+                            button_node.clone(),
+                            background_color(&selected.0, &MenuButton::Play),
                             MenuButton::Play,
                         ))
                         .with_children(|parent| {
-                            parent
-                                .spawn(TextBundle::from_section("Play", button_text_style.clone()));
-                        });
-
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: button_style.clone(),
-                                background_color: background_color(
-                                    &selected.0,
-                                    &MenuButton::Highscore,
-                                ),
-                                ..default()
-                            },
-                            MenuButton::Highscore,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                "Highscore",
-                                button_text_style.clone(),
+                            parent.spawn((
+                                Text::new("Play"),
+                                TextFont {
+                                    font_size: 64.0,
+                                    ..default()
+                                },
+                                TextColor(BUTTON_TEXT_COLOR),
                             ));
                         });
 
                     parent
                         .spawn((
-                            ButtonBundle {
-                                style: button_style,
-                                background_color: background_color(&selected.0, &MenuButton::Quit),
-                                ..default()
-                            },
+                            Button,
+                            button_node.clone(),
+                            background_color(&selected.0, &MenuButton::Highscore),
+                            MenuButton::Highscore,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Text::new("Highscore"),
+                                TextFont {
+                                    font_size: 64.0,
+                                    ..default()
+                                },
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
+                        });
+
+                    parent
+                        .spawn((
+                            Button,
+                            button_node.clone(),
+                            background_color(&selected.0, &MenuButton::Quit),
                             MenuButton::Quit,
                         ))
                         .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section("Quit", button_text_style));
+                            parent.spawn((
+                                Text::new("Quit"),
+                                TextFont {
+                                    font_size: 64.0,
+                                    ..default()
+                                },
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
                         });
                 });
         });

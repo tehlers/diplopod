@@ -27,6 +27,7 @@ fn spawn_diplopod(
     let shape = shapes::Rectangle {
         extents: Vec2::splat(tile_size.0 as f32),
         origin: shapes::RectangleOrigin::Center,
+        radii: None,
     };
 
     segments.0 = vec![commands
@@ -79,6 +80,7 @@ pub fn init_wall(
     let shape = shapes::Rectangle {
         extents: Vec2::splat(tile_size.0 as f32 * 2.0),
         origin: shapes::RectangleOrigin::Center,
+        radii: None,
     };
 
     for x in 0..CONSUMABLE_WIDTH + 1 {
@@ -405,10 +407,10 @@ pub fn spawn_consumables(
                 &tile_size,
             );
 
-            commands.spawn(AudioBundle {
-                source: sounds.special_spawn.clone(),
-                settings: PlaybackSettings::DESPAWN,
-            });
+            commands.spawn((
+                AudioPlayer(sounds.special_spawn.clone()),
+                PlaybackSettings::DESPAWN,
+            ));
         }
     }
 }
@@ -478,10 +480,10 @@ pub fn eat(
                     new_segments: 1,
                 });
 
-                commands.spawn(AudioBundle {
-                    source: sounds.eat_food.clone(),
-                    settings: PlaybackSettings::DESPAWN,
-                });
+                commands.spawn((
+                    AudioPlayer(sounds.eat_food.clone()),
+                    PlaybackSettings::DESPAWN,
+                ));
             }
         }
 
@@ -503,10 +505,10 @@ pub fn eat(
                     new_segments,
                 });
 
-                commands.spawn(AudioBundle {
-                    source: sounds.super_food.clone(),
-                    settings: PlaybackSettings::DESPAWN,
-                });
+                commands.spawn((
+                    AudioPlayer(sounds.super_food.clone()),
+                    PlaybackSettings::DESPAWN,
+                ));
             }
         }
 
@@ -517,10 +519,8 @@ pub fn eat(
                 immunity_time.0 += 10;
 
                 commands.spawn((
-                    AudioBundle {
-                        source: sounds.antidote.clone(),
-                        settings: PlaybackSettings::LOOP,
-                    },
+                    AudioPlayer(sounds.antidote.clone()),
+                    PlaybackSettings::LOOP,
                     AntidoteSound,
                     OnGameScreen,
                 ));
@@ -535,10 +535,10 @@ pub fn eat(
                     free_positions.shuffle();
                     growth_writer.send(Growth(1));
 
-                    commands.spawn(AudioBundle {
-                        source: sounds.eat_poison.clone(),
-                        settings: PlaybackSettings::DESPAWN,
-                    });
+                    commands.spawn((
+                        AudioPlayer(sounds.eat_poison.clone()),
+                        PlaybackSettings::DESPAWN,
+                    ));
                 } else {
                     game_over_writer.send(GameOver);
                 }
@@ -564,6 +564,7 @@ pub fn growth(
     let shape = shapes::Rectangle {
         extents: Vec2::splat(tile_size.0 as f32),
         origin: shapes::RectangleOrigin::Center,
+        radii: None,
     };
 
     if let Some(growth) = growth_reader.read().next() {
@@ -650,10 +651,10 @@ pub fn game_over(
     mut highscore: ResMut<Highscore>,
 ) {
     if reader.read().next().is_some() {
-        commands.spawn(AudioBundle {
-            source: sounds.game_over.clone(),
-            settings: PlaybackSettings::DESPAWN,
-        });
+        commands.spawn((
+            AudioPlayer(sounds.game_over.clone()),
+            PlaybackSettings::DESPAWN,
+        ));
 
         lastscore.0 = 0;
         for _ in segments.iter() {

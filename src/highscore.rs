@@ -52,9 +52,8 @@ impl Plugin for HighscorePlugin {
             )
             .add_systems(
                 Update,
-                save_highscore.run_if(
-                    resource_changed::<Highscore>.and_then(not(resource_added::<Highscore>)),
-                ),
+                save_highscore
+                    .run_if(resource_changed::<Highscore>.and(not(resource_added::<Highscore>))),
             )
             .insert_resource(load_highscore())
             .init_resource::<Lastscore>();
@@ -132,16 +131,9 @@ fn keyboard(
 }
 
 /// Forwards to the menu when the A key of the gamepad is pressed after an initial delay.
-pub fn gamepad(
-    gamepads: Res<Gamepads>,
-    buttons: Res<ButtonInput<GamepadButton>>,
-    mut game_state: ResMut<NextState<GameState>>,
-) {
+pub fn gamepad(gamepads: Query<&Gamepad>, mut game_state: ResMut<NextState<GameState>>) {
     for gamepad in gamepads.iter() {
-        if buttons.just_released(GamepadButton {
-            gamepad,
-            button_type: GamepadButtonType::South,
-        }) {
+        if gamepad.just_released(GamepadButton::South) {
             game_state.set(GameState::Menu);
         }
     }
@@ -149,86 +141,76 @@ pub fn gamepad(
 
 /// Creates the UI of the highscore screen.
 fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore: Res<Lastscore>) {
-    let title_text_style = TextStyle {
-        font_size: 128.0,
-        color: TITLE_COLOR,
-        ..default()
-    };
-
-    let headline_text_style = TextStyle {
-        font_size: 64.0,
-        color: HEADLINE_COLOR,
-        ..default()
-    };
-
-    let highscore_text_style = TextStyle {
-        font_size: 64.0,
-        color: HIGHSCORE_COLOR,
-        ..default()
-    };
-
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
             OnHighscoreScreen,
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
+                .spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle::from_section(TITLE, title_text_style).with_style(Style {
+                    parent.spawn((
+                        Text::new(TITLE),
+                        TextFont {
+                            font_size: 128.0,
+                            ..default()
+                        },
+                        TextColor(TITLE_COLOR),
+                        Node {
                             margin: UiRect::all(Val::Px(50.0)),
                             ..default()
-                        }),
-                    );
+                        },
+                    ));
 
-                    parent.spawn(
-                        TextBundle::from_section("Highscore", headline_text_style).with_style(
-                            Style {
-                                margin: UiRect::all(Val::Px(50.0)),
-                                ..default()
-                            },
-                        ),
-                    );
+                    parent.spawn((
+                        Text::new("Highscore"),
+                        TextFont {
+                            font_size: 64.0,
+                            ..default()
+                        },
+                        TextColor(HEADLINE_COLOR),
+                        Node {
+                            margin: UiRect::all(Val::Px(50.0)),
+                            ..default()
+                        },
+                    ));
 
-                    parent.spawn(
-                        TextBundle::from_section(
-                            format!("Highscore: {}", &highscore.0),
-                            highscore_text_style.clone(),
-                        )
-                        .with_style(Style {
+                    parent.spawn((
+                        Text::new(format!("Highscore {}", &highscore.0)),
+                        TextFont {
+                            font_size: 64.0,
+                            ..default()
+                        },
+                        TextColor(HIGHSCORE_COLOR),
+                        Node {
                             margin: UiRect::all(Val::Px(25.0)),
                             ..default()
-                        }),
-                    );
+                        },
+                    ));
 
-                    parent.spawn(
-                        TextBundle::from_section(
-                            format!("Your last score was: {}", &lastscore.0),
-                            highscore_text_style.clone(),
-                        )
-                        .with_style(Style {
+                    parent.spawn((
+                        Text::new(format!("Your last score was {}", &lastscore.0)),
+                        TextFont {
+                            font_size: 64.0,
+                            ..default()
+                        },
+                        TextColor(HIGHSCORE_COLOR),
+                        Node {
                             margin: UiRect::all(Val::Px(25.0)),
                             ..default()
-                        }),
-                    );
+                        },
+                    ));
                 });
         });
 

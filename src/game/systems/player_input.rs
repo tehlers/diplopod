@@ -28,20 +28,14 @@ pub fn keyboard(keyboard_input: Res<ButtonInput<KeyCode>>, mut heads: Query<&mut
     }
 }
 
-pub fn gamepad(
-    gamepads: Res<Gamepads>,
-    axes: Res<Axis<GamepadAxis>>,
-    mut heads: Query<&mut DiplopodHead>,
-) {
+pub fn gamepad(gamepads: Query<&Gamepad>, mut heads: Query<&mut DiplopodHead>) {
     const TILT: f32 = 0.9;
 
     if let Some(mut head) = heads.iter_mut().next() {
         let mut direction = Vec2::ZERO;
 
         for gamepad in gamepads.iter() {
-            if let Some(left_stick_x) =
-                axes.get(GamepadAxis::new(gamepad, GamepadAxisType::LeftStickX))
-            {
+            if let Some(left_stick_x) = gamepad.get(GamepadAxis::LeftStickX) {
                 if left_stick_x <= -TILT {
                     direction = Vec2::new(-1.0, 0.0);
                 }
@@ -51,9 +45,7 @@ pub fn gamepad(
                 }
             }
 
-            if let Some(left_stick_y) =
-                axes.get(GamepadAxis::new(gamepad, GamepadAxisType::LeftStickY))
-            {
+            if let Some(left_stick_y) = gamepad.get(GamepadAxis::LeftStickY) {
                 if left_stick_y <= -TILT {
                     direction = Vec2::new(direction.x, -1.0);
                 }

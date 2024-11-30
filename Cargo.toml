@@ -21,7 +21,7 @@ lto = "thin"
 opt-level = 'z'
 
 [dependencies.bevy]
-version = "0.14.2"
+version = "0.15.0"
 default-features = false
 features = [
   # Bevy functionality:
@@ -34,6 +34,7 @@ features = [
   "x11",                # Linux: Support X11 windowing system
   #"filesystem_watcher", # Asset hot-reloading
   #"render",             # Graphics Rendering
+  "default_font",
 
   ## "render" actually just includes:
   ## (feel free to use just a subset of these, instead of "render")
@@ -45,6 +46,7 @@ features = [
   "bevy_text",          # Text/font rendering
   "bevy_ui",            # UI toolkit
   "bevy_state",
+  "bevy_window",
 
   # File formats:
   #"png",
@@ -56,7 +58,6 @@ features = [
 
   # Bevy functionality:
   "wayland",              # Linux: Support Wayland windowing system
-  "subpixel_glyph_atlas", # Subpixel antialiasing for text/fonts
   #"serialize",            # Support for `serde` Serialize/Deserialize
   #"bevy_dynamic_plugin",   # Support for loading of `DynamicPlugin`s
 
@@ -82,7 +83,7 @@ features = [
 
 [dependencies]
 anyhow = "1"
-bevy_embedded_assets = "0.11"
-bevy_prototype_lyon = "0.12"
+bevy_embedded_assets = "0.12"
+bevy_prototype_lyon = "0.13"
 directories = "5"
 rand = "0.8.4"

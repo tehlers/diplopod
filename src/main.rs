@@ -67,7 +67,6 @@ fn main() {
             setup::set_default_font.run_if(resource_exists::<DefaultFontHandle>),
         )
         .init_state::<GameState>()
-        .insert_resource(Msaa::Sample4)
         .insert_resource(ClearColor(Color::BLACK))
         .run();
 }

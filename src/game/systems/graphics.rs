@@ -120,6 +120,7 @@ fn resize_consumables(
     let shape = shapes::Rectangle {
         extents: Vec2::splat(tile_size.0 as f32 * 2.0),
         origin: shapes::RectangleOrigin::Center,
+        radii: None,
     };
 
     for mut path in paths.p3().iter_mut() {
@@ -131,6 +132,7 @@ fn resize_consumables(
     let shape = shapes::Rectangle {
         extents: Vec2::splat(tile_size.0 as f32),
         origin: shapes::RectangleOrigin::Center,
+        radii: None,
     };
 
     for mut path in paths.p4().iter_mut() {
@@ -178,7 +180,7 @@ pub fn position_translation(
 
 pub fn rotate_superfood(mut query: Query<&mut Transform, With<Superfood>>, time: Res<Time>) {
     for mut transform in query.iter_mut() {
-        let delta = time.delta_seconds();
+        let delta = time.delta_secs();
         transform.rotate(Quat::from_rotation_z(1.5 * delta));
     }
 }
@@ -210,9 +212,13 @@ pub fn change_color(
     }
 }
 
-pub fn fade_text(mut commands: Commands, mut query: Query<(Entity, &mut Text, &mut FadingText)>) {
-    for (entity, mut text, mut fading_text) in query.iter_mut() {
-        text.sections[0].style.color.set_alpha(fading_text.0);
+pub fn fade_text(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut FadingText)>,
+    mut writer: Text2dWriter,
+) {
+    for (entity, mut fading_text) in query.iter_mut() {
+        writer.color(entity, 0).set_alpha(fading_text.0);
         fading_text.0 -= 0.1;
 
         if fading_text.0 <= 0.0 {
@@ -223,20 +229,18 @@ pub fn fade_text(mut commands: Commands, mut query: Query<(Entity, &mut Text, &m
 
 pub fn show_message(mut commands: Commands, mut show_message_reader: EventReader<ShowMessage>) {
     if let Some(show_message) = show_message_reader.read().next() {
-        let text_style = TextStyle {
-            font_size: 36.0,
-            color: Color::WHITE,
-            ..default()
-        };
-
         commands
-            .spawn(Text2dBundle {
-                text: Text::from_section(&show_message.text, text_style)
-                    .with_justify(JustifyText::Center),
+            .spawn((
+                Text2d::new(&show_message.text),
+                TextFont {
+                    font_size: 36.0,
+                    ..default()
+                },
+                TextColor::WHITE,
+                TextLayout::new_with_justify(JustifyText::Center),
                 // ensure that the text is drawn above the diplopod
-                transform: Transform::from_translation(Vec3::Z),
-                ..default()
-            })
+                Transform::from_translation(Vec3::Z),
+            ))
             .insert(show_message.position)
             .insert(OnGameScreen)
             .insert(FadingText(1.0));
