@@ -229,20 +229,19 @@ pub fn fade_text(
 
 pub fn show_message(mut commands: Commands, mut show_message_reader: EventReader<ShowMessage>) {
     if let Some(show_message) = show_message_reader.read().next() {
-        commands
-            .spawn((
-                Text2d::new(&show_message.text),
-                TextFont {
-                    font_size: 36.0,
-                    ..default()
-                },
-                TextColor::WHITE,
-                TextLayout::new_with_justify(JustifyText::Center),
-                // ensure that the text is drawn above the diplopod
-                Transform::from_translation(Vec3::Z),
-            ))
-            .insert(show_message.position)
-            .insert(OnGameScreen)
-            .insert(FadingText(1.0));
+        commands.spawn((
+            Text2d::new(&show_message.text),
+            TextFont {
+                font_size: 36.0,
+                ..default()
+            },
+            TextColor::WHITE,
+            TextLayout::new_with_justify(JustifyText::Center),
+            // ensure that the text is drawn above the diplopod
+            Transform::from_translation(Vec3::Z),
+            show_message.position,
+            OnGameScreen,
+            FadingText(1.0),
+        ));
     }
 }

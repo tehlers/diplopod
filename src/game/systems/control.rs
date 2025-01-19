@@ -38,16 +38,16 @@ fn spawn_diplopod(
             },
             Fill::color(DIPLOPOD_COLOR),
             Stroke::color(DIPLOPOD_COLOR),
+            DiplopodHead {
+                direction: Vec2::ZERO,
+            },
+            DiplopodSegment,
+            DiplopodPosition {
+                x: ARENA_WIDTH / 2,
+                y: ARENA_HEIGHT / 2,
+            },
+            OnGameScreen,
         ))
-        .insert(DiplopodHead {
-            direction: Vec2::ZERO,
-        })
-        .insert(DiplopodSegment)
-        .insert(DiplopodPosition {
-            x: ARENA_WIDTH / 2,
-            y: ARENA_HEIGHT / 2,
-        })
-        .insert(OnGameScreen)
         .id()];
 }
 
@@ -65,10 +65,10 @@ fn spawn_segment(
             },
             Fill::color(color),
             Stroke::color(color),
+            DiplopodSegment,
+            position,
+            OnGameScreen,
         ))
-        .insert(DiplopodSegment)
-        .insert(position)
-        .insert(OnGameScreen)
         .id()
 }
 
@@ -126,18 +126,17 @@ fn spawn_wall(
     pos: Position,
     shape: &Rectangle,
 ) {
-    commands
-        .spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(shape),
-                ..default()
-            },
-            Fill::color(WALL_COLOR),
-            Stroke::color(WALL_COLOR),
-        ))
-        .insert(Wall)
-        .insert(OnGameScreen)
-        .insert(pos);
+    commands.spawn((
+        ShapeBundle {
+            path: GeometryBuilder::build_as(shape),
+            ..default()
+        },
+        Fill::color(WALL_COLOR),
+        Stroke::color(WALL_COLOR),
+        Wall,
+        OnGameScreen,
+        pos,
+    ));
 
     free_positions.remove(&pos);
 }
@@ -189,18 +188,17 @@ fn spawn_random_food(
         match position_candidates.positions.pop() {
             None => break,
             Some(pos) => {
-                commands
-                    .spawn((
-                        ShapeBundle {
-                            path: GeometryBuilder::build_as(&shape),
-                            ..default()
-                        },
-                        Fill::color(FOOD_COLOR),
-                        Stroke::color(FOOD_COLOR),
-                    ))
-                    .insert(Food)
-                    .insert(OnGameScreen)
-                    .insert(pos);
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shape),
+                        ..default()
+                    },
+                    Fill::color(FOOD_COLOR),
+                    Stroke::color(FOOD_COLOR),
+                    Food,
+                    OnGameScreen,
+                    pos,
+                ));
                 free_positions.remove(&pos);
             }
         }
@@ -254,18 +252,17 @@ fn spawn_random_poison(
         match position_candidates.positions.pop() {
             None => break,
             Some(pos) => {
-                commands
-                    .spawn((
-                        ShapeBundle {
-                            path: GeometryBuilder::build_as(&shape),
-                            ..default()
-                        },
-                        Fill::color(POISON_FILL_COLOR),
-                        Stroke::new(POISON_OUTLINE_COLOR, 7.),
-                    ))
-                    .insert(Poison)
-                    .insert(OnGameScreen)
-                    .insert(pos);
+                commands.spawn((
+                    ShapeBundle {
+                        path: GeometryBuilder::build_as(&shape),
+                        ..default()
+                    },
+                    Fill::color(POISON_FILL_COLOR),
+                    Stroke::new(POISON_OUTLINE_COLOR, 7.),
+                    Poison,
+                    OnGameScreen,
+                    pos,
+                ));
                 free_positions.remove(&pos);
             }
         }
@@ -286,17 +283,16 @@ fn spawn_random_superfood(
         path_builder.line_to(tile_size.0 as f32 * Vec2::Y);
         let cross = path_builder.build();
 
-        commands
-            .spawn((
-                ShapeBundle {
-                    path: GeometryBuilder::build_as(&cross),
-                    ..default()
-                },
-                Stroke::new(SUPERFOOD_COLOR, 7.5),
-            ))
-            .insert(Superfood)
-            .insert(OnGameScreen)
-            .insert(pos);
+        commands.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&cross),
+                ..default()
+            },
+            Stroke::new(SUPERFOOD_COLOR, 7.5),
+            Superfood,
+            OnGameScreen,
+            pos,
+        ));
         free_positions.remove(&pos);
     }
 }
@@ -315,17 +311,16 @@ fn spawn_random_antidote(
         path_builder.line_to(tile_size.0 as f32 * Vec2::Y);
         let cross = path_builder.build();
 
-        commands
-            .spawn((
-                ShapeBundle {
-                    path: GeometryBuilder::build_as(&cross),
-                    ..default()
-                },
-                Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9),
-            ))
-            .insert(Antidote)
-            .insert(OnGameScreen)
-            .insert(pos);
+        commands.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&cross),
+                ..default()
+            },
+            Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9),
+            Antidote,
+            OnGameScreen,
+            pos,
+        ));
         free_positions.remove(&pos);
     }
 }
