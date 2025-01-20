@@ -11,29 +11,31 @@ use crate::game::OnGameScreen;
 use crate::prelude::*;
 use crate::GameState;
 
-pub fn init_diplopod(
-    mut commands: Commands,
-    mut segments: ResMut<DiplopodSegments>,
-    tile_size: Res<TileSize>,
-) {
-    spawn_diplopod(&mut commands, &mut segments, tile_size);
+use super::graphics::diplopod_position2translation;
+use super::graphics::position2translation;
+use super::graphics::TILE_SIZE;
+
+pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
+    spawn_diplopod(&mut commands, &mut segments);
 }
 
-fn spawn_diplopod(
-    commands: &mut Commands,
-    segments: &mut ResMut<DiplopodSegments>,
-    tile_size: Res<TileSize>,
-) {
+fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
     let shape = shapes::Rectangle {
-        extents: Vec2::splat(tile_size.0 as f32),
+        extents: Vec2::splat(TILE_SIZE),
         origin: shapes::RectangleOrigin::Center,
         radii: None,
+    };
+
+    let position = DiplopodPosition {
+        x: ARENA_WIDTH / 2,
+        y: ARENA_HEIGHT / 2,
     };
 
     segments.0 = vec![commands
         .spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
+                transform: Transform::from_translation(diplopod_position2translation(&position)),
                 ..default()
             },
             Fill::color(DIPLOPOD_COLOR),
@@ -41,11 +43,8 @@ fn spawn_diplopod(
             DiplopodHead {
                 direction: Vec2::ZERO,
             },
+            position,
             DiplopodSegment,
-            DiplopodPosition {
-                x: ARENA_WIDTH / 2,
-                y: ARENA_HEIGHT / 2,
-            },
             OnGameScreen,
         ))
         .id()];
@@ -61,6 +60,7 @@ fn spawn_segment(
         .spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(shape),
+                transform: Transform::from_translation(diplopod_position2translation(&position)),
                 ..default()
             },
             Fill::color(color),
@@ -72,13 +72,9 @@ fn spawn_segment(
         .id()
 }
 
-pub fn init_wall(
-    mut commands: Commands,
-    mut free_positions: ResMut<FreePositions>,
-    tile_size: Res<TileSize>,
-) {
+pub fn init_wall(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
     let shape = shapes::Rectangle {
-        extents: Vec2::splat(tile_size.0 as f32 * 2.0),
+        extents: Vec2::splat(TILE_SIZE * 2.0),
         origin: shapes::RectangleOrigin::Center,
         radii: None,
     };
@@ -129,6 +125,7 @@ fn spawn_wall(
     commands.spawn((
         ShapeBundle {
             path: GeometryBuilder::build_as(shape),
+            transform: Transform::from_translation(position2translation(&pos)),
             ..default()
         },
         Fill::color(WALL_COLOR),
@@ -141,19 +138,11 @@ fn spawn_wall(
     free_positions.remove(&pos);
 }
 
-pub fn init_food(
-    mut commands: Commands,
-    mut free_positions: ResMut<FreePositions>,
-    tile_size: Res<TileSize>,
-) {
-    spawn_food(&mut commands, &mut free_positions, &tile_size);
+pub fn init_food(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
+    spawn_food(&mut commands, &mut free_positions);
 }
 
-fn spawn_food(
-    commands: &mut Commands,
-    free_positions: &mut ResMut<FreePositions>,
-    tile_size: &Res<TileSize>,
-) {
+fn spawn_food(commands: &mut Commands, free_positions: &mut ResMut<FreePositions>) {
     let segment_positions = vec![DiplopodPosition {
         x: ARENA_WIDTH / 2,
         y: ARENA_HEIGHT / 2,
@@ -168,7 +157,6 @@ fn spawn_food(
         commands,
         &mut position_candidates,
         free_positions,
-        tile_size,
     );
 }
 
@@ -177,10 +165,9 @@ fn spawn_random_food(
     commands: &mut Commands,
     position_candidates: &mut FreePositions,
     free_positions: &mut ResMut<FreePositions>,
-    tile_size: &Res<TileSize>,
 ) {
     let shape = shapes::Circle {
-        radius: tile_size.0 as f32 * RADIUS_FACTOR,
+        radius: TILE_SIZE * RADIUS_FACTOR,
         center: Vec2::new(0., 0.),
     };
 
@@ -191,6 +178,7 @@ fn spawn_random_food(
                 commands.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shape),
+                        transform: Transform::from_translation(position2translation(&pos)),
                         ..default()
                     },
                     Fill::color(FOOD_COLOR),
@@ -205,19 +193,11 @@ fn spawn_random_food(
     }
 }
 
-pub fn init_poison(
-    mut commands: Commands,
-    mut free_positions: ResMut<FreePositions>,
-    tile_size: Res<TileSize>,
-) {
-    spawn_poison(&mut commands, &mut free_positions, &tile_size);
+pub fn init_poison(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
+    spawn_poison(&mut commands, &mut free_positions);
 }
 
-fn spawn_poison(
-    commands: &mut Commands,
-    free_positions: &mut ResMut<FreePositions>,
-    tile_size: &Res<TileSize>,
-) {
+fn spawn_poison(commands: &mut Commands, free_positions: &mut ResMut<FreePositions>) {
     let segment_positions = vec![DiplopodPosition {
         x: ARENA_WIDTH / 2,
         y: ARENA_HEIGHT / 2,
@@ -232,7 +212,6 @@ fn spawn_poison(
         commands,
         &mut position_candidates,
         free_positions,
-        tile_size,
     );
 }
 
@@ -241,10 +220,9 @@ fn spawn_random_poison(
     commands: &mut Commands,
     position_candidates: &mut FreePositions,
     free_positions: &mut ResMut<FreePositions>,
-    tile_size: &Res<TileSize>,
 ) {
     let shape = shapes::Circle {
-        radius: tile_size.0 as f32 * RADIUS_FACTOR,
+        radius: TILE_SIZE * RADIUS_FACTOR,
         center: Vec2::new(0., 0.),
     };
 
@@ -255,6 +233,7 @@ fn spawn_random_poison(
                 commands.spawn((
                     ShapeBundle {
                         path: GeometryBuilder::build_as(&shape),
+                        transform: Transform::from_translation(position2translation(&pos)),
                         ..default()
                     },
                     Fill::color(POISON_FILL_COLOR),
@@ -273,19 +252,19 @@ fn spawn_random_superfood(
     commands: &mut Commands,
     position_candidates: &mut FreePositions,
     free_positions: &mut ResMut<FreePositions>,
-    tile_size: &Res<TileSize>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         let mut path_builder = PathBuilder::new();
-        path_builder.move_to(-tile_size.0 as f32 * Vec2::X);
-        path_builder.line_to(tile_size.0 as f32 * Vec2::X);
-        path_builder.move_to(-tile_size.0 as f32 * Vec2::Y);
-        path_builder.line_to(tile_size.0 as f32 * Vec2::Y);
+        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
+        path_builder.line_to(TILE_SIZE * Vec2::X);
+        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
+        path_builder.line_to(TILE_SIZE * Vec2::Y);
         let cross = path_builder.build();
 
         commands.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&cross),
+                transform: Transform::from_translation(position2translation(&pos)),
                 ..default()
             },
             Stroke::new(SUPERFOOD_COLOR, 7.5),
@@ -301,22 +280,22 @@ fn spawn_random_antidote(
     commands: &mut Commands,
     position_candidates: &mut FreePositions,
     free_positions: &mut ResMut<FreePositions>,
-    tile_size: &Res<TileSize>,
 ) {
     if let Some(pos) = position_candidates.positions.pop() {
         let mut path_builder = PathBuilder::new();
-        path_builder.move_to(-tile_size.0 as f32 * Vec2::X);
-        path_builder.line_to(tile_size.0 as f32 * Vec2::X);
-        path_builder.move_to(-tile_size.0 as f32 * Vec2::Y);
-        path_builder.line_to(tile_size.0 as f32 * Vec2::Y);
+        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
+        path_builder.line_to(TILE_SIZE * Vec2::X);
+        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
+        path_builder.line_to(TILE_SIZE * Vec2::Y);
         let cross = path_builder.build();
 
         commands.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&cross),
+                transform: Transform::from_translation(position2translation(&pos)),
                 ..default()
             },
-            Stroke::new(ANTIDOTE_COLOR, tile_size.0 as f32 * 0.9),
+            Stroke::new(ANTIDOTE_COLOR, TILE_SIZE * 0.9),
             Antidote,
             OnGameScreen,
             pos,
@@ -336,7 +315,6 @@ pub fn spawn_consumables(
     antidotes: Query<Entity, With<Antidote>>,
     mut free_positions: ResMut<FreePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
-    tile_size: Res<TileSize>,
     sounds: Res<Sounds>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.read().next() {
@@ -356,7 +334,6 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_positions,
-                &tile_size,
             );
 
             spawn_random_poison(
@@ -364,7 +341,6 @@ pub fn spawn_consumables(
                 &mut commands,
                 &mut position_candidates,
                 &mut free_positions,
-                &tile_size,
             );
         }
 
@@ -387,20 +363,10 @@ pub fn spawn_consumables(
                 }
                 free_positions.shuffle();
 
-                spawn_random_antidote(
-                    &mut commands,
-                    &mut position_candidates,
-                    &mut free_positions,
-                    &tile_size,
-                );
+                spawn_random_antidote(&mut commands, &mut position_candidates, &mut free_positions);
             }
 
-            spawn_random_superfood(
-                &mut commands,
-                &mut position_candidates,
-                &mut free_positions,
-                &tile_size,
-            );
+            spawn_random_superfood(&mut commands, &mut position_candidates, &mut free_positions);
 
             commands.spawn((
                 AudioPlayer(sounds.special_spawn.clone()),
@@ -554,10 +520,9 @@ pub fn growth(
     mut segments: ResMut<DiplopodSegments>,
     mut growth_reader: EventReader<Growth>,
     immunity_time: Res<ImmunityTime>,
-    tile_size: Res<TileSize>,
 ) {
     let shape = shapes::Rectangle {
-        extents: Vec2::splat(tile_size.0 as f32),
+        extents: Vec2::splat(TILE_SIZE),
         origin: shapes::RectangleOrigin::Center,
         radii: None,
     };
@@ -579,10 +544,10 @@ pub fn growth(
 }
 
 pub fn move_antidote(
-    mut antidotes: Query<&mut Position, With<Antidote>>,
+    mut antidotes: Query<(&mut Position, &mut Transform), With<Antidote>>,
     mut segment_positions: Query<&mut DiplopodPosition, With<DiplopodSegment>>,
 ) {
-    for mut pos in antidotes.iter_mut() {
+    for (mut pos, mut transform) in antidotes.iter_mut() {
         let mut new_pos = *pos;
         match thread_rng().gen_range(0..4) {
             0 => new_pos.x -= 1,
@@ -606,6 +571,8 @@ pub fn move_antidote(
 
         pos.x = new_pos.x;
         pos.y = new_pos.y;
+
+        transform.translation = position2translation(&pos);
     }
 }
 

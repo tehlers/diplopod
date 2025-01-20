@@ -41,7 +41,6 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
-                    (graphics::on_window_created, graphics::on_window_resized),
                     (
                         player_input::keyboard,
                         player_input::gamepad,
@@ -55,10 +54,7 @@ impl Plugin for GamePlugin {
                         .in_set(Phase::Input)
                         .run_if(in_state(GameState::Game))
                         .run_if(resource_exists::<Paused>),
-                    (
-                        graphics::diplopod_position_translation,
-                        graphics::position_translation,
-                    )
+                    (graphics::diplopod_position_translation,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
                     (graphics::rotate_superfood,)
@@ -96,8 +92,6 @@ impl Plugin for GamePlugin {
                     .run_if(not(resource_exists::<Paused>)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
-            .insert_resource(TileSize::default())
-            .insert_resource(UpperLeft::default())
             .insert_resource(DiplopodSegments::default())
             .insert_resource(LastTailPosition::default())
             .insert_resource(LastSpecialSpawn::default())

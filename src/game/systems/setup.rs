@@ -1,14 +1,27 @@
 use crate::game::resources::DefaultFontHandle;
 use crate::game::resources::Sounds;
 use bevy::prelude::*;
+use bevy::render::camera::ScalingMode;
 use bevy::window::PrimaryWindow;
+
+use super::graphics::MAX_X;
+use super::graphics::MAX_Y;
 
 pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    commands.spawn(Camera2d);
+    commands.spawn((
+        Camera2d,
+        Projection::Orthographic(OrthographicProjection {
+            scaling_mode: ScalingMode::AutoMin {
+                min_width: MAX_X,
+                min_height: MAX_Y,
+            },
+            ..OrthographicProjection::default_2d()
+        }),
+    ));
 
     let sounds = Sounds {
         eat_food: asset_server.load("audio/eat_food.ogg"),

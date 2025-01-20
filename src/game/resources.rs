@@ -66,15 +66,6 @@ pub struct LastSpecialSpawn(pub u32);
 #[derive(Default, Resource)]
 pub struct ImmunityTime(pub u8);
 
-#[derive(Default, Debug, Resource)]
-pub struct TileSize(pub i32);
-
-#[derive(Default, Debug, Resource)]
-pub struct UpperLeft {
-    pub x: i32,
-    pub y: i32,
-}
-
 #[derive(Resource)]
 pub struct Sounds {
     pub eat_food: Handle<AudioSource>,
