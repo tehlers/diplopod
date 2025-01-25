@@ -17,7 +17,6 @@ use super::graphics::TILE_SIZE;
 
 struct SpawnDiplopodSegment {
     position: DiplopodPosition,
-    color: Color,
 }
 
 impl Command for SpawnDiplopodSegment {
@@ -29,6 +28,11 @@ impl Command for SpawnDiplopodSegment {
         };
 
         let is_head = world.resource::<DiplopodSegments>().0.is_empty();
+        let color = if world.resource::<ImmunityTime>().0 > 0 {
+            ANTIDOTE_COLOR
+        } else {
+            DIPLOPOD_COLOR
+        };
 
         let mut segment = world.spawn((
             ShapeBundle {
@@ -38,8 +42,8 @@ impl Command for SpawnDiplopodSegment {
                 )),
                 ..default()
             },
-            Fill::color(self.color),
-            Stroke::color(self.color),
+            Fill::color(color),
+            Stroke::color(color),
             DiplopodSegment,
             self.position,
             OnGameScreen,
@@ -59,7 +63,6 @@ pub fn init_diplopod(mut commands: Commands) {
             x: ARENA_WIDTH / 2,
             y: ARENA_HEIGHT / 2,
         },
-        color: DIPLOPOD_COLOR,
     });
 }
 
@@ -509,17 +512,11 @@ pub fn growth(
     mut commands: Commands,
     last_tail_position: Res<LastTailPosition>,
     mut growth_reader: EventReader<Growth>,
-    immunity_time: Res<ImmunityTime>,
 ) {
     if let Some(growth) = growth_reader.read().next() {
         for _ in 0..growth.0 {
             commands.queue(SpawnDiplopodSegment {
                 position: last_tail_position.0.unwrap(),
-                color: if immunity_time.0 > 0 {
-                    ANTIDOTE_COLOR
-                } else {
-                    DIPLOPOD_COLOR
-                },
             });
         }
     }
