@@ -15,9 +15,7 @@ use super::graphics::diplopod_position2translation;
 use super::graphics::position2translation;
 use super::graphics::TILE_SIZE;
 
-struct SpawnDiplopodSegment {
-    position: DiplopodPosition,
-}
+struct SpawnDiplopodSegment;
 
 impl Command for SpawnDiplopodSegment {
     fn apply(self, world: &mut World) {
@@ -27,7 +25,20 @@ impl Command for SpawnDiplopodSegment {
             radii: None,
         };
 
-        let is_head = world.resource::<DiplopodSegments>().0.is_empty();
+        let segments = &world.resource::<DiplopodSegments>().0;
+        let is_head = segments.is_empty();
+
+        let position = if is_head {
+            DiplopodPosition {
+                x: ARENA_WIDTH / 2,
+                y: ARENA_HEIGHT / 2,
+            }
+        } else {
+            *world
+                .get::<DiplopodPosition>(*segments.last().unwrap())
+                .unwrap()
+        };
+
         let color = if world.resource::<ImmunityTime>().0 > 0 {
             ANTIDOTE_COLOR
         } else {
@@ -37,15 +48,13 @@ impl Command for SpawnDiplopodSegment {
         let mut segment = world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_translation(diplopod_position2translation(
-                    &self.position,
-                )),
+                transform: Transform::from_translation(diplopod_position2translation(&position)),
                 ..default()
             },
             Fill::color(color),
             Stroke::color(color),
             DiplopodSegment,
-            self.position,
+            position,
             OnGameScreen,
         ));
 
@@ -58,12 +67,7 @@ impl Command for SpawnDiplopodSegment {
 }
 
 pub fn init_diplopod(mut commands: Commands) {
-    commands.queue(SpawnDiplopodSegment {
-        position: DiplopodPosition {
-            x: ARENA_WIDTH / 2,
-            y: ARENA_HEIGHT / 2,
-        },
-    });
+    commands.queue(SpawnDiplopodSegment);
 }
 
 pub fn init_wall(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
@@ -374,7 +378,6 @@ pub fn movement(
     mut heads: Query<(Entity, &DiplopodHead)>,
     mut positions: Query<&mut DiplopodPosition>,
     segments: ResMut<DiplopodSegments>,
-    mut last_tail_position: ResMut<LastTailPosition>,
     mut game_over_writer: EventWriter<GameOver>,
 ) {
     if let Some((head_entity, head)) = heads.iter_mut().next() {
@@ -400,8 +403,6 @@ pub fn movement(
             .for_each(|(pos, segment)| {
                 *positions.get_mut(*segment).unwrap() = *pos;
             });
-
-        last_tail_position.0 = Some(*segment_positions.last().unwrap());
     }
 }
 
@@ -508,16 +509,10 @@ pub fn eat(
     }
 }
 
-pub fn growth(
-    mut commands: Commands,
-    last_tail_position: Res<LastTailPosition>,
-    mut growth_reader: EventReader<Growth>,
-) {
+pub fn growth(mut commands: Commands, mut growth_reader: EventReader<Growth>) {
     if let Some(growth) = growth_reader.read().next() {
         for _ in 0..growth.0 {
-            commands.queue(SpawnDiplopodSegment {
-                position: last_tail_position.0.unwrap(),
-            });
+            commands.queue(SpawnDiplopodSegment);
         }
     }
 }

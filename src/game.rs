@@ -93,7 +93,6 @@ impl Plugin for GamePlugin {
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .insert_resource(DiplopodSegments::default())
-            .insert_resource(LastTailPosition::default())
             .insert_resource(LastSpecialSpawn::default())
             .insert_resource(ImmunityTime::default())
             .insert_resource(FreePositions::new(CONSUMABLE_WIDTH, CONSUMABLE_HEIGHT))
