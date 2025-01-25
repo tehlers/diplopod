@@ -15,57 +15,52 @@ use super::graphics::diplopod_position2translation;
 use super::graphics::position2translation;
 use super::graphics::TILE_SIZE;
 
-pub fn init_diplopod(mut commands: Commands) {
-    spawn_diplopod(&mut commands);
-}
-
-fn spawn_diplopod(commands: &mut Commands) {
-    let shape = shapes::Rectangle {
-        extents: Vec2::splat(TILE_SIZE),
-        origin: shapes::RectangleOrigin::Center,
-        radii: None,
-    };
-
-    let position = DiplopodPosition {
-        x: ARENA_WIDTH / 2,
-        y: ARENA_HEIGHT / 2,
-    };
-
-    commands.spawn((
-        ShapeBundle {
-            path: GeometryBuilder::build_as(&shape),
-            transform: Transform::from_translation(diplopod_position2translation(&position)),
-            ..default()
-        },
-        Fill::color(DIPLOPOD_COLOR),
-        Stroke::color(DIPLOPOD_COLOR),
-        DiplopodHead {
-            direction: Vec2::ZERO,
-        },
-        position,
-        DiplopodSegment,
-        OnGameScreen,
-    ));
-}
-
-fn spawn_segment(
-    commands: &mut Commands,
-    color: Color,
+struct SpawnDiplopodSegment {
     position: DiplopodPosition,
-    shape: &Rectangle,
-) {
-    commands.spawn((
-        ShapeBundle {
-            path: GeometryBuilder::build_as(shape),
-            transform: Transform::from_translation(diplopod_position2translation(&position)),
-            ..default()
+    color: Color,
+}
+
+impl Command for SpawnDiplopodSegment {
+    fn apply(self, world: &mut World) {
+        let shape = shapes::Rectangle {
+            extents: Vec2::splat(TILE_SIZE),
+            origin: shapes::RectangleOrigin::Center,
+            radii: None,
+        };
+
+        let is_head = world.resource::<DiplopodSegments>().0.is_empty();
+
+        let mut segment = world.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shape),
+                transform: Transform::from_translation(diplopod_position2translation(
+                    &self.position,
+                )),
+                ..default()
+            },
+            Fill::color(self.color),
+            Stroke::color(self.color),
+            DiplopodSegment,
+            self.position,
+            OnGameScreen,
+        ));
+
+        if is_head {
+            segment.insert(DiplopodHead {
+                direction: Vec2::ZERO,
+            });
+        }
+    }
+}
+
+pub fn init_diplopod(mut commands: Commands) {
+    commands.queue(SpawnDiplopodSegment {
+        position: DiplopodPosition {
+            x: ARENA_WIDTH / 2,
+            y: ARENA_HEIGHT / 2,
         },
-        Fill::color(color),
-        Stroke::color(color),
-        DiplopodSegment,
-        position,
-        OnGameScreen,
-    ));
+        color: DIPLOPOD_COLOR,
+    });
 }
 
 pub fn init_wall(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
@@ -516,24 +511,16 @@ pub fn growth(
     mut growth_reader: EventReader<Growth>,
     immunity_time: Res<ImmunityTime>,
 ) {
-    let shape = shapes::Rectangle {
-        extents: Vec2::splat(TILE_SIZE),
-        origin: shapes::RectangleOrigin::Center,
-        radii: None,
-    };
-
     if let Some(growth) = growth_reader.read().next() {
         for _ in 0..growth.0 {
-            spawn_segment(
-                &mut commands,
-                if immunity_time.0 > 0 {
+            commands.queue(SpawnDiplopodSegment {
+                position: last_tail_position.0.unwrap(),
+                color: if immunity_time.0 > 0 {
                     ANTIDOTE_COLOR
                 } else {
                     DIPLOPOD_COLOR
                 },
-                last_tail_position.0.unwrap(),
-                &shape,
-            );
+            });
         }
     }
 }
