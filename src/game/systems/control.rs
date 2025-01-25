@@ -15,11 +15,11 @@ use super::graphics::diplopod_position2translation;
 use super::graphics::position2translation;
 use super::graphics::TILE_SIZE;
 
-pub fn init_diplopod(mut commands: Commands, mut segments: ResMut<DiplopodSegments>) {
-    spawn_diplopod(&mut commands, &mut segments);
+pub fn init_diplopod(mut commands: Commands) {
+    spawn_diplopod(&mut commands);
 }
 
-fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegments>) {
+fn spawn_diplopod(commands: &mut Commands) {
     let shape = shapes::Rectangle {
         extents: Vec2::splat(TILE_SIZE),
         origin: shapes::RectangleOrigin::Center,
@@ -31,23 +31,21 @@ fn spawn_diplopod(commands: &mut Commands, segments: &mut ResMut<DiplopodSegment
         y: ARENA_HEIGHT / 2,
     };
 
-    segments.0 = vec![commands
-        .spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_translation(diplopod_position2translation(&position)),
-                ..default()
-            },
-            Fill::color(DIPLOPOD_COLOR),
-            Stroke::color(DIPLOPOD_COLOR),
-            DiplopodHead {
-                direction: Vec2::ZERO,
-            },
-            position,
-            DiplopodSegment,
-            OnGameScreen,
-        ))
-        .id()];
+    commands.spawn((
+        ShapeBundle {
+            path: GeometryBuilder::build_as(&shape),
+            transform: Transform::from_translation(diplopod_position2translation(&position)),
+            ..default()
+        },
+        Fill::color(DIPLOPOD_COLOR),
+        Stroke::color(DIPLOPOD_COLOR),
+        DiplopodHead {
+            direction: Vec2::ZERO,
+        },
+        position,
+        DiplopodSegment,
+        OnGameScreen,
+    ));
 }
 
 fn spawn_segment(
@@ -55,21 +53,19 @@ fn spawn_segment(
     color: Color,
     position: DiplopodPosition,
     shape: &Rectangle,
-) -> Entity {
-    commands
-        .spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(shape),
-                transform: Transform::from_translation(diplopod_position2translation(&position)),
-                ..default()
-            },
-            Fill::color(color),
-            Stroke::color(color),
-            DiplopodSegment,
-            position,
-            OnGameScreen,
-        ))
-        .id()
+) {
+    commands.spawn((
+        ShapeBundle {
+            path: GeometryBuilder::build_as(shape),
+            transform: Transform::from_translation(diplopod_position2translation(&position)),
+            ..default()
+        },
+        Fill::color(color),
+        Stroke::color(color),
+        DiplopodSegment,
+        position,
+        OnGameScreen,
+    ));
 }
 
 pub fn init_wall(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
@@ -517,7 +513,6 @@ pub fn eat(
 pub fn growth(
     mut commands: Commands,
     last_tail_position: Res<LastTailPosition>,
-    mut segments: ResMut<DiplopodSegments>,
     mut growth_reader: EventReader<Growth>,
     immunity_time: Res<ImmunityTime>,
 ) {
@@ -529,7 +524,7 @@ pub fn growth(
 
     if let Some(growth) = growth_reader.read().next() {
         for _ in 0..growth.0 {
-            segments.0.push(spawn_segment(
+            spawn_segment(
                 &mut commands,
                 if immunity_time.0 > 0 {
                     ANTIDOTE_COLOR
@@ -538,7 +533,7 @@ pub fn growth(
                 },
                 last_tail_position.0.unwrap(),
                 &shape,
-            ));
+            );
         }
     }
 }
@@ -603,7 +598,7 @@ pub fn control_antidote_sound(
 pub fn game_over(
     mut commands: Commands,
     mut reader: EventReader<GameOver>,
-    segments: Query<Entity, With<DiplopodSegment>>,
+    mut segments: ResMut<DiplopodSegments>,
     mut free_positions: ResMut<FreePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     mut immunity_time: ResMut<ImmunityTime>,
@@ -618,10 +613,7 @@ pub fn game_over(
             PlaybackSettings::DESPAWN,
         ));
 
-        lastscore.0 = 0;
-        for _ in segments.iter() {
-            lastscore.0 += 1;
-        }
+        lastscore.0 = segments.0.len() as u16;
 
         if lastscore.0 > highscore.0 {
             highscore.0 = lastscore.0;
@@ -631,6 +623,8 @@ pub fn game_over(
 
         last_special_spawn.0 = 0;
         immunity_time.0 = 0;
+
+        segments.0 = Vec::new();
 
         game_state.set(GameState::Highscore);
     }

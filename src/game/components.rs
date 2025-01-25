@@ -1,6 +1,11 @@
-use bevy::prelude::*;
+use bevy::{
+    ecs::{component::ComponentId, world::DeferredWorld},
+    prelude::*,
+};
 
 use crate::prelude::CONSUMABLE_SCALE_FACTOR;
+
+use super::DiplopodSegments;
 
 #[derive(Component)]
 pub struct DiplopodHead {
@@ -8,7 +13,12 @@ pub struct DiplopodHead {
 }
 
 #[derive(Component)]
+#[component(on_add=on_add_diplopod_segment)]
 pub struct DiplopodSegment;
+
+fn on_add_diplopod_segment(mut world: DeferredWorld, entity: Entity, _: ComponentId) {
+    world.resource_mut::<DiplopodSegments>().0.push(entity);
+}
 
 #[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct DiplopodPosition {
