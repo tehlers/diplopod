@@ -6,6 +6,7 @@ pub mod systems;
 use crate::despawn_screen;
 use crate::prelude::*;
 use crate::GameState;
+use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
@@ -41,32 +42,30 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
+                    toggle_pause
+                        .run_if(
+                            input_just_pressed(KeyCode::Space)
+                                .or(input_just_pressed(KeyCode::KeyP)),
+                        )
+                        .run_if(in_state(GameState::Game)),
                     (
                         player_input::keyboard,
                         player_input::gamepad,
-                        player_input::pause,
                         control::move_antidote.run_if(on_timer(Duration::from_millis(500))),
                     )
                         .in_set(Phase::Input)
-                        .run_if(in_state(GameState::Game))
-                        .run_if(not(resource_exists::<Paused>)),
-                    (player_input::unpause,)
-                        .in_set(Phase::Input)
-                        .run_if(in_state(GameState::Game))
-                        .run_if(resource_exists::<Paused>),
+                        .run_if(in_state(GameState::Game)),
                     (graphics::diplopod_position_translation,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
                     (graphics::rotate_superfood,)
                         .after(Phase::Movement)
-                        .run_if(in_state(GameState::Game))
-                        .run_if(not(resource_exists::<Paused>)),
+                        .run_if(in_state(GameState::Game)),
                     (
                         control::limit_immunity.run_if(on_timer(Duration::from_secs(1))),
                         graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
                     )
-                        .run_if(in_state(GameState::Game))
-                        .run_if(not(resource_exists::<Paused>)),
+                        .run_if(in_state(GameState::Game)),
                     control::game_over
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game))
@@ -88,8 +87,7 @@ impl Plugin for GamePlugin {
                         .chain(),
                     (graphics::change_color, control::control_antidote_sound),
                 )
-                    .run_if(in_state(GameState::Game))
-                    .run_if(not(resource_exists::<Paused>)),
+                    .run_if(in_state(GameState::Game)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .insert_resource(DiplopodSegments::default())
@@ -101,5 +99,19 @@ impl Plugin for GamePlugin {
             .add_event::<Growth>()
             .add_event::<SpawnConsumables>()
             .add_event::<ShowMessage>();
+    }
+}
+
+fn toggle_pause(mut time: ResMut<Time<Virtual>>, sounds: Query<&AudioSink>) {
+    if time.is_paused() {
+        for sound in sounds.iter() {
+            sound.play();
+        }
+        time.unpause();
+    } else {
+        for sound in sounds.iter() {
+            sound.pause();
+        }
+        time.pause();
     }
 }
