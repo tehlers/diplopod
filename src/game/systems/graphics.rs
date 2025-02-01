@@ -4,7 +4,6 @@ use bevy_prototype_lyon::prelude::*;
 
 use crate::game::components::*;
 use crate::game::events::ShowMessage;
-use crate::game::resources::ImmunityTime;
 use crate::game::OnGameScreen;
 use crate::prelude::*;
 
@@ -49,14 +48,16 @@ pub fn rotate_superfood(mut query: Query<&mut Transform, With<Superfood>>, time:
 
 pub fn change_color(
     mut query: Query<(&mut Fill, &mut Stroke), With<DiplopodSegment>>,
-    immunity_time: Res<ImmunityTime>,
+    heads: Query<&DiplopodHead>,
 ) {
-    if immunity_time.0 > 2 {
+    let head = heads.single();
+
+    if head.immunity.remaining_secs() > 2.0 {
         for (mut fill, mut stroke) in query.iter_mut() {
             fill.color = DIPLOPOD_IMMUNE_COLOR;
             stroke.color = DIPLOPOD_IMMUNE_COLOR;
         }
-    } else if immunity_time.0 > 0 {
+    } else if !head.immunity.finished() {
         for (mut fill, mut stroke) in query.iter_mut() {
             if fill.color == DIPLOPOD_IMMUNE_COLOR {
                 fill.color = DIPLOPOD_COLOR;

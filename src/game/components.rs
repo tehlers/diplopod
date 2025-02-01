@@ -10,6 +10,16 @@ use super::DiplopodSegments;
 #[derive(Component)]
 pub struct DiplopodHead {
     pub direction: Vec2,
+    pub immunity: Timer,
+}
+
+impl Default for DiplopodHead {
+    fn default() -> Self {
+        Self {
+            direction: Vec2::ZERO,
+            immunity: Timer::from_seconds(0.0, TimerMode::Once),
+        }
+    }
 }
 
 #[derive(Component)]

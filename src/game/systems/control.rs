@@ -39,7 +39,17 @@ impl Command for SpawnDiplopodSegment {
                 .unwrap()
         };
 
-        let color = if world.resource::<ImmunityTime>().0 > 0 {
+        let immune = if is_head {
+            false
+        } else {
+            !world
+                .get::<DiplopodHead>(*segments.first().unwrap())
+                .unwrap()
+                .immunity
+                .finished()
+        };
+
+        let color = if immune {
             ANTIDOTE_COLOR
         } else {
             DIPLOPOD_COLOR
@@ -59,9 +69,7 @@ impl Command for SpawnDiplopodSegment {
         ));
 
         if is_head {
-            segment.insert(DiplopodHead {
-                direction: Vec2::ZERO,
-            });
+            segment.insert(DiplopodHead::default());
         }
     }
 }
@@ -417,13 +425,12 @@ pub fn eat(
     superfood_positions: Query<(Entity, &Position), With<Superfood>>,
     poison_positions: Query<(Entity, &Position), With<Poison>>,
     antidote_positions: Query<(Entity, &Position), With<Antidote>>,
-    head_positions: Query<&DiplopodPosition, With<DiplopodHead>>,
+    mut heads: Query<(&mut DiplopodHead, &DiplopodPosition)>,
     wall_positions: Query<(Entity, &Position), With<Wall>>,
     mut free_positions: ResMut<FreePositions>,
-    mut immunity_time: ResMut<ImmunityTime>,
     sounds: Res<Sounds>,
 ) {
-    for head_pos in head_positions.iter() {
+    for (mut head, head_pos) in heads.iter_mut() {
         for (ent, food_pos) in food_positions.iter() {
             if *food_pos == head_pos.to_position() {
                 commands.entity(ent).despawn();
@@ -472,7 +479,9 @@ pub fn eat(
             if *antidote_pos == head_pos.to_position() {
                 commands.entity(ent).despawn();
                 free_positions.positions.push(*antidote_pos);
-                immunity_time.0 += 10;
+
+                let remaining = head.immunity.remaining_secs();
+                head.immunity = Timer::from_seconds(10.0 + remaining, TimerMode::Once);
 
                 commands.spawn((
                     AudioPlayer(sounds.antidote.clone()),
@@ -485,7 +494,7 @@ pub fn eat(
 
         for (ent, poison_pos) in poison_positions.iter() {
             if *poison_pos == head_pos.to_position() {
-                if immunity_time.0 > 0 {
+                if !head.immunity.finished() {
                     commands.entity(ent).despawn();
                     free_positions.positions.push(*poison_pos);
                     free_positions.shuffle();
@@ -550,20 +559,24 @@ pub fn move_antidote(
     }
 }
 
-pub fn limit_immunity(mut immunity_time: ResMut<ImmunityTime>) {
-    if immunity_time.0 > 0 {
-        immunity_time.0 -= 1;
+pub fn limit_immunity(mut heads: Query<&mut DiplopodHead>, time: Res<Time>) {
+    let mut head = heads.single_mut();
+
+    if !head.immunity.finished() {
+        head.immunity.tick(time.delta());
     }
 }
 
 pub fn control_antidote_sound(
     mut commands: Commands,
-    immunity_time: Res<ImmunityTime>,
+    heads: Query<&DiplopodHead>,
     antidote_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
 ) {
-    if immunity_time.0 > 2 {
+    let head = heads.single();
+
+    if head.immunity.remaining_secs() > 2.0 {
         // keep the sound
-    } else if immunity_time.0 > 0 {
+    } else if !head.immunity.finished() {
         if let Ok(sound) = antidote_sound.get_single() {
             sound.0.toggle();
         }
@@ -580,7 +593,6 @@ pub fn game_over(
     mut segments: ResMut<DiplopodSegments>,
     mut free_positions: ResMut<FreePositions>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
-    mut immunity_time: ResMut<ImmunityTime>,
     sounds: Res<Sounds>,
     mut game_state: ResMut<NextState<GameState>>,
     mut lastscore: ResMut<Lastscore>,
@@ -601,7 +613,6 @@ pub fn game_over(
         free_positions.reset();
 
         last_special_spawn.0 = 0;
-        immunity_time.0 = 0;
 
         segments.0 = Vec::new();
 

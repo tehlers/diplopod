@@ -60,9 +60,6 @@ impl FreePositions {
 #[derive(Default, Resource)]
 pub struct LastSpecialSpawn(pub u32);
 
-#[derive(Default, Resource)]
-pub struct ImmunityTime(pub u8);
-
 #[derive(Resource)]
 pub struct Sounds {
     pub eat_food: Handle<AudioSource>,
