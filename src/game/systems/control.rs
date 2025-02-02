@@ -100,6 +100,112 @@ impl Command for SpawnWall {
     }
 }
 
+struct SpawnFood {
+    position: Position,
+}
+
+impl Command for SpawnFood {
+    fn apply(self, world: &mut World) {
+        let shape = shapes::Circle {
+            radius: TILE_SIZE * RADIUS_FACTOR,
+            center: Vec2::new(0., 0.),
+        };
+
+        world.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shape),
+                transform: Transform::from_translation(position2translation(&self.position)),
+                ..default()
+            },
+            Fill::color(FOOD_COLOR),
+            Stroke::color(FOOD_COLOR),
+            Food,
+            OnGameScreen,
+            self.position,
+        ));
+    }
+}
+
+struct SpawnPoison {
+    position: Position,
+}
+
+impl Command for SpawnPoison {
+    fn apply(self, world: &mut World) {
+        let shape = shapes::Circle {
+            radius: TILE_SIZE * RADIUS_FACTOR,
+            center: Vec2::new(0., 0.),
+        };
+
+        world.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shape),
+                transform: Transform::from_translation(position2translation(&self.position)),
+                ..default()
+            },
+            Fill::color(POISON_FILL_COLOR),
+            Stroke::new(POISON_OUTLINE_COLOR, 7.),
+            Poison,
+            OnGameScreen,
+            self.position,
+        ));
+    }
+}
+
+struct SpawnSuperfood {
+    position: Position,
+}
+
+impl Command for SpawnSuperfood {
+    fn apply(self, world: &mut World) {
+        let mut path_builder = PathBuilder::new();
+        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
+        path_builder.line_to(TILE_SIZE * Vec2::X);
+        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
+        path_builder.line_to(TILE_SIZE * Vec2::Y);
+        let cross = path_builder.build();
+
+        world.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&cross),
+                transform: Transform::from_translation(position2translation(&self.position)),
+                ..default()
+            },
+            Stroke::new(SUPERFOOD_COLOR, 7.5),
+            Superfood,
+            OnGameScreen,
+            self.position,
+        ));
+    }
+}
+
+struct SpawnAntidote {
+    position: Position,
+}
+
+impl Command for SpawnAntidote {
+    fn apply(self, world: &mut World) {
+        let mut path_builder = PathBuilder::new();
+        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
+        path_builder.line_to(TILE_SIZE * Vec2::X);
+        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
+        path_builder.line_to(TILE_SIZE * Vec2::Y);
+        let cross = path_builder.build();
+
+        world.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&cross),
+                transform: Transform::from_translation(position2translation(&self.position)),
+                ..default()
+            },
+            Stroke::new(ANTIDOTE_COLOR, TILE_SIZE * 0.9),
+            Antidote,
+            OnGameScreen,
+            self.position,
+        ));
+    }
+}
+
 pub fn init_diplopod(mut commands: Commands) {
     commands.queue(SpawnDiplopodSegment);
 }
@@ -160,29 +266,10 @@ fn spawn_random_food(
     position_candidates: &mut FreePositions,
     free_positions: &mut ResMut<FreePositions>,
 ) {
-    let shape = shapes::Circle {
-        radius: TILE_SIZE * RADIUS_FACTOR,
-        center: Vec2::new(0., 0.),
-    };
-
     for _ in 0..amount {
-        match position_candidates.positions.pop() {
-            None => break,
-            Some(pos) => {
-                commands.spawn((
-                    ShapeBundle {
-                        path: GeometryBuilder::build_as(&shape),
-                        transform: Transform::from_translation(position2translation(&pos)),
-                        ..default()
-                    },
-                    Fill::color(FOOD_COLOR),
-                    Stroke::color(FOOD_COLOR),
-                    Food,
-                    OnGameScreen,
-                    pos,
-                ));
-                free_positions.remove(&pos);
-            }
+        if let Some(position) = position_candidates.positions.pop() {
+            commands.queue(SpawnFood { position });
+            free_positions.remove(&position);
         }
     }
 }
@@ -215,86 +302,11 @@ fn spawn_random_poison(
     position_candidates: &mut FreePositions,
     free_positions: &mut ResMut<FreePositions>,
 ) {
-    let shape = shapes::Circle {
-        radius: TILE_SIZE * RADIUS_FACTOR,
-        center: Vec2::new(0., 0.),
-    };
-
     for _ in 0..amount {
-        match position_candidates.positions.pop() {
-            None => break,
-            Some(pos) => {
-                commands.spawn((
-                    ShapeBundle {
-                        path: GeometryBuilder::build_as(&shape),
-                        transform: Transform::from_translation(position2translation(&pos)),
-                        ..default()
-                    },
-                    Fill::color(POISON_FILL_COLOR),
-                    Stroke::new(POISON_OUTLINE_COLOR, 7.),
-                    Poison,
-                    OnGameScreen,
-                    pos,
-                ));
-                free_positions.remove(&pos);
-            }
+        if let Some(position) = position_candidates.positions.pop() {
+            commands.queue(SpawnPoison { position });
+            free_positions.remove(&position);
         }
-    }
-}
-
-fn spawn_random_superfood(
-    commands: &mut Commands,
-    position_candidates: &mut FreePositions,
-    free_positions: &mut ResMut<FreePositions>,
-) {
-    if let Some(pos) = position_candidates.positions.pop() {
-        let mut path_builder = PathBuilder::new();
-        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
-        path_builder.line_to(TILE_SIZE * Vec2::X);
-        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
-        path_builder.line_to(TILE_SIZE * Vec2::Y);
-        let cross = path_builder.build();
-
-        commands.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&cross),
-                transform: Transform::from_translation(position2translation(&pos)),
-                ..default()
-            },
-            Stroke::new(SUPERFOOD_COLOR, 7.5),
-            Superfood,
-            OnGameScreen,
-            pos,
-        ));
-        free_positions.remove(&pos);
-    }
-}
-
-fn spawn_random_antidote(
-    commands: &mut Commands,
-    position_candidates: &mut FreePositions,
-    free_positions: &mut ResMut<FreePositions>,
-) {
-    if let Some(pos) = position_candidates.positions.pop() {
-        let mut path_builder = PathBuilder::new();
-        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
-        path_builder.line_to(TILE_SIZE * Vec2::X);
-        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
-        path_builder.line_to(TILE_SIZE * Vec2::Y);
-        let cross = path_builder.build();
-
-        commands.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&cross),
-                transform: Transform::from_translation(position2translation(&pos)),
-                ..default()
-            },
-            Stroke::new(ANTIDOTE_COLOR, TILE_SIZE * 0.9),
-            Antidote,
-            OnGameScreen,
-            pos,
-        ));
-        free_positions.remove(&pos);
     }
 }
 
@@ -357,10 +369,16 @@ pub fn spawn_consumables(
                 }
                 free_positions.shuffle();
 
-                spawn_random_antidote(&mut commands, &mut position_candidates, &mut free_positions);
+                if let Some(position) = position_candidates.positions.pop() {
+                    commands.queue(SpawnAntidote { position });
+                    free_positions.remove(&position);
+                }
             }
 
-            spawn_random_superfood(&mut commands, &mut position_candidates, &mut free_positions);
+            if let Some(position) = position_candidates.positions.pop() {
+                commands.queue(SpawnSuperfood { position });
+                free_positions.remove(&position);
+            }
 
             commands.spawn((
                 AudioPlayer(sounds.special_spawn.clone()),
