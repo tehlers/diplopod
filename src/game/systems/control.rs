@@ -1,4 +1,3 @@
-use bevy_prototype_lyon::shapes::Rectangle;
 use rand::{thread_rng, Rng};
 
 use bevy::prelude::*;
@@ -74,74 +73,63 @@ impl Command for SpawnDiplopodSegment {
     }
 }
 
+struct SpawnWall {
+    position: Position,
+}
+
+impl Command for SpawnWall {
+    fn apply(self, world: &mut World) {
+        let shape = shapes::Rectangle {
+            extents: Vec2::splat(TILE_SIZE * 2.0),
+            origin: shapes::RectangleOrigin::Center,
+            radii: None,
+        };
+
+        world.spawn((
+            ShapeBundle {
+                path: GeometryBuilder::build_as(&shape),
+                transform: Transform::from_translation(position2translation(&self.position)),
+                ..default()
+            },
+            Fill::color(WALL_COLOR),
+            Stroke::color(WALL_COLOR),
+            Wall,
+            OnGameScreen,
+            self.position,
+        ));
+    }
+}
+
 pub fn init_diplopod(mut commands: Commands) {
     commands.queue(SpawnDiplopodSegment);
 }
 
 pub fn init_wall(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
-    let shape = shapes::Rectangle {
-        extents: Vec2::splat(TILE_SIZE * 2.0),
-        origin: shapes::RectangleOrigin::Center,
-        radii: None,
-    };
-
     for x in 0..CONSUMABLE_WIDTH + 1 {
-        spawn_wall(
-            &mut commands,
-            &mut free_positions,
-            Position { x, y: 0 },
-            &shape,
-        );
-        spawn_wall(
-            &mut commands,
-            &mut free_positions,
-            Position {
-                x,
-                y: CONSUMABLE_HEIGHT,
-            },
-            &shape,
-        );
+        let position = Position { x, y: 0 };
+        commands.queue(SpawnWall { position });
+        free_positions.remove(&position);
+
+        let position = Position {
+            x,
+            y: CONSUMABLE_HEIGHT,
+        };
+        commands.queue(SpawnWall { position });
+        free_positions.remove(&position);
     }
 
     for y in 1..CONSUMABLE_HEIGHT {
-        spawn_wall(
-            &mut commands,
-            &mut free_positions,
-            Position { x: 0, y },
-            &shape,
-        );
-        spawn_wall(
-            &mut commands,
-            &mut free_positions,
-            Position {
-                x: CONSUMABLE_WIDTH,
-                y,
-            },
-            &shape,
-        );
+        let position = Position { x: 0, y };
+        commands.queue(SpawnWall { position });
+        free_positions.remove(&position);
+
+        let position = Position {
+            x: CONSUMABLE_WIDTH,
+            y,
+        };
+        commands.queue(SpawnWall { position });
+        free_positions.remove(&position);
     }
-}
-
-fn spawn_wall(
-    commands: &mut Commands,
-    free_positions: &mut ResMut<FreePositions>,
-    pos: Position,
-    shape: &Rectangle,
-) {
-    commands.spawn((
-        ShapeBundle {
-            path: GeometryBuilder::build_as(shape),
-            transform: Transform::from_translation(position2translation(&pos)),
-            ..default()
-        },
-        Fill::color(WALL_COLOR),
-        Stroke::color(WALL_COLOR),
-        Wall,
-        OnGameScreen,
-        pos,
-    ));
-
-    free_positions.remove(&pos);
 }
 
 pub fn init_food(mut commands: Commands, mut free_positions: ResMut<FreePositions>) {
