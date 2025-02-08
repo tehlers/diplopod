@@ -440,15 +440,17 @@ pub fn eat(
             if *antidote_pos == head_pos.to_position() {
                 commands.entity(ent).despawn();
 
+                if head.immunity.finished() {
+                    commands.spawn((
+                        AudioPlayer(sounds.antidote.clone()),
+                        PlaybackSettings::LOOP,
+                        AntidoteSound,
+                        OnGameScreen,
+                    ));
+                }
+
                 let remaining = head.immunity.remaining_secs();
                 head.immunity = Timer::from_seconds(10.0 + remaining, TimerMode::Once);
-
-                commands.spawn((
-                    AudioPlayer(sounds.antidote.clone()),
-                    PlaybackSettings::LOOP,
-                    AntidoteSound,
-                    OnGameScreen,
-                ));
             }
         }
 
