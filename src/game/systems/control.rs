@@ -250,28 +250,13 @@ pub fn setup_game(mut commands: Commands) {
 
     position_candidates.shuffle(&mut thread_rng());
 
-    spawn_random_food(AMOUNT_OF_FOOD, &mut commands, &mut position_candidates);
-    spawn_random_poison(AMOUNT_OF_POISON, &mut commands, &mut position_candidates);
-}
-
-fn spawn_random_food(
-    amount: u32,
-    commands: &mut Commands,
-    position_candidates: &mut Vec<Position>,
-) {
-    for _ in 0..amount {
+    for _ in 0..AMOUNT_OF_FOOD {
         if let Some(position) = position_candidates.pop() {
             commands.queue(SpawnFood { position });
         }
     }
-}
 
-fn spawn_random_poison(
-    amount: u32,
-    commands: &mut Commands,
-    position_candidates: &mut Vec<Position>,
-) {
-    for _ in 0..amount {
+    for _ in 0..AMOUNT_OF_POISON {
         if let Some(position) = position_candidates.pop() {
             commands.queue(SpawnPoison { position });
         }
@@ -314,8 +299,13 @@ pub fn spawn_consumables(
         position_candidates.shuffle(&mut thread_rng());
 
         if spawn_event.regular {
-            spawn_random_food(1, &mut commands, &mut position_candidates);
-            spawn_random_poison(1, &mut commands, &mut position_candidates);
+            if let Some(position) = position_candidates.pop() {
+                commands.queue(SpawnFood { position });
+            }
+
+            if let Some(position) = position_candidates.pop() {
+                commands.queue(SpawnPoison { position });
+            }
         }
 
         let new_size = segments.0.len() as u32 + spawn_event.new_segments as u32;
