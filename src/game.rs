@@ -4,7 +4,6 @@ pub mod resources;
 pub mod systems;
 
 use crate::despawn_screen;
-use crate::prelude::*;
 use crate::GameState;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
@@ -29,16 +28,7 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(ShapePlugin)
-            .add_systems(
-                OnEnter(GameState::Game),
-                (
-                    control::init_diplopod,
-                    control::init_wall,
-                    control::init_food,
-                    control::init_poison,
-                )
-                    .chain(),
-            )
+            .add_systems(OnEnter(GameState::Game), control::setup_game)
             .add_systems(
                 Update,
                 (
@@ -92,7 +82,6 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .insert_resource(DiplopodSegments::default())
             .insert_resource(LastSpecialSpawn::default())
-            .insert_resource(FreePositions::new(CONSUMABLE_WIDTH, CONSUMABLE_HEIGHT))
             .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
             .add_event::<Growth>()
