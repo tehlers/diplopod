@@ -508,7 +508,12 @@ pub fn control_antidote_sound(
     let head = heads.single();
 
     if head.immunity.remaining_secs() > 2.0 {
-        // keep the sound
+        // keep the sound and restart it, if it was already toggling
+        if let Ok(sound) = antidote_sound.get_single() {
+            if sound.0.is_paused() {
+                sound.0.play();
+            }
+        }
     } else if !head.immunity.finished() {
         if let Ok(sound) = antidote_sound.get_single() {
             sound.0.toggle();
