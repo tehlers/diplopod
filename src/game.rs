@@ -72,7 +72,6 @@ impl Plugin for GamePlugin {
                         control::eat,
                         control::spawn_consumables.run_if(on_event::<SpawnConsumables>),
                         graphics::show_message,
-                        control::growth.run_if(on_event::<Growth>),
                     )
                         .chain(),
                     (graphics::change_color, control::control_antidote_sound),
@@ -84,7 +83,6 @@ impl Plugin for GamePlugin {
             .insert_resource(LastSpecialSpawn::default())
             .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
-            .add_event::<Growth>()
             .add_event::<SpawnConsumables>()
             .add_event::<ShowMessage>();
     }

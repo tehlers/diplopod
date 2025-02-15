@@ -94,7 +94,7 @@ impl Command for SpawnWall {
             },
             Fill::color(WALL_COLOR),
             Stroke::color(WALL_COLOR),
-            Wall,
+            Obstacle::Wall,
             OnGameScreen,
             self.position,
         ));
@@ -120,7 +120,7 @@ impl Command for SpawnFood {
             },
             Fill::color(FOOD_COLOR),
             Stroke::color(FOOD_COLOR),
-            Food,
+            Obstacle::Food,
             OnGameScreen,
             self.position,
         ));
@@ -146,7 +146,7 @@ impl Command for SpawnPoison {
             },
             Fill::color(POISON_FILL_COLOR),
             Stroke::new(POISON_OUTLINE_COLOR, 7.),
-            Poison,
+            Obstacle::Poison,
             OnGameScreen,
             self.position,
         ));
@@ -173,6 +173,7 @@ impl Command for SpawnSuperfood {
                 ..default()
             },
             Stroke::new(SUPERFOOD_COLOR, 7.5),
+            Obstacle::Superfood,
             Superfood,
             OnGameScreen,
             self.position,
@@ -200,6 +201,7 @@ impl Command for SpawnAntidote {
                 ..default()
             },
             Stroke::new(ANTIDOTE_COLOR, TILE_SIZE * 0.9),
+            Obstacle::Antidote,
             Antidote,
             OnGameScreen,
             self.position,
@@ -308,9 +310,9 @@ pub fn spawn_consumables(
             }
         }
 
-        let new_size = segments.0.len() as u32 + spawn_event.new_segments as u32;
-        if new_size - last_special_spawn.0 > SPECIAL_SPAWN_INTERVAL {
-            last_special_spawn.0 = (new_size / SPECIAL_SPAWN_INTERVAL) * SPECIAL_SPAWN_INTERVAL;
+        if segments.0.len() as u32 - last_special_spawn.0 > SPECIAL_SPAWN_INTERVAL {
+            last_special_spawn.0 =
+                (segments.0.len() as u32 / SPECIAL_SPAWN_INTERVAL) * SPECIAL_SPAWN_INTERVAL;
 
             for ent in superfood.iter() {
                 commands.entity(ent).despawn();
@@ -373,105 +375,86 @@ pub fn movement(
 #[allow(clippy::too_many_arguments)]
 pub fn eat(
     mut commands: Commands,
-    mut growth_writer: EventWriter<Growth>,
+    mut heads: Query<(&mut DiplopodHead, &DiplopodPosition)>,
+    obstacles: Query<(Entity, &Position, &Obstacle)>,
     mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
     mut show_message_writer: EventWriter<ShowMessage>,
-    food_positions: Query<(Entity, &Position), With<Food>>,
-    superfood_positions: Query<(Entity, &Position), With<Superfood>>,
-    poison_positions: Query<(Entity, &Position), With<Poison>>,
-    antidote_positions: Query<(Entity, &Position), With<Antidote>>,
-    mut heads: Query<(&mut DiplopodHead, &DiplopodPosition)>,
-    wall_positions: Query<(Entity, &Position), With<Wall>>,
     sounds: Res<Sounds>,
 ) {
-    for (mut head, head_pos) in heads.iter_mut() {
-        for (ent, food_pos) in food_positions.iter() {
-            if *food_pos == head_pos.to_position() {
-                commands.entity(ent).despawn();
-                growth_writer.send(Growth(1));
+    for (mut head, head_position) in heads.iter_mut() {
+        for (entity, position, obstacle) in obstacles.iter() {
+            if *position == head_position.to_position() {
+                match obstacle {
+                    Obstacle::Food => {
+                        commands.entity(entity).despawn();
+                        commands.queue(SpawnDiplopodSegment);
 
-                spawn_consumables_writer.send(SpawnConsumables {
-                    regular: true,
-                    new_segments: 1,
-                });
+                        spawn_consumables_writer.send(SpawnConsumables { regular: true });
 
-                commands.spawn((
-                    AudioPlayer(sounds.eat_food.clone()),
-                    PlaybackSettings::DESPAWN,
-                ));
+                        commands.spawn((
+                            AudioPlayer(sounds.eat_food.clone()),
+                            PlaybackSettings::DESPAWN,
+                        ));
+                    }
+
+                    Obstacle::Superfood => {
+                        commands.entity(entity).despawn();
+                        let growth = thread_rng().gen_range(2..10);
+                        for _ in 0..growth {
+                            commands.queue(SpawnDiplopodSegment);
+                        }
+
+                        show_message_writer.send(ShowMessage {
+                            text: growth.to_string(),
+                            position: *head_position,
+                        });
+
+                        spawn_consumables_writer.send(SpawnConsumables { regular: false });
+
+                        commands.spawn((
+                            AudioPlayer(sounds.super_food.clone()),
+                            PlaybackSettings::DESPAWN,
+                        ));
+                    }
+
+                    Obstacle::Poison => {
+                        if !head.immunity.finished() {
+                            commands.entity(entity).despawn();
+                            commands.queue(SpawnDiplopodSegment);
+
+                            spawn_consumables_writer.send(SpawnConsumables { regular: false });
+
+                            commands.spawn((
+                                AudioPlayer(sounds.eat_poison.clone()),
+                                PlaybackSettings::DESPAWN,
+                            ));
+                        } else {
+                            game_over_writer.send(GameOver);
+                        }
+                    }
+
+                    Obstacle::Antidote => {
+                        commands.entity(entity).despawn();
+
+                        if head.immunity.finished() {
+                            commands.spawn((
+                                AudioPlayer(sounds.antidote.clone()),
+                                PlaybackSettings::LOOP,
+                                AntidoteSound,
+                                OnGameScreen,
+                            ));
+                        }
+
+                        let remaining = head.immunity.remaining_secs();
+                        head.immunity = Timer::from_seconds(10.0 + remaining, TimerMode::Once);
+                    }
+
+                    Obstacle::Wall => {
+                        game_over_writer.send(GameOver);
+                    }
+                };
             }
-        }
-
-        for (ent, superfood_pos) in superfood_positions.iter() {
-            if *superfood_pos == head_pos.to_position() {
-                commands.entity(ent).despawn();
-                let new_segments = thread_rng().gen_range(2..10);
-                growth_writer.send(Growth(new_segments));
-
-                show_message_writer.send(ShowMessage {
-                    text: new_segments.to_string(),
-                    position: *head_pos,
-                });
-
-                spawn_consumables_writer.send(SpawnConsumables {
-                    regular: false,
-                    new_segments,
-                });
-
-                commands.spawn((
-                    AudioPlayer(sounds.super_food.clone()),
-                    PlaybackSettings::DESPAWN,
-                ));
-            }
-        }
-
-        for (ent, antidote_pos) in antidote_positions.iter() {
-            if *antidote_pos == head_pos.to_position() {
-                commands.entity(ent).despawn();
-
-                if head.immunity.finished() {
-                    commands.spawn((
-                        AudioPlayer(sounds.antidote.clone()),
-                        PlaybackSettings::LOOP,
-                        AntidoteSound,
-                        OnGameScreen,
-                    ));
-                }
-
-                let remaining = head.immunity.remaining_secs();
-                head.immunity = Timer::from_seconds(10.0 + remaining, TimerMode::Once);
-            }
-        }
-
-        for (ent, poison_pos) in poison_positions.iter() {
-            if *poison_pos == head_pos.to_position() {
-                if !head.immunity.finished() {
-                    commands.entity(ent).despawn();
-                    growth_writer.send(Growth(1));
-
-                    commands.spawn((
-                        AudioPlayer(sounds.eat_poison.clone()),
-                        PlaybackSettings::DESPAWN,
-                    ));
-                } else {
-                    game_over_writer.send(GameOver);
-                }
-            }
-        }
-
-        for (_ent, wall_pos) in wall_positions.iter() {
-            if *wall_pos == head_pos.to_position() {
-                game_over_writer.send(GameOver);
-            }
-        }
-    }
-}
-
-pub fn growth(mut commands: Commands, mut growth_reader: EventReader<Growth>) {
-    if let Some(growth) = growth_reader.read().next() {
-        for _ in 0..growth.0 {
-            commands.queue(SpawnDiplopodSegment);
         }
     }
 }

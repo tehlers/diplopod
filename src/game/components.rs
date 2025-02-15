@@ -52,13 +52,13 @@ pub struct Position {
 }
 
 #[derive(Component)]
-pub struct Wall;
-
-#[derive(Component)]
-pub struct Food;
-
-#[derive(Component)]
-pub struct Poison;
+pub enum Obstacle {
+    Food,
+    Poison,
+    Superfood,
+    Antidote,
+    Wall,
+}
 
 #[derive(Component)]
 pub struct Superfood;

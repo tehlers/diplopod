@@ -5,12 +5,8 @@ use bevy::ecs::event::Event;
 pub struct GameOver;
 
 #[derive(Event)]
-pub struct Growth(pub u8);
-
-#[derive(Event)]
 pub struct SpawnConsumables {
     pub regular: bool,
-    pub new_segments: u8,
 }
 
 #[derive(Event)]
