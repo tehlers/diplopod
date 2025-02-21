@@ -1,7 +1,7 @@
 [package]
 name = "diplopod"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/tehlers/diplopod"
@@ -85,5 +85,5 @@ features = [
 anyhow = "1"
 bevy_embedded_assets = "0.12"
 bevy_prototype_lyon = "0.13"
-directories = "5"
-rand = "0.8.4"
+directories = "6"
+rand = "0.9"

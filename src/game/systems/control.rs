@@ -1,19 +1,19 @@
 use rand::seq::SliceRandom;
-use rand::{thread_rng, Rng};
+use rand::{Rng, rng};
 
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
+use crate::GameState;
+use crate::game::OnGameScreen;
 use crate::game::components::*;
 use crate::game::events::*;
 use crate::game::resources::*;
-use crate::game::OnGameScreen;
 use crate::prelude::*;
-use crate::GameState;
 
+use super::graphics::TILE_SIZE;
 use super::graphics::diplopod_position2translation;
 use super::graphics::position2translation;
-use super::graphics::TILE_SIZE;
 
 struct SpawnDiplopodSegment;
 
@@ -250,7 +250,7 @@ pub fn setup_game(mut commands: Commands) {
     .to_position();
     position_candidates.retain(|&p| p != segment_position);
 
-    position_candidates.shuffle(&mut thread_rng());
+    position_candidates.shuffle(&mut rng());
 
     for _ in 0..AMOUNT_OF_FOOD {
         if let Some(position) = position_candidates.pop() {
@@ -298,7 +298,7 @@ pub fn spawn_consumables(
             }
         }
 
-        position_candidates.shuffle(&mut thread_rng());
+        position_candidates.shuffle(&mut rng());
 
         if spawn_event.regular {
             if let Some(position) = position_candidates.pop() {
@@ -400,7 +400,7 @@ pub fn eat(
 
                     Obstacle::Superfood => {
                         commands.entity(entity).despawn();
-                        let growth = thread_rng().gen_range(2..10);
+                        let growth = rng().random_range(2..10);
                         for _ in 0..growth {
                             commands.queue(SpawnDiplopodSegment);
                         }
@@ -465,7 +465,7 @@ pub fn move_antidote(
 ) {
     for (mut pos, mut transform) in antidotes.iter_mut() {
         let mut new_pos = *pos;
-        match thread_rng().gen_range(0..4) {
+        match rng().random_range(0..4) {
             0 => new_pos.x -= 1,
             1 => new_pos.x += 1,
             2 => new_pos.y -= 1,

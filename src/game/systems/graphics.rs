@@ -2,9 +2,9 @@ use bevy::prelude::*;
 
 use bevy_prototype_lyon::prelude::*;
 
+use crate::game::OnGameScreen;
 use crate::game::components::*;
 use crate::game::events::ShowMessage;
-use crate::game::OnGameScreen;
 use crate::prelude::*;
 
 pub const MAX_X: f32 = 1920.0;

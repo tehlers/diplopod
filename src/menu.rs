@@ -2,7 +2,7 @@ use bevy::{app::AppExit, color::palettes::css::ANTIQUE_WHITE, prelude::*};
 
 use crate::prelude::TITLE;
 
-use super::{despawn_screen, GameState};
+use super::{GameState, despawn_screen};
 
 pub struct MenuPlugin;
 

@@ -1,9 +1,9 @@
-use anyhow::anyhow;
 use anyhow::Result;
+use anyhow::anyhow;
 use bevy::color::palettes::css::ANTIQUE_WHITE;
 use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
-use bevy::{input::keyboard::KeyboardInput, input::ButtonState, prelude::*};
+use bevy::{input::ButtonState, input::keyboard::KeyboardInput, prelude::*};
 use directories::ProjectDirs;
 use std::fs::File;
 use std::io::Write;
@@ -11,7 +11,7 @@ use std::io::Write;
 use crate::game::resources::{self, Highscore, Lastscore};
 use crate::prelude::TITLE;
 
-use super::{despawn_screen, GameState};
+use super::{GameState, despawn_screen};
 
 /// Adds a screen that shows the highscore of the current session and
 /// the score of the last game.

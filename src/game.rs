@@ -3,8 +3,8 @@ pub mod events;
 pub mod resources;
 pub mod systems;
 
-use crate::despawn_screen;
 use crate::GameState;
+use crate::despawn_screen;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
