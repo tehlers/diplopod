@@ -39,6 +39,16 @@ pub struct DiplopodPosition {
     pub y: i32,
 }
 
+impl From<DiplopodPosition> for Transform {
+    fn from(position: DiplopodPosition) -> Self {
+        Transform::from_xyz(
+            position.x as f32 * TILE_SIZE + UPPER_LEFT.x - MAX_X / 2.,
+            position.y as f32 * TILE_SIZE + UPPER_LEFT.y - MAX_Y / 2.,
+            0.0,
+        )
+    }
+}
+
 impl DiplopodPosition {
     pub fn to_position(self) -> Position {
         Position {

@@ -17,16 +17,8 @@ pub const UPPER_LEFT: Vec2 = Vec2::new(
 
 pub fn diplopod_position_translation(mut segments: Query<(&DiplopodPosition, &mut Transform)>) {
     for (pos, mut transform) in segments.iter_mut() {
-        transform.translation = diplopod_position2translation(pos);
+        *transform = (*pos).into();
     }
-}
-
-pub fn diplopod_position2translation(position: &DiplopodPosition) -> Vec3 {
-    Vec3::new(
-        position.x as f32 * TILE_SIZE + UPPER_LEFT.x - MAX_X / 2.,
-        position.y as f32 * TILE_SIZE + UPPER_LEFT.y - MAX_Y / 2.,
-        0.0,
-    )
 }
 
 pub fn rotate_superfood(mut query: Query<&mut Transform, With<Superfood>>, time: Res<Time>) {

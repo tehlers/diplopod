@@ -12,7 +12,6 @@ use crate::game::resources::*;
 use crate::prelude::*;
 
 use super::graphics::TILE_SIZE;
-use super::graphics::diplopod_position2translation;
 
 struct SpawnDiplopodSegment;
 
@@ -57,7 +56,7 @@ impl Command for SpawnDiplopodSegment {
         let mut segment = world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_translation(diplopod_position2translation(&position)),
+                transform: position.into(),
                 ..default()
             },
             Fill::color(color),
