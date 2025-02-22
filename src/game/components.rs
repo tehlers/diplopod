@@ -5,7 +5,10 @@ use bevy::{
 
 use crate::prelude::CONSUMABLE_SCALE_FACTOR;
 
-use super::DiplopodSegments;
+use super::{
+    DiplopodSegments,
+    graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT},
+};
 
 #[derive(Component)]
 pub struct DiplopodHead {
@@ -49,6 +52,20 @@ impl DiplopodPosition {
 pub struct Position {
     pub x: i32,
     pub y: i32,
+}
+
+impl From<Position> for Transform {
+    fn from(position: Position) -> Self {
+        Transform::from_xyz(
+            position.x as f32 * TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32 + UPPER_LEFT.x
+                - MAX_X / 2.
+                + TILE_SIZE / 2.,
+            position.y as f32 * TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32 + UPPER_LEFT.y
+                - MAX_Y / 2.
+                + TILE_SIZE / 2.,
+            1.0,
+        )
+    }
 }
 
 #[derive(Component)]

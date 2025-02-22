@@ -13,7 +13,6 @@ use crate::prelude::*;
 
 use super::graphics::TILE_SIZE;
 use super::graphics::diplopod_position2translation;
-use super::graphics::position2translation;
 
 struct SpawnDiplopodSegment;
 
@@ -89,7 +88,7 @@ impl Command for SpawnWall {
         world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_translation(position2translation(&self.position)),
+                transform: self.position.into(),
                 ..default()
             },
             Fill::color(WALL_COLOR),
@@ -115,7 +114,7 @@ impl Command for SpawnFood {
         world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_translation(position2translation(&self.position)),
+                transform: self.position.into(),
                 ..default()
             },
             Fill::color(FOOD_COLOR),
@@ -141,7 +140,7 @@ impl Command for SpawnPoison {
         world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
-                transform: Transform::from_translation(position2translation(&self.position)),
+                transform: self.position.into(),
                 ..default()
             },
             Fill::color(POISON_FILL_COLOR),
@@ -169,7 +168,7 @@ impl Command for SpawnSuperfood {
         world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&cross),
-                transform: Transform::from_translation(position2translation(&self.position)),
+                transform: self.position.into(),
                 ..default()
             },
             Stroke::new(SUPERFOOD_COLOR, 7.5),
@@ -197,7 +196,7 @@ impl Command for SpawnAntidote {
         world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&cross),
-                transform: Transform::from_translation(position2translation(&self.position)),
+                transform: self.position.into(),
                 ..default()
             },
             Stroke::new(ANTIDOTE_COLOR, TILE_SIZE * 0.9),
@@ -488,7 +487,7 @@ pub fn move_antidote(
         pos.x = new_pos.x;
         pos.y = new_pos.y;
 
-        transform.translation = position2translation(&pos);
+        *transform = (*pos).into();
     }
 }
 
