@@ -245,7 +245,7 @@ pub fn setup_game(mut commands: Commands) {
         x: ARENA_WIDTH / 2,
         y: ARENA_HEIGHT / 2,
     }
-    .to_position();
+    .into();
     position_candidates.retain(|&p| p != segment_position);
 
     position_candidates.shuffle(&mut rng());
@@ -291,7 +291,7 @@ pub fn spawn_consumables(
 
         for segment in segments.0.iter() {
             if let Ok(diplopod_position) = diplopod_positions.get(*segment) {
-                let position = diplopod_position.to_position();
+                let position = (*diplopod_position).into();
                 position_candidates.retain(|&p| p != position);
             }
         }
@@ -382,7 +382,7 @@ pub fn eat(
 ) {
     for (mut head, head_position) in heads.iter_mut() {
         for (entity, position, obstacle) in obstacles.iter() {
-            if *position == head_position.to_position() {
+            if *position == (*head_position).into() {
                 match obstacle {
                     Obstacle::Food => {
                         commands.entity(entity).despawn();
@@ -477,8 +477,8 @@ pub fn move_antidote(
             || new_pos.y >= CONSUMABLE_HEIGHT
             || segment_positions
                 .iter_mut()
-                .map(|p| p.to_position())
-                .any(|x| x == new_pos)
+                .map(|p| (*p).into())
+                .any(|x: Position| x == new_pos)
         {
             continue;
         }

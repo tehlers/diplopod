@@ -49,11 +49,11 @@ impl From<DiplopodPosition> for Transform {
     }
 }
 
-impl DiplopodPosition {
-    pub fn to_position(self) -> Position {
+impl From<DiplopodPosition> for Position {
+    fn from(position: DiplopodPosition) -> Self {
         Position {
-            x: self.x / CONSUMABLE_SCALE_FACTOR,
-            y: self.y / CONSUMABLE_SCALE_FACTOR,
+            x: position.x / CONSUMABLE_SCALE_FACTOR,
+            y: position.y / CONSUMABLE_SCALE_FACTOR,
         }
     }
 }
