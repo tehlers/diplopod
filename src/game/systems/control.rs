@@ -11,7 +11,13 @@ use crate::game::events::*;
 use crate::game::resources::*;
 use crate::prelude::*;
 
-use super::graphics::TILE_SIZE;
+use super::graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT};
+
+const START_POSITION: Transform = Transform::from_xyz(
+    (ARENA_WIDTH / 2) as f32 * TILE_SIZE + UPPER_LEFT.x - MAX_X / 2.,
+    (ARENA_HEIGHT / 2) as f32 * TILE_SIZE + UPPER_LEFT.y - MAX_Y / 2.,
+    0.0,
+);
 
 struct SpawnDiplopodSegment;
 
@@ -27,14 +33,9 @@ impl Command for SpawnDiplopodSegment {
         let is_head = segments.is_empty();
 
         let position = if is_head {
-            DiplopodPosition {
-                x: ARENA_WIDTH / 2,
-                y: ARENA_HEIGHT / 2,
-            }
+            START_POSITION
         } else {
-            *world
-                .get::<DiplopodPosition>(*segments.last().unwrap())
-                .unwrap()
+            *world.get::<Transform>(*segments.last().unwrap()).unwrap()
         };
 
         let immune = if is_head {
@@ -56,13 +57,12 @@ impl Command for SpawnDiplopodSegment {
         let mut segment = world.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
-                transform: position.into(),
+                transform: position,
                 ..default()
             },
             Fill::color(color),
             Stroke::color(color),
             DiplopodSegment,
-            position,
             OnGameScreen,
         ));
 
@@ -227,13 +227,7 @@ pub fn setup_game(mut commands: Commands) {
         commands.queue(SpawnWall { position });
     }
 
-    let mut free_positions = get_randomized_free_positions(vec![
-        DiplopodPosition {
-            x: ARENA_WIDTH / 2,
-            y: ARENA_HEIGHT / 2,
-        }
-        .into(),
-    ]);
+    let mut free_positions = get_randomized_free_positions(vec![START_POSITION.into()]);
 
     for _ in 0..AMOUNT_OF_FOOD {
         if let Some(position) = free_positions.pop() {
@@ -324,7 +318,7 @@ pub fn spawn_consumables(
 
 pub fn movement(
     mut heads: Query<(Entity, &DiplopodHead)>,
-    mut positions: Query<&mut DiplopodPosition>,
+    mut positions: Query<&mut Transform>,
     segments: ResMut<DiplopodSegments>,
     mut game_over_writer: EventWriter<GameOver>,
 ) {
@@ -332,14 +326,14 @@ pub fn movement(
         let segment_positions = segments
             .0
             .iter()
-            .map(|e| *positions.get_mut(*e).unwrap())
-            .collect::<Vec<DiplopodPosition>>();
+            .map(|e| positions.get_mut(*e).unwrap().translation)
+            .collect::<Vec<Vec3>>();
 
         let mut head_pos = positions.get_mut(head_entity).unwrap();
-        head_pos.x += head.direction.x as i32;
-        head_pos.y += head.direction.y as i32;
+        head_pos.translation.x += head.direction.x * TILE_SIZE;
+        head_pos.translation.y += head.direction.y * TILE_SIZE;
 
-        if segment_positions.contains(&head_pos)
+        if segment_positions.contains(&head_pos.translation)
             && (head.direction.x != 0.0 || head.direction.y != 0.0)
         {
             game_over_writer.send(GameOver);
@@ -349,7 +343,7 @@ pub fn movement(
             .iter()
             .zip(segments.0.iter().skip(1))
             .for_each(|(pos, segment)| {
-                *positions.get_mut(*segment).unwrap() = *pos;
+                positions.get_mut(*segment).unwrap().translation = *pos;
             });
     }
 }
@@ -357,15 +351,15 @@ pub fn movement(
 #[allow(clippy::too_many_arguments)]
 pub fn eat(
     mut commands: Commands,
-    mut heads: Query<(&mut DiplopodHead, &DiplopodPosition)>,
+    mut heads: Query<(&mut DiplopodHead, &Transform)>,
     obstacles: Query<(Entity, &Transform, &Obstacle)>,
     mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
     mut show_message_writer: EventWriter<ShowMessage>,
     sounds: Res<Sounds>,
 ) {
-    for (mut head, head_diplopod_position) in heads.iter_mut() {
-        let head_position: Position = (*head_diplopod_position).into();
+    for (mut head, head_transform) in heads.iter_mut() {
+        let head_position: Position = (*head_transform).into();
         for (entity, transform, obstacle) in obstacles.iter() {
             if head_position == (*transform).into() {
                 match obstacle {
@@ -390,7 +384,7 @@ pub fn eat(
 
                         show_message_writer.send(ShowMessage {
                             text: growth.to_string(),
-                            position: *head_diplopod_position,
+                            transform: *head_transform,
                         });
 
                         spawn_consumables_writer.send(SpawnConsumables { regular: false });
@@ -443,8 +437,8 @@ pub fn eat(
 }
 
 pub fn move_antidote(
-    mut antidotes: Query<&mut Transform, With<Antidote>>,
-    mut segment_positions: Query<&mut DiplopodPosition, With<DiplopodSegment>>,
+    mut antidotes: Query<&mut Transform, (With<Antidote>, Without<DiplopodSegment>)>,
+    mut segment_positions: Query<&mut Transform, With<DiplopodSegment>>,
 ) {
     for mut transform in antidotes.iter_mut() {
         let mut new_pos: Position = (*transform).into();

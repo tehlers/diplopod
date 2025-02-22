@@ -33,31 +33,6 @@ fn on_add_diplopod_segment(mut world: DeferredWorld, entity: Entity, _: Componen
     world.resource_mut::<DiplopodSegments>().0.push(entity);
 }
 
-#[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct DiplopodPosition {
-    pub x: i32,
-    pub y: i32,
-}
-
-impl From<DiplopodPosition> for Transform {
-    fn from(position: DiplopodPosition) -> Self {
-        Transform::from_xyz(
-            position.x as f32 * TILE_SIZE + UPPER_LEFT.x - MAX_X / 2.,
-            position.y as f32 * TILE_SIZE + UPPER_LEFT.y - MAX_Y / 2.,
-            0.0,
-        )
-    }
-}
-
-impl From<DiplopodPosition> for Position {
-    fn from(position: DiplopodPosition) -> Self {
-        Position {
-            x: position.x / CONSUMABLE_SCALE_FACTOR,
-            y: position.y / CONSUMABLE_SCALE_FACTOR,
-        }
-    }
-}
-
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i32,

@@ -45,9 +45,6 @@ impl Plugin for GamePlugin {
                     )
                         .in_set(Phase::Input)
                         .run_if(in_state(GameState::Game)),
-                    (graphics::diplopod_position_translation,)
-                        .after(Phase::Movement)
-                        .run_if(in_state(GameState::Game)),
                     (graphics::rotate_superfood,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),

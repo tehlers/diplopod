@@ -15,12 +15,6 @@ pub const UPPER_LEFT: Vec2 = Vec2::new(
     (MAX_Y - (ARENA_HEIGHT - 1) as f32 * TILE_SIZE) / 2.,
 );
 
-pub fn diplopod_position_translation(mut segments: Query<(&DiplopodPosition, &mut Transform)>) {
-    for (pos, mut transform) in segments.iter_mut() {
-        *transform = (*pos).into();
-    }
-}
-
 pub fn rotate_superfood(mut query: Query<&mut Transform, With<Superfood>>, time: Res<Time>) {
     for mut transform in query.iter_mut() {
         let delta = time.delta_secs();
@@ -82,9 +76,11 @@ pub fn show_message(mut commands: Commands, mut show_message_reader: EventReader
             },
             TextColor::WHITE,
             TextLayout::new_with_justify(JustifyText::Center),
-            // ensure that the text is drawn above the diplopod
-            Transform::from_translation(Vec3::Z),
-            show_message.position,
+            Transform::from_xyz(
+                show_message.transform.translation.x,
+                show_message.transform.translation.y,
+                2.0,
+            ),
             OnGameScreen,
             FadingText(1.0),
         ));
