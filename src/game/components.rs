@@ -58,7 +58,7 @@ impl From<DiplopodPosition> for Position {
     }
 }
 
-#[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -75,6 +75,19 @@ impl From<Position> for Transform {
                 + TILE_SIZE / 2.,
             1.0,
         )
+    }
+}
+
+impl From<Transform> for Position {
+    fn from(transform: Transform) -> Self {
+        Position {
+            x: ((transform.translation.x - UPPER_LEFT.x + MAX_X / 2. - TILE_SIZE / 2.)
+                / (TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32))
+                .round() as i32,
+            y: ((transform.translation.y - UPPER_LEFT.y + MAX_Y / 2. - TILE_SIZE / 2.)
+                / (TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32))
+                .round() as i32,
+        }
     }
 }
 

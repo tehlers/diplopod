@@ -94,7 +94,6 @@ impl Command for SpawnWall {
             Stroke::color(WALL_COLOR),
             Obstacle::Wall,
             OnGameScreen,
-            self.position,
         ));
     }
 }
@@ -120,7 +119,6 @@ impl Command for SpawnFood {
             Stroke::color(FOOD_COLOR),
             Obstacle::Food,
             OnGameScreen,
-            self.position,
         ));
     }
 }
@@ -146,7 +144,6 @@ impl Command for SpawnPoison {
             Stroke::new(POISON_OUTLINE_COLOR, 7.),
             Obstacle::Poison,
             OnGameScreen,
-            self.position,
         ));
     }
 }
@@ -174,7 +171,6 @@ impl Command for SpawnSuperfood {
             Obstacle::Superfood,
             Superfood,
             OnGameScreen,
-            self.position,
         ));
     }
 }
@@ -202,7 +198,6 @@ impl Command for SpawnAntidote {
             Obstacle::Antidote,
             Antidote,
             OnGameScreen,
-            self.position,
         ));
     }
 }
@@ -232,35 +227,44 @@ pub fn setup_game(mut commands: Commands) {
         commands.queue(SpawnWall { position });
     }
 
-    let mut position_candidates: Vec<Position> =
-        Vec::with_capacity(((CONSUMABLE_WIDTH - 1) * (CONSUMABLE_HEIGHT - 1)) as usize);
-
-    for x in 1..CONSUMABLE_WIDTH {
-        for y in 1..CONSUMABLE_HEIGHT {
-            position_candidates.push(Position { x, y });
+    let mut free_positions = get_randomized_free_positions(vec![
+        DiplopodPosition {
+            x: ARENA_WIDTH / 2,
+            y: ARENA_HEIGHT / 2,
         }
-    }
-
-    let segment_position = DiplopodPosition {
-        x: ARENA_WIDTH / 2,
-        y: ARENA_HEIGHT / 2,
-    }
-    .into();
-    position_candidates.retain(|&p| p != segment_position);
-
-    position_candidates.shuffle(&mut rng());
+        .into(),
+    ]);
 
     for _ in 0..AMOUNT_OF_FOOD {
-        if let Some(position) = position_candidates.pop() {
+        if let Some(position) = free_positions.pop() {
             commands.queue(SpawnFood { position });
         }
     }
 
     for _ in 0..AMOUNT_OF_POISON {
-        if let Some(position) = position_candidates.pop() {
+        if let Some(position) = free_positions.pop() {
             commands.queue(SpawnPoison { position });
         }
     }
+}
+
+fn get_randomized_free_positions(occupied: Vec<Position>) -> Vec<Position> {
+    let mut free_positions: Vec<Position> =
+        Vec::with_capacity(((CONSUMABLE_WIDTH - 1) * (CONSUMABLE_HEIGHT - 1)) as usize);
+
+    for x in 1..CONSUMABLE_WIDTH {
+        for y in 1..CONSUMABLE_HEIGHT {
+            free_positions.push(Position { x, y });
+        }
+    }
+
+    for position in occupied {
+        free_positions.retain(|&p| p != position);
+    }
+
+    free_positions.shuffle(&mut rng());
+
+    free_positions
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -268,42 +272,22 @@ pub fn spawn_consumables(
     mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
     mut spawn_consumables_reader: EventReader<SpawnConsumables>,
-    diplopod_positions: Query<&DiplopodPosition>,
-    positions: Query<&Position>,
+    obstacles: Query<&Transform>,
     superfood: Query<Entity, With<Superfood>>,
     antidotes: Query<Entity, With<Antidote>>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     sounds: Res<Sounds>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.read().next() {
-        let mut position_candidates: Vec<Position> =
-            Vec::with_capacity(((CONSUMABLE_WIDTH - 1) * (CONSUMABLE_HEIGHT - 1)) as usize);
-
-        for x in 1..CONSUMABLE_WIDTH {
-            for y in 1..CONSUMABLE_HEIGHT {
-                position_candidates.push(Position { x, y });
-            }
-        }
-
-        for position in positions.iter() {
-            position_candidates.retain(|&p| p != *position);
-        }
-
-        for segment in segments.0.iter() {
-            if let Ok(diplopod_position) = diplopod_positions.get(*segment) {
-                let position = (*diplopod_position).into();
-                position_candidates.retain(|&p| p != position);
-            }
-        }
-
-        position_candidates.shuffle(&mut rng());
+        let mut free_positions =
+            get_randomized_free_positions(obstacles.iter().map(|o| (*o).into()).collect());
 
         if spawn_event.regular {
-            if let Some(position) = position_candidates.pop() {
+            if let Some(position) = free_positions.pop() {
                 commands.queue(SpawnFood { position });
             }
 
-            if let Some(position) = position_candidates.pop() {
+            if let Some(position) = free_positions.pop() {
                 commands.queue(SpawnPoison { position });
             }
         }
@@ -321,12 +305,12 @@ pub fn spawn_consumables(
                     commands.entity(ent).despawn();
                 }
 
-                if let Some(position) = position_candidates.pop() {
+                if let Some(position) = free_positions.pop() {
                     commands.queue(SpawnAntidote { position });
                 }
             }
 
-            if let Some(position) = position_candidates.pop() {
+            if let Some(position) = free_positions.pop() {
                 commands.queue(SpawnSuperfood { position });
             }
 
@@ -374,15 +358,16 @@ pub fn movement(
 pub fn eat(
     mut commands: Commands,
     mut heads: Query<(&mut DiplopodHead, &DiplopodPosition)>,
-    obstacles: Query<(Entity, &Position, &Obstacle)>,
+    obstacles: Query<(Entity, &Transform, &Obstacle)>,
     mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
     mut show_message_writer: EventWriter<ShowMessage>,
     sounds: Res<Sounds>,
 ) {
-    for (mut head, head_position) in heads.iter_mut() {
-        for (entity, position, obstacle) in obstacles.iter() {
-            if *position == (*head_position).into() {
+    for (mut head, head_diplopod_position) in heads.iter_mut() {
+        let head_position: Position = (*head_diplopod_position).into();
+        for (entity, transform, obstacle) in obstacles.iter() {
+            if head_position == (*transform).into() {
                 match obstacle {
                     Obstacle::Food => {
                         commands.entity(entity).despawn();
@@ -405,7 +390,7 @@ pub fn eat(
 
                         show_message_writer.send(ShowMessage {
                             text: growth.to_string(),
-                            position: *head_position,
+                            position: *head_diplopod_position,
                         });
 
                         spawn_consumables_writer.send(SpawnConsumables { regular: false });
@@ -458,11 +443,11 @@ pub fn eat(
 }
 
 pub fn move_antidote(
-    mut antidotes: Query<(&mut Position, &mut Transform), With<Antidote>>,
+    mut antidotes: Query<&mut Transform, With<Antidote>>,
     mut segment_positions: Query<&mut DiplopodPosition, With<DiplopodSegment>>,
 ) {
-    for (mut pos, mut transform) in antidotes.iter_mut() {
-        let mut new_pos = *pos;
+    for mut transform in antidotes.iter_mut() {
+        let mut new_pos: Position = (*transform).into();
         match rng().random_range(0..4) {
             0 => new_pos.x -= 1,
             1 => new_pos.x += 1,
@@ -478,15 +463,12 @@ pub fn move_antidote(
             || segment_positions
                 .iter_mut()
                 .map(|p| (*p).into())
-                .any(|x: Position| x == new_pos)
+                .any(|p: Position| p == new_pos)
         {
             continue;
         }
 
-        pos.x = new_pos.x;
-        pos.y = new_pos.y;
-
-        *transform = (*pos).into();
+        *transform = new_pos.into();
     }
 }
 
