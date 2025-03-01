@@ -6,7 +6,8 @@ use crate::prelude::{CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH};
 
 use super::{
     OnGameScreen,
-    components::{DiplopodHead, DiplopodSegment, Obstacle, Position},
+    components::{Obstacle, Position},
+    diplopod::{DiplopodHead, DiplopodSegment},
     graphics::TILE_SIZE,
 };
 

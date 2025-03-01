@@ -1,37 +1,8 @@
-use bevy::{
-    ecs::{component::ComponentId, world::DeferredWorld},
-    prelude::*,
-};
+use bevy::prelude::*;
 
 use crate::prelude::CONSUMABLE_SCALE_FACTOR;
 
-use super::{
-    DiplopodSegments,
-    graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT},
-};
-
-#[derive(Component)]
-pub struct DiplopodHead {
-    pub direction: Vec2,
-    pub immunity: Timer,
-}
-
-impl Default for DiplopodHead {
-    fn default() -> Self {
-        Self {
-            direction: Vec2::ZERO,
-            immunity: Timer::from_seconds(0.0, TimerMode::Once),
-        }
-    }
-}
-
-#[derive(Component)]
-#[component(on_add=on_add_diplopod_segment)]
-pub struct DiplopodSegment;
-
-fn on_add_diplopod_segment(mut world: DeferredWorld, entity: Entity, _: ComponentId) {
-    world.resource_mut::<DiplopodSegments>().0.push(entity);
-}
+use super::graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT};
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Position {

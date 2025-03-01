@@ -1,5 +1,6 @@
 pub mod antidote;
 pub mod components;
+pub mod diplopod;
 pub mod events;
 pub mod fading_text;
 pub mod food;
@@ -16,6 +17,7 @@ use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
 use bevy_prototype_lyon::prelude::*;
+use diplopod::DiplopodSegments;
 use events::*;
 use resources::*;
 use systems::*;
@@ -45,8 +47,8 @@ impl Plugin for GamePlugin {
                         )
                         .run_if(in_state(GameState::Game)),
                     (
-                        player_input::keyboard,
-                        player_input::gamepad,
+                        diplopod::keyboard,
+                        diplopod::gamepad,
                         antidote::move_antidote.run_if(on_timer(Duration::from_millis(500))),
                     )
                         .in_set(Phase::Input)
@@ -54,7 +56,7 @@ impl Plugin for GamePlugin {
                     (superfood::rotate_superfood,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
-                    (control::limit_immunity, fading_text::fade_text)
+                    (diplopod::limit_immunity, fading_text::fade_text)
                         .run_if(in_state(GameState::Game)),
                     control::game_over
                         .after(Phase::Movement)
@@ -66,20 +68,23 @@ impl Plugin for GamePlugin {
                 FixedUpdate,
                 (
                     (
-                        control::movement
+                        diplopod::movement
                             .after(Phase::Input)
                             .in_set(Phase::Movement),
                         control::eat,
                         control::spawn_consumables.run_if(on_event::<SpawnConsumables>),
                     )
                         .chain(),
-                    (graphics::change_color, antidote::control_antidote_sound),
+                    (
+                        diplopod::change_color_during_immunity,
+                        antidote::control_antidote_sound,
+                    ),
                 )
                     .run_if(in_state(GameState::Game)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
-            .insert_resource(DiplopodSegments::default())
-            .insert_resource(LastSpecialSpawn::default())
+            .init_resource::<DiplopodSegments>()
+            .init_resource::<LastSpecialSpawn>()
             .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
             .add_event::<SpawnConsumables>();

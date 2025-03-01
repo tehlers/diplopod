@@ -9,8 +9,6 @@ use game::systems::*;
 use prelude::TITLE;
 
 mod prelude {
-    use bevy::{color::palettes::css::ORANGE, prelude::Color};
-
     pub const TITLE: &str = "diplopod";
 
     pub const CONSUMABLE_WIDTH: i32 = 39 + 1;
@@ -21,9 +19,6 @@ mod prelude {
     pub const AMOUNT_OF_FOOD: u32 = 16;
     pub const AMOUNT_OF_POISON: u32 = 17;
     pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
-
-    pub const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
-    pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
 
     pub const RADIUS_FACTOR: f32 = 0.9;
 }

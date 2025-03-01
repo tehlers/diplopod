@@ -2,12 +2,12 @@ use rand::seq::SliceRandom;
 use rand::{Rng, rng};
 
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::*;
 
 use crate::GameState;
 use crate::game::OnGameScreen;
 use crate::game::antidote::{Antidote, AntidoteSound, SpawnAntidote};
 use crate::game::components::*;
+use crate::game::diplopod::{DiplopodHead, DiplopodSegments, START_POSITION, SpawnDiplopodSegment};
 use crate::game::events::*;
 use crate::game::fading_text::SpawnFadingText;
 use crate::game::food::SpawnFood;
@@ -16,67 +16,6 @@ use crate::game::resources::*;
 use crate::game::superfood::{SpawnSuperfood, Superfood};
 use crate::game::wall::SpawnWall;
 use crate::prelude::*;
-
-use super::graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT};
-
-const START_POSITION: Transform = Transform::from_xyz(
-    (ARENA_WIDTH / 2) as f32 * TILE_SIZE + UPPER_LEFT.x - MAX_X / 2.,
-    (ARENA_HEIGHT / 2) as f32 * TILE_SIZE + UPPER_LEFT.y - MAX_Y / 2.,
-    0.0,
-);
-
-struct SpawnDiplopodSegment;
-
-impl Command for SpawnDiplopodSegment {
-    fn apply(self, world: &mut World) {
-        let shape = shapes::Rectangle {
-            extents: Vec2::splat(TILE_SIZE),
-            origin: shapes::RectangleOrigin::Center,
-            radii: None,
-        };
-
-        let segments = &world.resource::<DiplopodSegments>().0;
-        let is_head = segments.is_empty();
-
-        let position = if is_head {
-            START_POSITION
-        } else {
-            *world.get::<Transform>(*segments.last().unwrap()).unwrap()
-        };
-
-        let immune = if is_head {
-            false
-        } else {
-            !world
-                .get::<DiplopodHead>(*segments.first().unwrap())
-                .unwrap()
-                .immunity
-                .finished()
-        };
-
-        let color = if immune {
-            DIPLOPOD_IMMUNE_COLOR
-        } else {
-            DIPLOPOD_COLOR
-        };
-
-        let mut segment = world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: position,
-                ..default()
-            },
-            Fill::color(color),
-            Stroke::color(color),
-            DiplopodSegment,
-            OnGameScreen,
-        ));
-
-        if is_head {
-            segment.insert(DiplopodHead::default());
-        }
-    }
-}
 
 pub fn setup_game(mut commands: Commands) {
     commands.queue(SpawnDiplopodSegment);
@@ -192,38 +131,6 @@ pub fn spawn_consumables(
     }
 }
 
-pub fn movement(
-    mut heads: Query<(Entity, &DiplopodHead)>,
-    mut positions: Query<&mut Transform>,
-    segments: ResMut<DiplopodSegments>,
-    mut game_over_writer: EventWriter<GameOver>,
-) {
-    if let Some((head_entity, head)) = heads.iter_mut().next() {
-        let segment_positions = segments
-            .0
-            .iter()
-            .map(|e| positions.get_mut(*e).unwrap().translation)
-            .collect::<Vec<Vec3>>();
-
-        let mut head_pos = positions.get_mut(head_entity).unwrap();
-        head_pos.translation.x += head.direction.x * TILE_SIZE;
-        head_pos.translation.y += head.direction.y * TILE_SIZE;
-
-        if segment_positions.contains(&head_pos.translation)
-            && (head.direction.x != 0.0 || head.direction.y != 0.0)
-        {
-            game_over_writer.send(GameOver);
-        }
-
-        segment_positions
-            .iter()
-            .zip(segments.0.iter().skip(1))
-            .for_each(|(pos, segment)| {
-                positions.get_mut(*segment).unwrap().translation = *pos;
-            });
-    }
-}
-
 #[allow(clippy::too_many_arguments)]
 pub fn eat(
     mut commands: Commands,
@@ -308,14 +215,6 @@ pub fn eat(
                 };
             }
         }
-    }
-}
-
-pub fn limit_immunity(mut heads: Query<&mut DiplopodHead>, time: Res<Time>) {
-    let mut head = heads.single_mut();
-
-    if !head.immunity.finished() {
-        head.immunity.tick(time.delta());
     }
 }
 

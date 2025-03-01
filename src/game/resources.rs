@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 
 #[derive(Default, Resource)]
-pub struct DiplopodSegments(pub Vec<Entity>);
-
-#[derive(Default, Resource)]
 pub struct LastSpecialSpawn(pub u32);
 
 #[derive(Resource)]
