@@ -6,7 +6,6 @@ use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy::window::PrimaryWindow;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
-use game::resources::*;
 
 const TITLE: &str = "diplopod";
 const MAX_X: f32 = 1920.0;
@@ -18,6 +17,19 @@ enum GameState {
     Menu,
     Game,
     Highscore,
+}
+
+#[derive(Resource)]
+struct DefaultFontHandle(Handle<Font>);
+
+#[derive(Resource)]
+struct Sounds {
+    eat_food: Handle<AudioSource>,
+    eat_poison: Handle<AudioSource>,
+    special_spawn: Handle<AudioSource>,
+    super_food: Handle<AudioSource>,
+    antidote: Handle<AudioSource>,
+    game_over: Handle<AudioSource>,
 }
 
 fn main() {

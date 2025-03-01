@@ -3,14 +3,16 @@ pub mod diplopod;
 pub mod fading_text;
 pub mod food;
 pub mod poison;
-pub mod resources;
 pub mod superfood;
 pub mod wall;
 
 use crate::GameState;
 use crate::MAX_X;
 use crate::MAX_Y;
+use crate::Sounds;
 use crate::despawn_screen;
+use crate::highscore::Highscore;
+use crate::highscore::Lastscore;
 use antidote::*;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
@@ -24,7 +26,6 @@ use poison::SpawnPoison;
 use rand::Rng;
 use rand::rng;
 use rand::seq::SliceRandom;
-use resources::*;
 use superfood::*;
 use wall::SpawnWall;
 
@@ -89,11 +90,8 @@ enum Obstacle {
 #[derive(Component)]
 struct OnGameScreen;
 
-#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-enum Phase {
-    Input,
-    Movement,
-}
+#[derive(Default, Resource)]
+pub struct LastSpecialSpawn(pub u32);
 
 #[derive(Event)]
 pub struct GameOver;
@@ -101,6 +99,12 @@ pub struct GameOver;
 #[derive(Event)]
 struct SpawnConsumables {
     pub regular: bool,
+}
+
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+enum Phase {
+    Input,
+    Movement,
 }
 
 pub struct GamePlugin;

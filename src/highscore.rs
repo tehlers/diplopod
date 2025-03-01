@@ -9,7 +9,6 @@ use std::fs::File;
 use std::io::Write;
 
 use crate::TITLE;
-use crate::game::resources::{self, Highscore, Lastscore};
 
 use super::{GameState, despawn_screen};
 
@@ -28,6 +27,12 @@ const HIGHSCORE: &str = "highscore";
 
 #[derive(Component)]
 struct OnHighscoreScreen;
+
+#[derive(Default, Resource)]
+pub struct Highscore(pub u16);
+
+#[derive(Default, Resource)]
+pub struct Lastscore(pub u16);
 
 #[derive(Default, Resource)]
 pub struct InitialDelay;
@@ -63,7 +68,7 @@ impl Plugin for HighscorePlugin {
 /// Load highscore from platform specific data directory (e.g.
 /// `$HOME/.local/share/diplopod/highscore`). If the file is invalid or inaccessible the highscore will
 /// be set back to zero.
-fn load_highscore() -> resources::Highscore {
+fn load_highscore() -> Highscore {
     match read_highscore_from_file() {
         Ok(highscore) => Highscore(highscore),
         Err(e) => {
