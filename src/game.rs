@@ -33,27 +33,27 @@ use resources::*;
 use superfood::*;
 use wall::SpawnWall;
 
-pub const CONSUMABLE_WIDTH: i32 = 39 + 1;
-pub const CONSUMABLE_HEIGHT: i32 = 21 + 1;
-pub const CONSUMABLE_SCALE_FACTOR: i32 = 2;
-pub const ARENA_WIDTH: i32 = (CONSUMABLE_WIDTH + 1) * CONSUMABLE_SCALE_FACTOR;
-pub const ARENA_HEIGHT: i32 = (CONSUMABLE_HEIGHT + 1) * CONSUMABLE_SCALE_FACTOR;
-pub const TILE_SIZE: f32 = MAX_X / ARENA_WIDTH as f32;
-pub const UPPER_LEFT: Vec2 = Vec2::new(
+const CONSUMABLE_WIDTH: i32 = 39 + 1;
+const CONSUMABLE_HEIGHT: i32 = 21 + 1;
+const CONSUMABLE_SCALE_FACTOR: i32 = 2;
+const ARENA_WIDTH: i32 = (CONSUMABLE_WIDTH + 1) * CONSUMABLE_SCALE_FACTOR;
+const ARENA_HEIGHT: i32 = (CONSUMABLE_HEIGHT + 1) * CONSUMABLE_SCALE_FACTOR;
+const TILE_SIZE: f32 = MAX_X / ARENA_WIDTH as f32;
+const UPPER_LEFT: Vec2 = Vec2::new(
     (MAX_X - (ARENA_WIDTH - 1) as f32 * TILE_SIZE) / 2.,
     (MAX_Y - (ARENA_HEIGHT - 1) as f32 * TILE_SIZE) / 2.,
 );
-pub const RADIUS_FACTOR: f32 = 0.9;
+const RADIUS_FACTOR: f32 = 0.9;
 
-pub const AMOUNT_OF_FOOD: u32 = 16;
-pub const AMOUNT_OF_POISON: u32 = 17;
-pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
+const AMOUNT_OF_FOOD: u32 = 16;
+const AMOUNT_OF_POISON: u32 = 17;
+const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 
 #[derive(Component)]
-pub struct OnGameScreen;
+struct OnGameScreen;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum Phase {
+enum Phase {
     Input,
     Movement,
 }
@@ -319,7 +319,7 @@ fn check_collision(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn game_over(
+fn game_over(
     mut commands: Commands,
     mut reader: EventReader<GameOver>,
     mut segments: ResMut<DiplopodSegments>,

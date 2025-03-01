@@ -8,12 +8,12 @@ use bevy::window::PrimaryWindow;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use game::resources::*;
 
-pub const TITLE: &str = "diplopod";
-pub const MAX_X: f32 = 1920.0;
-pub const MAX_Y: f32 = 1200.0;
+const TITLE: &str = "diplopod";
+const MAX_X: f32 = 1920.0;
+const MAX_Y: f32 = 1200.0;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum GameState {
+enum GameState {
     #[default]
     Menu,
     Game,
