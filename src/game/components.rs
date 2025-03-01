@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::prelude::CONSUMABLE_SCALE_FACTOR;
+use crate::{MAX_X, MAX_Y};
 
-use super::graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT};
+use super::{CONSUMABLE_SCALE_FACTOR, TILE_SIZE, UPPER_LEFT};
 
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Position {

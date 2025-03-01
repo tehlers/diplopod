@@ -11,6 +11,8 @@ pub mod systems;
 pub mod wall;
 
 use crate::GameState;
+use crate::MAX_X;
+use crate::MAX_Y;
 use crate::despawn_screen;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
@@ -21,6 +23,22 @@ use diplopod::DiplopodSegments;
 use events::*;
 use resources::*;
 use systems::*;
+
+pub const CONSUMABLE_WIDTH: i32 = 39 + 1;
+pub const CONSUMABLE_HEIGHT: i32 = 21 + 1;
+pub const CONSUMABLE_SCALE_FACTOR: i32 = 2;
+pub const ARENA_WIDTH: i32 = (CONSUMABLE_WIDTH + 1) * CONSUMABLE_SCALE_FACTOR;
+pub const ARENA_HEIGHT: i32 = (CONSUMABLE_HEIGHT + 1) * CONSUMABLE_SCALE_FACTOR;
+pub const TILE_SIZE: f32 = MAX_X / ARENA_WIDTH as f32;
+pub const UPPER_LEFT: Vec2 = Vec2::new(
+    (MAX_X - (ARENA_WIDTH - 1) as f32 * TILE_SIZE) / 2.,
+    (MAX_Y - (ARENA_HEIGHT - 1) as f32 * TILE_SIZE) / 2.,
+);
+pub const RADIUS_FACTOR: f32 = 0.9;
+
+pub const AMOUNT_OF_FOOD: u32 = 16;
+pub const AMOUNT_OF_POISON: u32 = 17;
+pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 
 #[derive(Component)]
 pub struct OnGameScreen;

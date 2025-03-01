@@ -4,7 +4,6 @@ use rand::{Rng, rng};
 use bevy::prelude::*;
 
 use crate::GameState;
-use crate::game::OnGameScreen;
 use crate::game::antidote::{Antidote, AntidoteSound, SpawnAntidote};
 use crate::game::components::*;
 use crate::game::diplopod::{DiplopodHead, DiplopodSegments, START_POSITION, SpawnDiplopodSegment};
@@ -15,7 +14,10 @@ use crate::game::poison::SpawnPoison;
 use crate::game::resources::*;
 use crate::game::superfood::{SpawnSuperfood, Superfood};
 use crate::game::wall::SpawnWall;
-use crate::prelude::*;
+use crate::game::{
+    AMOUNT_OF_FOOD, AMOUNT_OF_POISON, CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH, OnGameScreen,
+    SPECIAL_SPAWN_INTERVAL,
+};
 
 pub fn setup_game(mut commands: Commands) {
     commands.queue(SpawnDiplopodSegment);

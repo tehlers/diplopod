@@ -8,8 +8,8 @@ use directories::ProjectDirs;
 use std::fs::File;
 use std::io::Write;
 
+use crate::TITLE;
 use crate::game::resources::{self, Highscore, Lastscore};
-use crate::prelude::TITLE;
 
 use super::{GameState, despawn_screen};
 

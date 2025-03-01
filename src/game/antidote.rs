@@ -2,13 +2,10 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use rand::{Rng, rng};
 
-use crate::prelude::{CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH};
-
 use super::{
-    OnGameScreen,
+    CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH, OnGameScreen, TILE_SIZE,
     components::{Obstacle, Position},
     diplopod::{DiplopodHead, DiplopodSegment},
-    graphics::TILE_SIZE,
 };
 
 const ANTIDOTE_COLOR: Color = Color::WHITE;

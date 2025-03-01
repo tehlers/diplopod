@@ -1,11 +1,10 @@
+use crate::MAX_X;
+use crate::MAX_Y;
 use crate::game::resources::DefaultFontHandle;
 use crate::game::resources::Sounds;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy::window::PrimaryWindow;
-
-use super::graphics::MAX_X;
-use super::graphics::MAX_Y;
 
 pub fn setup(
     mut commands: Commands,

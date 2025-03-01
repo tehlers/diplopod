@@ -1,6 +1,6 @@
 use bevy::{app::AppExit, color::palettes::css::ANTIQUE_WHITE, prelude::*};
 
-use crate::prelude::TITLE;
+use crate::TITLE;
 
 use super::{GameState, despawn_screen};
 

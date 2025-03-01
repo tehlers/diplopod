@@ -5,12 +5,9 @@ use bevy::{
 };
 use bevy_prototype_lyon::prelude::*;
 
-use crate::prelude::{ARENA_HEIGHT, ARENA_WIDTH};
+use crate::{MAX_X, MAX_Y};
 
-use super::{
-    GameOver, OnGameScreen,
-    graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT},
-};
+use super::{ARENA_HEIGHT, ARENA_WIDTH, GameOver, OnGameScreen, TILE_SIZE, UPPER_LEFT};
 
 pub const START_POSITION: Transform = Transform::from_xyz(
     (ARENA_WIDTH / 2) as f32 * TILE_SIZE + UPPER_LEFT.x - MAX_X / 2.,

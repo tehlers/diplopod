@@ -1,12 +1,9 @@
 use bevy::{color::palettes::css::RED, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 
-use crate::prelude::RADIUS_FACTOR;
-
 use super::{
-    OnGameScreen,
+    OnGameScreen, RADIUS_FACTOR, TILE_SIZE,
     components::{Obstacle, Position},
-    graphics::TILE_SIZE,
 };
 
 const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);

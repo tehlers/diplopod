@@ -6,22 +6,10 @@ use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use game::resources::*;
 use game::systems::*;
-use prelude::TITLE;
 
-mod prelude {
-    pub const TITLE: &str = "diplopod";
-
-    pub const CONSUMABLE_WIDTH: i32 = 39 + 1;
-    pub const CONSUMABLE_HEIGHT: i32 = 21 + 1;
-    pub const CONSUMABLE_SCALE_FACTOR: i32 = 2;
-    pub const ARENA_WIDTH: i32 = (CONSUMABLE_WIDTH + 1) * CONSUMABLE_SCALE_FACTOR;
-    pub const ARENA_HEIGHT: i32 = (CONSUMABLE_HEIGHT + 1) * CONSUMABLE_SCALE_FACTOR;
-    pub const AMOUNT_OF_FOOD: u32 = 16;
-    pub const AMOUNT_OF_POISON: u32 = 17;
-    pub const SPECIAL_SPAWN_INTERVAL: u32 = 16;
-
-    pub const RADIUS_FACTOR: f32 = 0.9;
-}
+pub const TITLE: &str = "diplopod";
+pub const MAX_X: f32 = 1920.0;
+pub const MAX_Y: f32 = 1200.0;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
