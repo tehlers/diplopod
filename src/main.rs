@@ -32,7 +32,6 @@ mod prelude {
     pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
     pub const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
     pub const POISON_FILL_COLOR: Color = Color::BLACK;
-    pub const ANTIDOTE_COLOR: Color = Color::WHITE;
 
     pub const RADIUS_FACTOR: f32 = 0.9;
 }

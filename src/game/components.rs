@@ -77,9 +77,3 @@ pub enum Obstacle {
 
 #[derive(Component)]
 pub struct Superfood;
-
-#[derive(Component)]
-pub struct Antidote;
-
-#[derive(Component)]
-pub struct AntidoteSound;

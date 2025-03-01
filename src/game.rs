@@ -1,3 +1,4 @@
+pub mod antidote;
 pub mod components;
 pub mod events;
 pub mod fading_text;
@@ -42,7 +43,7 @@ impl Plugin for GamePlugin {
                     (
                         player_input::keyboard,
                         player_input::gamepad,
-                        control::move_antidote.run_if(on_timer(Duration::from_millis(500))),
+                        antidote::move_antidote.run_if(on_timer(Duration::from_millis(500))),
                     )
                         .in_set(Phase::Input)
                         .run_if(in_state(GameState::Game)),
@@ -68,7 +69,7 @@ impl Plugin for GamePlugin {
                         control::spawn_consumables.run_if(on_event::<SpawnConsumables>),
                     )
                         .chain(),
-                    (graphics::change_color, control::control_antidote_sound),
+                    (graphics::change_color, antidote::control_antidote_sound),
                 )
                     .run_if(in_state(GameState::Game)),
             )
