@@ -27,7 +27,6 @@ mod prelude {
 
     pub const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
     pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
-    pub const WALL_COLOR: Color = Color::srgb(0.25, 0.25, 0.25);
     pub const FOOD_COLOR: Color = Color::srgb(0.0, 1.0, 0.0);
     pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
     pub const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);

@@ -4,6 +4,7 @@ pub mod events;
 pub mod fading_text;
 pub mod resources;
 pub mod systems;
+pub mod wall;
 
 use crate::GameState;
 use crate::despawn_screen;

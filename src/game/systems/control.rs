@@ -11,6 +11,7 @@ use crate::game::components::*;
 use crate::game::events::*;
 use crate::game::fading_text::SpawnFadingText;
 use crate::game::resources::*;
+use crate::game::wall::SpawnWall;
 use crate::prelude::*;
 
 use super::graphics::{MAX_X, MAX_Y, TILE_SIZE, UPPER_LEFT};
@@ -71,32 +72,6 @@ impl Command for SpawnDiplopodSegment {
         if is_head {
             segment.insert(DiplopodHead::default());
         }
-    }
-}
-
-struct SpawnWall {
-    position: Position,
-}
-
-impl Command for SpawnWall {
-    fn apply(self, world: &mut World) {
-        let shape = shapes::Rectangle {
-            extents: Vec2::splat(TILE_SIZE * 2.0),
-            origin: shapes::RectangleOrigin::Center,
-            radii: None,
-        };
-
-        world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: self.position.into(),
-                ..default()
-            },
-            Fill::color(WALL_COLOR),
-            Stroke::color(WALL_COLOR),
-            Obstacle::Wall,
-            OnGameScreen,
-        ));
     }
 }
 
