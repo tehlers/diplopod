@@ -1,5 +1,6 @@
 pub mod components;
 pub mod events;
+pub mod fading_text;
 pub mod resources;
 pub mod systems;
 
@@ -48,10 +49,7 @@ impl Plugin for GamePlugin {
                     (graphics::rotate_superfood,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
-                    (
-                        control::limit_immunity,
-                        graphics::fade_text.run_if(on_timer(Duration::from_millis(200))),
-                    )
+                    (control::limit_immunity, fading_text::fade_text)
                         .run_if(in_state(GameState::Game)),
                     control::game_over
                         .after(Phase::Movement)
@@ -68,7 +66,6 @@ impl Plugin for GamePlugin {
                             .in_set(Phase::Movement),
                         control::eat,
                         control::spawn_consumables.run_if(on_event::<SpawnConsumables>),
-                        graphics::show_message,
                     )
                         .chain(),
                     (graphics::change_color, control::control_antidote_sound),
@@ -80,8 +77,7 @@ impl Plugin for GamePlugin {
             .insert_resource(LastSpecialSpawn::default())
             .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
-            .add_event::<SpawnConsumables>()
-            .add_event::<ShowMessage>();
+            .add_event::<SpawnConsumables>();
     }
 }
 

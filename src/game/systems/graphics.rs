@@ -2,9 +2,7 @@ use bevy::prelude::*;
 
 use bevy_prototype_lyon::prelude::*;
 
-use crate::game::OnGameScreen;
 use crate::game::components::*;
-use crate::game::events::ShowMessage;
 use crate::prelude::*;
 
 pub const MAX_X: f32 = 1920.0;
@@ -48,41 +46,5 @@ pub fn change_color(
             fill.color = DIPLOPOD_COLOR;
             stroke.color = DIPLOPOD_COLOR;
         }
-    }
-}
-
-pub fn fade_text(
-    mut commands: Commands,
-    mut query: Query<(Entity, &mut FadingText)>,
-    mut writer: Text2dWriter,
-) {
-    for (entity, mut fading_text) in query.iter_mut() {
-        writer.color(entity, 0).set_alpha(fading_text.0);
-        fading_text.0 -= 0.1;
-
-        if fading_text.0 <= 0.0 {
-            commands.entity(entity).despawn();
-        }
-    }
-}
-
-pub fn show_message(mut commands: Commands, mut show_message_reader: EventReader<ShowMessage>) {
-    if let Some(show_message) = show_message_reader.read().next() {
-        commands.spawn((
-            Text2d::new(&show_message.text),
-            TextFont {
-                font_size: 36.0,
-                ..default()
-            },
-            TextColor::WHITE,
-            TextLayout::new_with_justify(JustifyText::Center),
-            Transform::from_xyz(
-                show_message.transform.translation.x,
-                show_message.transform.translation.y,
-                2.0,
-            ),
-            OnGameScreen,
-            FadingText(1.0),
-        ));
     }
 }

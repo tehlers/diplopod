@@ -8,6 +8,7 @@ use crate::GameState;
 use crate::game::OnGameScreen;
 use crate::game::components::*;
 use crate::game::events::*;
+use crate::game::fading_text::SpawnFadingText;
 use crate::game::resources::*;
 use crate::prelude::*;
 
@@ -355,7 +356,6 @@ pub fn eat(
     obstacles: Query<(Entity, &Transform, &Obstacle)>,
     mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
-    mut show_message_writer: EventWriter<ShowMessage>,
     sounds: Res<Sounds>,
 ) {
     for (mut head, head_transform) in heads.iter_mut() {
@@ -382,7 +382,7 @@ pub fn eat(
                             commands.queue(SpawnDiplopodSegment);
                         }
 
-                        show_message_writer.send(ShowMessage {
+                        commands.queue(SpawnFadingText {
                             text: growth.to_string(),
                             transform: *head_transform,
                         });

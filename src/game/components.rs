@@ -82,7 +82,4 @@ pub struct Superfood;
 pub struct Antidote;
 
 #[derive(Component)]
-pub struct FadingText(pub f32);
-
-#[derive(Component)]
 pub struct AntidoteSound;
