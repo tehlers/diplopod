@@ -10,6 +10,7 @@ use crate::game::antidote::{Antidote, AntidoteSound, SpawnAntidote};
 use crate::game::components::*;
 use crate::game::events::*;
 use crate::game::fading_text::SpawnFadingText;
+use crate::game::food::SpawnFood;
 use crate::game::resources::*;
 use crate::game::wall::SpawnWall;
 use crate::prelude::*;
@@ -72,31 +73,6 @@ impl Command for SpawnDiplopodSegment {
         if is_head {
             segment.insert(DiplopodHead::default());
         }
-    }
-}
-
-struct SpawnFood {
-    position: Position,
-}
-
-impl Command for SpawnFood {
-    fn apply(self, world: &mut World) {
-        let shape = shapes::Circle {
-            radius: TILE_SIZE * RADIUS_FACTOR,
-            center: Vec2::new(0., 0.),
-        };
-
-        world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: self.position.into(),
-                ..default()
-            },
-            Fill::color(FOOD_COLOR),
-            Stroke::color(FOOD_COLOR),
-            Obstacle::Food,
-            OnGameScreen,
-        ));
     }
 }
 
