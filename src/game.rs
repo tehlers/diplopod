@@ -1,6 +1,5 @@
 pub mod antidote;
 pub mod diplopod;
-pub mod events;
 pub mod fading_text;
 pub mod food;
 pub mod poison;
@@ -19,7 +18,6 @@ use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
 use bevy_prototype_lyon::prelude::*;
 use diplopod::*;
-use events::*;
 use fading_text::SpawnFadingText;
 use food::SpawnFood;
 use poison::SpawnPoison;
@@ -95,6 +93,14 @@ struct OnGameScreen;
 enum Phase {
     Input,
     Movement,
+}
+
+#[derive(Event)]
+pub struct GameOver;
+
+#[derive(Event)]
+struct SpawnConsumables {
+    pub regular: bool,
 }
 
 pub struct GamePlugin;
