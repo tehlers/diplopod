@@ -5,6 +5,7 @@ pub mod fading_text;
 pub mod food;
 pub mod poison;
 pub mod resources;
+pub mod superfood;
 pub mod systems;
 pub mod wall;
 
@@ -50,7 +51,7 @@ impl Plugin for GamePlugin {
                     )
                         .in_set(Phase::Input)
                         .run_if(in_state(GameState::Game)),
-                    (graphics::rotate_superfood,)
+                    (superfood::rotate_superfood,)
                         .after(Phase::Movement)
                         .run_if(in_state(GameState::Game)),
                     (control::limit_immunity, fading_text::fade_text)

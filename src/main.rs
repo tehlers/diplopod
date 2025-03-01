@@ -9,10 +9,7 @@ use game::systems::*;
 use prelude::TITLE;
 
 mod prelude {
-    use bevy::{
-        color::palettes::css::{BLUE, ORANGE},
-        prelude::Color,
-    };
+    use bevy::{color::palettes::css::ORANGE, prelude::Color};
 
     pub const TITLE: &str = "diplopod";
 
@@ -27,7 +24,6 @@ mod prelude {
 
     pub const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
     pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
-    pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
 
     pub const RADIUS_FACTOR: f32 = 0.9;
 }

@@ -13,6 +13,7 @@ use crate::game::fading_text::SpawnFadingText;
 use crate::game::food::SpawnFood;
 use crate::game::poison::SpawnPoison;
 use crate::game::resources::*;
+use crate::game::superfood::{SpawnSuperfood, Superfood};
 use crate::game::wall::SpawnWall;
 use crate::prelude::*;
 
@@ -74,33 +75,6 @@ impl Command for SpawnDiplopodSegment {
         if is_head {
             segment.insert(DiplopodHead::default());
         }
-    }
-}
-
-struct SpawnSuperfood {
-    position: Position,
-}
-
-impl Command for SpawnSuperfood {
-    fn apply(self, world: &mut World) {
-        let mut path_builder = PathBuilder::new();
-        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
-        path_builder.line_to(TILE_SIZE * Vec2::X);
-        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
-        path_builder.line_to(TILE_SIZE * Vec2::Y);
-        let cross = path_builder.build();
-
-        world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&cross),
-                transform: self.position.into(),
-                ..default()
-            },
-            Stroke::new(SUPERFOOD_COLOR, 7.5),
-            Obstacle::Superfood,
-            Superfood,
-            OnGameScreen,
-        ));
     }
 }
 

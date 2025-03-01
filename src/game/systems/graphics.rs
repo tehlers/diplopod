@@ -13,13 +13,6 @@ pub const UPPER_LEFT: Vec2 = Vec2::new(
     (MAX_Y - (ARENA_HEIGHT - 1) as f32 * TILE_SIZE) / 2.,
 );
 
-pub fn rotate_superfood(mut query: Query<&mut Transform, With<Superfood>>, time: Res<Time>) {
-    for mut transform in query.iter_mut() {
-        let delta = time.delta_secs();
-        transform.rotate(Quat::from_rotation_z(1.5 * delta));
-    }
-}
-
 pub fn change_color(
     mut query: Query<(&mut Fill, &mut Stroke), With<DiplopodSegment>>,
     heads: Query<&DiplopodHead>,

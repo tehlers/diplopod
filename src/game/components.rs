@@ -74,6 +74,3 @@ pub enum Obstacle {
     Antidote,
     Wall,
 }
-
-#[derive(Component)]
-pub struct Superfood;
