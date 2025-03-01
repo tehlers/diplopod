@@ -1,10 +1,7 @@
 use bevy::{color::palettes::css::RED, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 
-use super::{
-    OnGameScreen, RADIUS_FACTOR, TILE_SIZE,
-    components::{Obstacle, Position},
-};
+use super::{Obstacle, OnGameScreen, Position, RADIUS_FACTOR, TILE_SIZE};
 
 const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
 const POISON_FILL_COLOR: Color = Color::BLACK;

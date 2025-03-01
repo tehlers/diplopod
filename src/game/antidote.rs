@@ -3,8 +3,7 @@ use bevy_prototype_lyon::prelude::*;
 use rand::{Rng, rng};
 
 use super::{
-    CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH, OnGameScreen, TILE_SIZE,
-    components::{Obstacle, Position},
+    CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH, Obstacle, OnGameScreen, Position, TILE_SIZE,
     diplopod::{DiplopodHead, DiplopodSegment},
 };
 

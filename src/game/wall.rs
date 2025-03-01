@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
-use super::{
-    OnGameScreen, TILE_SIZE,
-    components::{Obstacle, Position},
-};
+use super::{Obstacle, OnGameScreen, Position, TILE_SIZE};
 
 const WALL_COLOR: Color = Color::srgb(0.25, 0.25, 0.25);
 

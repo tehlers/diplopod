@@ -1,10 +1,7 @@
 use bevy::{color::palettes::css::BLUE, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 
-use super::{
-    OnGameScreen, TILE_SIZE,
-    components::{Obstacle, Position},
-};
+use super::{Obstacle, OnGameScreen, Position, TILE_SIZE};
 
 const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
 

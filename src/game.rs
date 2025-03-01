@@ -1,5 +1,4 @@
 pub mod antidote;
-pub mod components;
 pub mod diplopod;
 pub mod events;
 pub mod fading_text;
@@ -19,8 +18,6 @@ use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
 use bevy_prototype_lyon::prelude::*;
-use components::Obstacle;
-use components::Position;
 use diplopod::*;
 use events::*;
 use fading_text::SpawnFadingText;
@@ -48,6 +45,48 @@ const RADIUS_FACTOR: f32 = 0.9;
 const AMOUNT_OF_FOOD: u32 = 16;
 const AMOUNT_OF_POISON: u32 = 17;
 const SPECIAL_SPAWN_INTERVAL: u32 = 16;
+
+#[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl From<Position> for Transform {
+    fn from(position: Position) -> Self {
+        Transform::from_xyz(
+            position.x as f32 * TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32 + UPPER_LEFT.x
+                - MAX_X / 2.
+                + TILE_SIZE / 2.,
+            position.y as f32 * TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32 + UPPER_LEFT.y
+                - MAX_Y / 2.
+                + TILE_SIZE / 2.,
+            1.0,
+        )
+    }
+}
+
+impl From<Transform> for Position {
+    fn from(transform: Transform) -> Self {
+        Position {
+            x: ((transform.translation.x - UPPER_LEFT.x + MAX_X / 2. - TILE_SIZE / 2.)
+                / (TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32))
+                .round() as i32,
+            y: ((transform.translation.y - UPPER_LEFT.y + MAX_Y / 2. - TILE_SIZE / 2.)
+                / (TILE_SIZE * CONSUMABLE_SCALE_FACTOR as f32))
+                .round() as i32,
+        }
+    }
+}
+
+#[derive(Component)]
+enum Obstacle {
+    Food,
+    Poison,
+    Superfood,
+    Antidote,
+    Wall,
+}
 
 #[derive(Component)]
 struct OnGameScreen;

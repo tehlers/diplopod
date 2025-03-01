@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
-use super::{
-    OnGameScreen, RADIUS_FACTOR, TILE_SIZE,
-    components::{Obstacle, Position},
-};
+use super::{Obstacle, OnGameScreen, Position, RADIUS_FACTOR, TILE_SIZE};
 
 const FOOD_COLOR: Color = Color::srgb(0.0, 1.0, 0.0);
 
