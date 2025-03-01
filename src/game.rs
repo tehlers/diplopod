@@ -3,6 +3,7 @@ pub mod components;
 pub mod events;
 pub mod fading_text;
 pub mod food;
+pub mod poison;
 pub mod resources;
 pub mod systems;
 pub mod wall;

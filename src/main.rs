@@ -10,7 +10,7 @@ use prelude::TITLE;
 
 mod prelude {
     use bevy::{
-        color::palettes::css::{BLUE, ORANGE, RED},
+        color::palettes::css::{BLUE, ORANGE},
         prelude::Color,
     };
 
@@ -28,8 +28,6 @@ mod prelude {
     pub const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
     pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
     pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
-    pub const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
-    pub const POISON_FILL_COLOR: Color = Color::BLACK;
 
     pub const RADIUS_FACTOR: f32 = 0.9;
 }
