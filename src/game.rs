@@ -101,12 +101,6 @@ struct SpawnConsumables {
     pub regular: bool,
 }
 
-#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-enum Phase {
-    Input,
-    Movement,
-}
-
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
@@ -116,52 +110,36 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
-                    toggle_pause
-                        .run_if(
-                            input_just_pressed(KeyCode::Space)
-                                .or(input_just_pressed(KeyCode::KeyP)),
-                        )
-                        .run_if(in_state(GameState::Game)),
+                    toggle_pause.run_if(
+                        input_just_pressed(KeyCode::Space).or(input_just_pressed(KeyCode::KeyP)),
+                    ),
+                    diplopod::keyboard,
+                    diplopod::gamepad,
+                    diplopod::limit_immunity,
+                    superfood::rotate_superfood,
+                    fading_text::fade_text,
                     (
-                        diplopod::keyboard,
-                        diplopod::gamepad,
-                        antidote::move_antidote.run_if(on_timer(Duration::from_millis(500))),
+                        diplopod::change_color_during_immunity,
+                        antidote::control_antidote_sound,
                     )
-                        .in_set(Phase::Input)
-                        .run_if(in_state(GameState::Game)),
-                    (superfood::rotate_superfood,)
-                        .after(Phase::Movement)
-                        .run_if(in_state(GameState::Game)),
-                    (diplopod::limit_immunity, fading_text::fade_text)
-                        .run_if(in_state(GameState::Game)),
-                    game_over
-                        .after(Phase::Movement)
-                        .run_if(in_state(GameState::Game))
-                        .run_if(on_event::<GameOver>),
-                ),
+                        .run_if(on_timer(Duration::from_millis(75))),
+                    game_over.run_if(on_event::<GameOver>),
+                )
+                    .run_if(in_state(GameState::Game)),
             )
             .add_systems(
                 FixedUpdate,
                 (
-                    (
-                        diplopod::movement
-                            .after(Phase::Input)
-                            .in_set(Phase::Movement),
-                        check_collision,
-                        spawn_consumables.run_if(on_event::<SpawnConsumables>),
-                    )
-                        .chain(),
-                    (
-                        diplopod::change_color_during_immunity,
-                        antidote::control_antidote_sound,
-                    ),
+                    diplopod::movement.run_if(on_timer(Duration::from_millis(75))),
+                    antidote::move_antidote.run_if(on_timer(Duration::from_millis(500))),
+                    check_collision,
+                    spawn_consumables.run_if(on_event::<SpawnConsumables>),
                 )
                     .run_if(in_state(GameState::Game)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .init_resource::<DiplopodSegments>()
             .init_resource::<LastSpecialSpawn>()
-            .insert_resource(Time::<Fixed>::from_seconds(0.075))
             .add_event::<GameOver>()
             .add_event::<SpawnConsumables>();
     }
