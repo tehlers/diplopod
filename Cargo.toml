@@ -60,6 +60,7 @@ features = [
   "wayland",              # Linux: Support Wayland windowing system
   #"serialize",            # Support for `serde` Serialize/Deserialize
   #"bevy_dynamic_plugin",   # Support for loading of `DynamicPlugin`s
+  "webgl2",
 
   # File formats:
   #"ktx2", # preferred format for GPU textures
@@ -86,4 +87,5 @@ anyhow = "1"
 bevy_embedded_assets = "0.12"
 bevy_prototype_lyon = "0.13"
 directories = "6"
+getrandom = { version = "0.3", features = ["wasm_js"] }
 rand = "0.9"
