@@ -15,6 +15,8 @@ use crate::highscore::Highscore;
 use crate::highscore::Lastscore;
 use antidote::*;
 use bevy::input::common_conditions::input_just_pressed;
+use bevy::input::gamepad::GamepadRumbleIntensity;
+use bevy::input::gamepad::GamepadRumbleRequest;
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use bevy::utils::Duration;
@@ -101,6 +103,12 @@ struct SpawnConsumables {
     pub regular: bool,
 }
 
+#[derive(Event)]
+enum Rumble {
+    Eat,
+    Death,
+}
+
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
@@ -110,22 +118,26 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
-                    toggle_pause.run_if(
-                        input_just_pressed(KeyCode::Space).or(input_just_pressed(KeyCode::KeyP)),
-                    ),
-                    diplopod::keyboard,
-                    diplopod::gamepad,
-                    diplopod::limit_immunity,
-                    superfood::rotate_superfood,
-                    fading_text::fade_text,
                     (
-                        diplopod::change_color_during_immunity,
-                        antidote::control_antidote_sound,
+                        toggle_pause.run_if(
+                            input_just_pressed(KeyCode::Space)
+                                .or(input_just_pressed(KeyCode::KeyP)),
+                        ),
+                        diplopod::keyboard,
+                        diplopod::gamepad,
+                        diplopod::limit_immunity,
+                        superfood::rotate_superfood,
+                        fading_text::fade_text,
+                        (
+                            diplopod::change_color_during_immunity,
+                            antidote::control_antidote_sound,
+                        )
+                            .run_if(on_timer(Duration::from_millis(75))),
+                        game_over.run_if(on_event::<GameOver>),
                     )
-                        .run_if(on_timer(Duration::from_millis(75))),
-                    game_over.run_if(on_event::<GameOver>),
-                )
-                    .run_if(in_state(GameState::Game)),
+                        .run_if(in_state(GameState::Game)),
+                    rumble,
+                ),
             )
             .add_systems(
                 FixedUpdate,
@@ -141,6 +153,7 @@ impl Plugin for GamePlugin {
             .init_resource::<DiplopodSegments>()
             .init_resource::<LastSpecialSpawn>()
             .add_event::<GameOver>()
+            .add_event::<Rumble>()
             .add_event::<SpawnConsumables>();
     }
 }
@@ -265,6 +278,7 @@ fn check_collision(
     obstacles: Query<(Entity, &Transform, &Obstacle)>,
     mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
     mut game_over_writer: EventWriter<GameOver>,
+    mut rumble_writer: EventWriter<Rumble>,
     sounds: Res<Sounds>,
 ) {
     for (mut head, head_transform) in heads.iter_mut() {
@@ -277,6 +291,7 @@ fn check_collision(
                         commands.queue(SpawnDiplopodSegment);
 
                         spawn_consumables_writer.send(SpawnConsumables { regular: true });
+                        rumble_writer.send(Rumble::Eat);
 
                         commands.spawn((
                             AudioPlayer(sounds.eat_food.clone()),
@@ -297,6 +312,7 @@ fn check_collision(
                         });
 
                         spawn_consumables_writer.send(SpawnConsumables { regular: false });
+                        rumble_writer.send(Rumble::Eat);
 
                         commands.spawn((
                             AudioPlayer(sounds.super_food.clone()),
@@ -310,6 +326,7 @@ fn check_collision(
                             commands.queue(SpawnDiplopodSegment);
 
                             spawn_consumables_writer.send(SpawnConsumables { regular: false });
+                            rumble_writer.send(Rumble::Eat);
 
                             commands.spawn((
                                 AudioPlayer(sounds.eat_poison.clone()),
@@ -334,6 +351,8 @@ fn check_collision(
 
                         let remaining = head.immunity.remaining_secs();
                         head.immunity = Timer::from_seconds(10.0 + remaining, TimerMode::Once);
+
+                        rumble_writer.send(Rumble::Eat);
                     }
 
                     Obstacle::Wall => {
@@ -355,12 +374,14 @@ fn game_over(
     mut game_state: ResMut<NextState<GameState>>,
     mut lastscore: ResMut<Lastscore>,
     mut highscore: ResMut<Highscore>,
+    mut rumble_writer: EventWriter<Rumble>,
 ) {
     if reader.read().next().is_some() {
         commands.spawn((
             AudioPlayer(sounds.game_over.clone()),
             PlaybackSettings::DESPAWN,
         ));
+        rumble_writer.send(Rumble::Death);
 
         lastscore.0 = segments.0.len() as u16;
 
@@ -373,6 +394,28 @@ fn game_over(
         segments.0 = Vec::new();
 
         game_state.set(GameState::Highscore);
+    }
+}
+
+fn rumble(
+    mut rumble_reader: EventReader<Rumble>,
+    mut rumble_writer: EventWriter<GamepadRumbleRequest>,
+    gamepads: Query<Entity, With<Gamepad>>,
+) {
+    if let Some(rumble) = rumble_reader.read().next() {
+        for gamepad in &gamepads {
+            rumble_writer.send(GamepadRumbleRequest::Add {
+                gamepad,
+                intensity: match rumble {
+                    Rumble::Eat => GamepadRumbleIntensity::WEAK_MAX,
+                    Rumble::Death => GamepadRumbleIntensity::MAX,
+                },
+                duration: match rumble {
+                    Rumble::Eat => Duration::from_millis(100),
+                    Rumble::Death => Duration::from_secs(1),
+                },
+            });
+        }
     }
 }
 
