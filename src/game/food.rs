@@ -16,14 +16,14 @@ impl Command for SpawnFood {
             center: Vec2::new(0., 0.),
         };
 
+        let transform: Transform = self.position.into();
+
         world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: self.position.into(),
-                ..default()
-            },
-            Fill::color(FOOD_COLOR),
-            Stroke::color(FOOD_COLOR),
+            ShapeBuilder::with(&shape)
+                .fill(FOOD_COLOR)
+                .stroke((FOOD_COLOR, 1.0))
+                .build(),
+            transform,
             Obstacle::Food,
             OnGameScreen,
         ));

@@ -17,14 +17,14 @@ impl Command for SpawnPoison {
             center: Vec2::new(0., 0.),
         };
 
+        let transform: Transform = self.position.into();
+
         world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: self.position.into(),
-                ..default()
-            },
-            Fill::color(POISON_FILL_COLOR),
-            Stroke::new(POISON_OUTLINE_COLOR, 7.),
+            ShapeBuilder::with(&shape)
+                .fill(POISON_FILL_COLOR)
+                .stroke((POISON_OUTLINE_COLOR, 7.))
+                .build(),
+            transform,
             Obstacle::Poison,
             OnGameScreen,
         ));

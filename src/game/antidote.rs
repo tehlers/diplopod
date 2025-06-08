@@ -21,20 +21,20 @@ pub struct SpawnAntidote {
 
 impl Command for SpawnAntidote {
     fn apply(self, world: &mut World) {
-        let mut path_builder = PathBuilder::new();
-        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
-        path_builder.line_to(TILE_SIZE * Vec2::X);
-        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
-        path_builder.line_to(TILE_SIZE * Vec2::Y);
-        let cross = path_builder.build();
+        let cross = ShapePath::new()
+            .move_to({ -TILE_SIZE } * Vec2::X)
+            .line_to(TILE_SIZE * Vec2::X)
+            .move_to({ -TILE_SIZE } * Vec2::Y)
+            .line_to(TILE_SIZE * Vec2::Y)
+            .close();
+
+        let transform: Transform = self.position.into();
 
         world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&cross),
-                transform: self.position.into(),
-                ..default()
-            },
-            Stroke::new(ANTIDOTE_COLOR, TILE_SIZE * 0.9),
+            ShapeBuilder::with(&cross)
+                .stroke((ANTIDOTE_COLOR, TILE_SIZE * 0.9))
+                .build(),
+            transform,
             Obstacle::Antidote,
             Antidote,
             OnGameScreen,
@@ -76,21 +76,21 @@ pub fn control_antidote_sound(
     heads: Query<&DiplopodHead>,
     antidote_sound: Query<(&AudioSink, Entity), With<AntidoteSound>>,
 ) {
-    let head = heads.single();
-
-    if head.immunity.remaining_secs() > 2.0 {
-        // keep the sound and restart it, if it was already toggling
-        if let Ok(sound) = antidote_sound.get_single() {
-            if sound.0.is_paused() {
-                sound.0.play();
+    if let Ok(head) = heads.single() {
+        if head.immunity.remaining_secs() > 2.0 {
+            // keep the sound and restart it, if it was already toggling
+            if let Ok(sound) = antidote_sound.single() {
+                if sound.0.is_paused() {
+                    sound.0.play();
+                }
             }
+        } else if !head.immunity.finished() {
+            if let Ok(sound) = antidote_sound.single() {
+                sound.0.toggle_playback();
+            }
+        } else if let Ok(sound) = antidote_sound.single() {
+            sound.0.stop();
+            commands.entity(sound.1).despawn();
         }
-    } else if !head.immunity.finished() {
-        if let Ok(sound) = antidote_sound.get_single() {
-            sound.0.toggle();
-        }
-    } else if let Ok(sound) = antidote_sound.get_single() {
-        sound.0.stop();
-        commands.entity(sound.1).despawn();
     }
 }

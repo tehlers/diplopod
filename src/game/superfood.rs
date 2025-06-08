@@ -14,20 +14,20 @@ pub struct SpawnSuperfood {
 
 impl Command for SpawnSuperfood {
     fn apply(self, world: &mut World) {
-        let mut path_builder = PathBuilder::new();
-        path_builder.move_to({ -TILE_SIZE } * Vec2::X);
-        path_builder.line_to(TILE_SIZE * Vec2::X);
-        path_builder.move_to({ -TILE_SIZE } * Vec2::Y);
-        path_builder.line_to(TILE_SIZE * Vec2::Y);
-        let cross = path_builder.build();
+        let cross = ShapePath::new()
+            .move_to({ -TILE_SIZE } * Vec2::X)
+            .line_to(TILE_SIZE * Vec2::X)
+            .move_to({ -TILE_SIZE } * Vec2::Y)
+            .line_to(TILE_SIZE * Vec2::Y)
+            .close();
+
+        let transform: Transform = self.position.into();
 
         world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&cross),
-                transform: self.position.into(),
-                ..default()
-            },
-            Stroke::new(SUPERFOOD_COLOR, 7.5),
+            ShapeBuilder::with(&cross)
+                .stroke((SUPERFOOD_COLOR, 7.5))
+                .build(),
+            transform,
             Obstacle::Superfood,
             Superfood,
             OnGameScreen,

@@ -2,11 +2,11 @@ use anyhow::Result;
 use anyhow::anyhow;
 use bevy::color::palettes::css::ANTIQUE_WHITE;
 use bevy::time::common_conditions::on_timer;
-use bevy::utils::Duration;
 use bevy::{input::ButtonState, input::keyboard::KeyboardInput, prelude::*};
 use directories::ProjectDirs;
 use std::fs::File;
 use std::io::Write;
+use std::time::Duration;
 
 use crate::TITLE;
 

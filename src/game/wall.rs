@@ -17,14 +17,14 @@ impl Command for SpawnWall {
             radii: None,
         };
 
+        let transform: Transform = self.position.into();
+
         world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: self.position.into(),
-                ..default()
-            },
-            Fill::color(WALL_COLOR),
-            Stroke::color(WALL_COLOR),
+            ShapeBuilder::with(&shape)
+                .fill(WALL_COLOR)
+                .stroke((WALL_COLOR, 1.0))
+                .build(),
+            transform,
             Obstacle::Wall,
             OnGameScreen,
         ));

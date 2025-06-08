@@ -79,7 +79,7 @@ fn keyboard(
             MenuButton::Play => game_state.set(GameState::Game),
             MenuButton::Highscore => game_state.set(GameState::Highscore),
             MenuButton::Quit => {
-                app_exit_events.send(AppExit::Success);
+                app_exit_events.write(AppExit::Success);
             }
         }
     }
@@ -110,7 +110,7 @@ pub fn gamepad(
                 MenuButton::Play => game_state.set(GameState::Game),
                 MenuButton::Highscore => game_state.set(GameState::Highscore),
                 MenuButton::Quit => {
-                    app_exit_events.send(AppExit::Success);
+                    app_exit_events.write(AppExit::Success);
                 }
             }
         }

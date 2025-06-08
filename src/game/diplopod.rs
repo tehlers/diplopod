@@ -1,6 +1,6 @@
 use bevy::{
     color::palettes::css::ORANGE,
-    ecs::{component::ComponentId, world::DeferredWorld},
+    ecs::{component::HookContext, world::DeferredWorld},
     prelude::*,
 };
 use bevy_prototype_lyon::prelude::*;
@@ -40,7 +40,7 @@ impl Default for DiplopodHead {
 #[component(on_add=on_add_diplopod_segment)]
 pub struct DiplopodSegment;
 
-fn on_add_diplopod_segment(mut world: DeferredWorld, entity: Entity, _: ComponentId) {
+fn on_add_diplopod_segment(mut world: DeferredWorld, HookContext { entity, .. }: HookContext) {
     world.resource_mut::<DiplopodSegments>().0.push(entity);
 }
 
@@ -80,13 +80,11 @@ impl Command for SpawnDiplopodSegment {
         };
 
         let mut segment = world.spawn((
-            ShapeBundle {
-                path: GeometryBuilder::build_as(&shape),
-                transform: position,
-                ..default()
-            },
-            Fill::color(color),
-            Stroke::color(color),
+            ShapeBuilder::with(&shape)
+                .fill(color)
+                .stroke((color, 1.0))
+                .build(),
+            position,
             DiplopodSegment,
             OnGameScreen,
         ));
@@ -177,7 +175,7 @@ pub fn movement(
         if segment_positions.contains(&head_pos.translation)
             && (head.direction.x != 0.0 || head.direction.y != 0.0)
         {
-            game_over_writer.send(GameOver);
+            game_over_writer.write(GameOver);
         }
 
         segment_positions
@@ -190,38 +188,54 @@ pub fn movement(
 }
 
 pub fn limit_immunity(mut heads: Query<&mut DiplopodHead>, time: Res<Time>) {
-    let mut head = heads.single_mut();
-
-    if !head.immunity.finished() {
-        head.immunity.tick(time.delta());
+    if let Ok(mut head) = heads.single_mut() {
+        if !head.immunity.finished() {
+            head.immunity.tick(time.delta());
+        }
     }
 }
 
 pub fn change_color_during_immunity(
-    mut query: Query<(&mut Fill, &mut Stroke), With<DiplopodSegment>>,
+    mut query: Query<&mut Shape, With<DiplopodSegment>>,
     heads: Query<&DiplopodHead>,
 ) {
-    let head = heads.single();
+    let segment = shapes::Rectangle {
+        extents: Vec2::splat(TILE_SIZE),
+        origin: shapes::RectangleOrigin::Center,
+        radii: None,
+    };
 
-    if head.immunity.remaining_secs() > 2.0 {
-        for (mut fill, mut stroke) in query.iter_mut() {
-            fill.color = DIPLOPOD_IMMUNE_COLOR;
-            stroke.color = DIPLOPOD_IMMUNE_COLOR;
-        }
-    } else if !head.immunity.finished() {
-        for (mut fill, mut stroke) in query.iter_mut() {
-            if fill.color == DIPLOPOD_IMMUNE_COLOR {
-                fill.color = DIPLOPOD_COLOR;
-                stroke.color = DIPLOPOD_COLOR;
-            } else {
-                fill.color = DIPLOPOD_IMMUNE_COLOR;
-                stroke.color = DIPLOPOD_IMMUNE_COLOR;
+    if let Ok(head) = heads.single() {
+        if head.immunity.remaining_secs() > 2.0 {
+            for mut shape in query.iter_mut() {
+                *shape = ShapeBuilder::with(&segment)
+                    .fill(DIPLOPOD_IMMUNE_COLOR)
+                    .stroke((DIPLOPOD_IMMUNE_COLOR, 1.0))
+                    .build();
             }
-        }
-    } else {
-        for (mut fill, mut stroke) in query.iter_mut() {
-            fill.color = DIPLOPOD_COLOR;
-            stroke.color = DIPLOPOD_COLOR;
+        } else if !head.immunity.finished() {
+            for mut shape in query.iter_mut() {
+                if let Some(fill) = shape.fill {
+                    if fill.color == DIPLOPOD_IMMUNE_COLOR {
+                        *shape = ShapeBuilder::with(&segment)
+                            .fill(DIPLOPOD_COLOR)
+                            .stroke((DIPLOPOD_COLOR, 1.0))
+                            .build();
+                    } else {
+                        *shape = ShapeBuilder::with(&segment)
+                            .fill(DIPLOPOD_IMMUNE_COLOR)
+                            .stroke((DIPLOPOD_IMMUNE_COLOR, 1.0))
+                            .build();
+                    }
+                }
+            }
+        } else {
+            for mut shape in query.iter_mut() {
+                *shape = ShapeBuilder::with(&segment)
+                    .fill(DIPLOPOD_COLOR)
+                    .stroke((DIPLOPOD_COLOR, 1.0))
+                    .build();
+            }
         }
     }
 }

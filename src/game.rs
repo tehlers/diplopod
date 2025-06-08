@@ -19,7 +19,6 @@ use bevy::input::gamepad::GamepadRumbleIntensity;
 use bevy::input::gamepad::GamepadRumbleRequest;
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
-use bevy::utils::Duration;
 use bevy_prototype_lyon::prelude::*;
 use diplopod::*;
 use fading_text::SpawnFadingText;
@@ -28,6 +27,7 @@ use poison::SpawnPoison;
 use rand::Rng;
 use rand::rng;
 use rand::seq::SliceRandom;
+use std::time::Duration;
 use superfood::*;
 use wall::SpawnWall;
 
@@ -290,8 +290,8 @@ fn check_collision(
                         commands.entity(entity).despawn();
                         commands.queue(SpawnDiplopodSegment);
 
-                        spawn_consumables_writer.send(SpawnConsumables { regular: true });
-                        rumble_writer.send(Rumble::Eat);
+                        spawn_consumables_writer.write(SpawnConsumables { regular: true });
+                        rumble_writer.write(Rumble::Eat);
 
                         commands.spawn((
                             AudioPlayer(sounds.eat_food.clone()),
@@ -311,8 +311,8 @@ fn check_collision(
                             transform: *head_transform,
                         });
 
-                        spawn_consumables_writer.send(SpawnConsumables { regular: false });
-                        rumble_writer.send(Rumble::Eat);
+                        spawn_consumables_writer.write(SpawnConsumables { regular: false });
+                        rumble_writer.write(Rumble::Eat);
 
                         commands.spawn((
                             AudioPlayer(sounds.super_food.clone()),
@@ -325,15 +325,15 @@ fn check_collision(
                             commands.entity(entity).despawn();
                             commands.queue(SpawnDiplopodSegment);
 
-                            spawn_consumables_writer.send(SpawnConsumables { regular: false });
-                            rumble_writer.send(Rumble::Eat);
+                            spawn_consumables_writer.write(SpawnConsumables { regular: false });
+                            rumble_writer.write(Rumble::Eat);
 
                             commands.spawn((
                                 AudioPlayer(sounds.eat_poison.clone()),
                                 PlaybackSettings::DESPAWN,
                             ));
                         } else {
-                            game_over_writer.send(GameOver);
+                            game_over_writer.write(GameOver);
                         }
                     }
 
@@ -352,11 +352,11 @@ fn check_collision(
                         let remaining = head.immunity.remaining_secs();
                         head.immunity = Timer::from_seconds(10.0 + remaining, TimerMode::Once);
 
-                        rumble_writer.send(Rumble::Eat);
+                        rumble_writer.write(Rumble::Eat);
                     }
 
                     Obstacle::Wall => {
-                        game_over_writer.send(GameOver);
+                        game_over_writer.write(GameOver);
                     }
                 };
             }
@@ -381,7 +381,7 @@ fn game_over(
             AudioPlayer(sounds.game_over.clone()),
             PlaybackSettings::DESPAWN,
         ));
-        rumble_writer.send(Rumble::Death);
+        rumble_writer.write(Rumble::Death);
 
         lastscore.0 = segments.0.len() as u16;
 
@@ -404,7 +404,7 @@ fn rumble(
 ) {
     if let Some(rumble) = rumble_reader.read().next() {
         for gamepad in &gamepads {
-            rumble_writer.send(GamepadRumbleRequest::Add {
+            rumble_writer.write(GamepadRumbleRequest::Add {
                 gamepad,
                 intensity: match rumble {
                     Rumble::Eat => GamepadRumbleIntensity::WEAK_MAX,
