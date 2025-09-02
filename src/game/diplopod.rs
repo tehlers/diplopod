@@ -188,10 +188,10 @@ pub fn movement(
 }
 
 pub fn limit_immunity(mut heads: Query<&mut DiplopodHead>, time: Res<Time>) {
-    if let Ok(mut head) = heads.single_mut() {
-        if !head.immunity.finished() {
-            head.immunity.tick(time.delta());
-        }
+    if let Ok(mut head) = heads.single_mut()
+        && !head.immunity.finished()
+    {
+        head.immunity.tick(time.delta());
     }
 }
 
