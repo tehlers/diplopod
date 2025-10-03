@@ -1,9 +1,10 @@
-use bevy::{color::palettes::css::BLUE, prelude::*};
-use bevy_prototype_lyon::prelude::*;
+use bevy::{ecs::system::SystemState, prelude::*};
+
+use crate::game::CommandResources;
 
 use super::{Obstacle, OnGameScreen, Position, TILE_SIZE};
 
-const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
+const STROKE_WIDTH: f32 = 7.5;
 
 #[derive(Component)]
 pub struct Superfood;
@@ -14,24 +15,25 @@ pub struct SpawnSuperfood {
 
 impl Command for SpawnSuperfood {
     fn apply(self, world: &mut World) {
-        let cross = ShapePath::new()
-            .move_to({ -TILE_SIZE } * Vec2::X)
-            .line_to(TILE_SIZE * Vec2::X)
-            .move_to({ -TILE_SIZE } * Vec2::Y)
-            .line_to(TILE_SIZE * Vec2::Y)
-            .close();
+        let mut command_resources: CommandResources = SystemState::new(world);
+        let (mut commands, mut meshes, colors) = command_resources.get_mut(world);
 
         let transform: Transform = self.position.into();
+        commands
+            .spawn((
+                Mesh2d(meshes.add(Rectangle::new(TILE_SIZE * 2.0, STROKE_WIDTH))),
+                colors.superfood.clone(),
+                transform,
+                Obstacle::Superfood,
+                Superfood,
+                OnGameScreen,
+            ))
+            .with_child((
+                Mesh2d(meshes.add(Rectangle::new(STROKE_WIDTH, TILE_SIZE * 2.0))),
+                colors.superfood.clone(),
+            ));
 
-        world.spawn((
-            ShapeBuilder::with(&cross)
-                .stroke((SUPERFOOD_COLOR, 7.5))
-                .build(),
-            transform,
-            Obstacle::Superfood,
-            Superfood,
-            OnGameScreen,
-        ));
+        command_resources.apply(world);
     }
 }
 

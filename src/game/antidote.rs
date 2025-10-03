@@ -1,13 +1,14 @@
-use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::*;
+use bevy::{ecs::system::SystemState, prelude::*};
 use rand::{Rng, rng};
+
+use crate::game::CommandResources;
 
 use super::{
     CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH, Obstacle, OnGameScreen, Position, TILE_SIZE,
     diplopod::{DiplopodHead, DiplopodSegment},
 };
 
-const ANTIDOTE_COLOR: Color = Color::WHITE;
+const STROKE_WIDTH: f32 = TILE_SIZE * 0.9;
 
 #[derive(Component)]
 pub struct Antidote;
@@ -21,24 +22,25 @@ pub struct SpawnAntidote {
 
 impl Command for SpawnAntidote {
     fn apply(self, world: &mut World) {
-        let cross = ShapePath::new()
-            .move_to({ -TILE_SIZE } * Vec2::X)
-            .line_to(TILE_SIZE * Vec2::X)
-            .move_to({ -TILE_SIZE } * Vec2::Y)
-            .line_to(TILE_SIZE * Vec2::Y)
-            .close();
+        let mut command_resources: CommandResources = SystemState::new(world);
+        let (mut commands, mut meshes, colors) = command_resources.get_mut(world);
 
         let transform: Transform = self.position.into();
+        commands
+            .spawn((
+                Mesh2d(meshes.add(Rectangle::new(TILE_SIZE * 2.0, STROKE_WIDTH))),
+                colors.antidote.clone(),
+                transform.with_translation(transform.translation + Vec3::Z * 2.0),
+                Obstacle::Antidote,
+                Antidote,
+                OnGameScreen,
+            ))
+            .with_child((
+                Mesh2d(meshes.add(Rectangle::new(STROKE_WIDTH, TILE_SIZE * 2.0))),
+                colors.antidote.clone(),
+            ));
 
-        world.spawn((
-            ShapeBuilder::with(&cross)
-                .stroke((ANTIDOTE_COLOR, TILE_SIZE * 0.9))
-                .build(),
-            transform,
-            Obstacle::Antidote,
-            Antidote,
-            OnGameScreen,
-        ));
+        command_resources.apply(world);
     }
 }
 pub fn move_antidote(
@@ -67,7 +69,8 @@ pub fn move_antidote(
             continue;
         }
 
-        *transform = new_pos.into();
+        let new_transform: Transform = new_pos.into();
+        *transform = new_transform.with_translation(new_transform.translation + Vec3::Z * 2.0);
     }
 }
 

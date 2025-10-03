@@ -1,11 +1,12 @@
 use bevy::{
-    color::palettes::css::ORANGE,
-    ecs::{component::HookContext, world::DeferredWorld},
+    ecs::{component::HookContext, system::SystemState, world::DeferredWorld},
     prelude::*,
 };
-use bevy_prototype_lyon::prelude::*;
 
-use crate::{MAX_X, MAX_Y};
+use crate::{
+    MAX_X, MAX_Y,
+    game::{CommandResources, DiplopodColors},
+};
 
 use super::{ARENA_HEIGHT, ARENA_WIDTH, GameOver, OnGameScreen, TILE_SIZE, UPPER_LEFT};
 
@@ -14,9 +15,6 @@ pub const START_POSITION: Transform = Transform::from_xyz(
     (ARENA_HEIGHT / 2) as f32 * TILE_SIZE + UPPER_LEFT.y - MAX_Y / 2.,
     0.0,
 );
-
-const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
-const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
 
 #[derive(Default, Resource)]
 pub struct DiplopodSegments(pub Vec<Entity>);
@@ -48,12 +46,6 @@ pub struct SpawnDiplopodSegment;
 
 impl Command for SpawnDiplopodSegment {
     fn apply(self, world: &mut World) {
-        let shape = shapes::Rectangle {
-            extents: Vec2::splat(TILE_SIZE),
-            origin: shapes::RectangleOrigin::Center,
-            radii: None,
-        };
-
         let segments = &world.resource::<DiplopodSegments>().0;
         let is_head = segments.is_empty();
 
@@ -73,17 +65,18 @@ impl Command for SpawnDiplopodSegment {
                 .finished()
         };
 
+        let mut command_resources: CommandResources = SystemState::new(world);
+        let (mut commands, mut meshes, colors) = command_resources.get_mut(world);
+
         let color = if immune {
-            DIPLOPOD_IMMUNE_COLOR
+            colors.diplopod_immune.clone()
         } else {
-            DIPLOPOD_COLOR
+            colors.diplopod_normal.clone()
         };
 
-        let mut segment = world.spawn((
-            ShapeBuilder::with(&shape)
-                .fill(color)
-                .stroke((color, 1.0))
-                .build(),
+        let mut segment = commands.spawn((
+            Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),
+            color,
             position,
             DiplopodSegment,
             OnGameScreen,
@@ -92,6 +85,8 @@ impl Command for SpawnDiplopodSegment {
         if is_head {
             segment.insert(DiplopodHead::default());
         }
+
+        command_resources.apply(world);
     }
 }
 
@@ -196,45 +191,32 @@ pub fn limit_immunity(mut heads: Query<&mut DiplopodHead>, time: Res<Time>) {
 }
 
 pub fn change_color_during_immunity(
-    mut query: Query<&mut Shape, With<DiplopodSegment>>,
+    mut query: Query<&mut MeshMaterial2d<ColorMaterial>, With<DiplopodSegment>>,
     heads: Query<&DiplopodHead>,
+    diplopod_colors: Res<DiplopodColors>,
 ) {
-    let segment = shapes::Rectangle {
-        extents: Vec2::splat(TILE_SIZE),
-        origin: shapes::RectangleOrigin::Center,
-        radii: None,
-    };
-
     if let Ok(head) = heads.single() {
-        if head.immunity.remaining_secs() > 2.0 {
-            for mut shape in query.iter_mut() {
-                *shape = ShapeBuilder::with(&segment)
-                    .fill(DIPLOPOD_IMMUNE_COLOR)
-                    .stroke((DIPLOPOD_IMMUNE_COLOR, 1.0))
-                    .build();
-            }
+        let target_color = if head.immunity.remaining_secs() > 2.0 {
+            diplopod_colors.diplopod_immune.clone()
         } else if !head.immunity.finished() {
-            for mut shape in query.iter_mut() {
-                if let Some(fill) = shape.fill {
-                    if fill.color == DIPLOPOD_IMMUNE_COLOR {
-                        *shape = ShapeBuilder::with(&segment)
-                            .fill(DIPLOPOD_COLOR)
-                            .stroke((DIPLOPOD_COLOR, 1.0))
-                            .build();
-                    } else {
-                        *shape = ShapeBuilder::with(&segment)
-                            .fill(DIPLOPOD_IMMUNE_COLOR)
-                            .stroke((DIPLOPOD_IMMUNE_COLOR, 1.0))
-                            .build();
-                    }
+            if let Some(current_color) = query.iter().next() {
+                if current_color.0 == diplopod_colors.diplopod_normal.0 {
+                    diplopod_colors.diplopod_immune.clone()
+                } else {
+                    diplopod_colors.diplopod_normal.clone()
                 }
+            } else {
+                diplopod_colors.diplopod_normal.clone()
             }
         } else {
-            for mut shape in query.iter_mut() {
-                *shape = ShapeBuilder::with(&segment)
-                    .fill(DIPLOPOD_COLOR)
-                    .stroke((DIPLOPOD_COLOR, 1.0))
-                    .build();
+            diplopod_colors.diplopod_normal.clone()
+        };
+
+        if let Some(current_color) = query.iter().next()
+            && current_color.0 != target_color.0
+        {
+            for mut segment_color in query.iter_mut() {
+                *segment_color = target_color.clone();
             }
         }
     }

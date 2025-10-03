@@ -7,6 +7,11 @@ use bevy::render::camera::ScalingMode;
 use bevy::window::PrimaryWindow;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 
+use crate::game::{
+    ANTIDOTE_COLOR, DIPLOPOD_COLOR, DIPLOPOD_IMMUNE_COLOR, DiplopodColors, FOOD_COLOR,
+    POISON_FILL_COLOR, POISON_OUTLINE_COLOR, SUPERFOOD_COLOR, WALL_COLOR,
+};
+
 const TITLE: &str = "diplopod";
 const MAX_X: f32 = 1920.0;
 const MAX_Y: f32 = 1200.0;
@@ -62,6 +67,7 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
         Camera2d,
@@ -90,6 +96,17 @@ fn setup(
     if let Ok(mut window) = windows.single_mut() {
         window.cursor_options.visible = false;
     }
+
+    commands.insert_resource(DiplopodColors {
+        diplopod_normal: MeshMaterial2d(materials.add(DIPLOPOD_COLOR)),
+        diplopod_immune: MeshMaterial2d(materials.add(DIPLOPOD_IMMUNE_COLOR)),
+        antidote: MeshMaterial2d(materials.add(ANTIDOTE_COLOR)),
+        food: MeshMaterial2d(materials.add(FOOD_COLOR)),
+        poison_fill: MeshMaterial2d(materials.add(POISON_FILL_COLOR)),
+        poison_outline: MeshMaterial2d(materials.add(POISON_OUTLINE_COLOR)),
+        superfood: MeshMaterial2d(materials.add(SUPERFOOD_COLOR)),
+        wall: MeshMaterial2d(materials.add(WALL_COLOR)),
+    });
 }
 
 fn set_default_font(

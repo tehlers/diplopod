@@ -14,12 +14,15 @@ use crate::despawn_screen;
 use crate::highscore::Highscore;
 use crate::highscore::Lastscore;
 use antidote::*;
+use bevy::color::palettes::css::BLUE;
+use bevy::color::palettes::css::ORANGE;
+use bevy::color::palettes::css::RED;
+use bevy::ecs::system::SystemState;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::gamepad::GamepadRumbleIntensity;
 use bevy::input::gamepad::GamepadRumbleRequest;
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
-use bevy_prototype_lyon::prelude::*;
 use diplopod::*;
 use fading_text::SpawnFadingText;
 use food::SpawnFood;
@@ -47,11 +50,26 @@ const AMOUNT_OF_FOOD: u32 = 16;
 const AMOUNT_OF_POISON: u32 = 17;
 const SPECIAL_SPAWN_INTERVAL: u32 = 16;
 
+pub const ANTIDOTE_COLOR: Color = Color::WHITE;
+pub const DIPLOPOD_COLOR: Color = Color::Srgba(ORANGE);
+pub const DIPLOPOD_IMMUNE_COLOR: Color = Color::WHITE;
+pub const FOOD_COLOR: Color = Color::srgb(0.0, 1.0, 0.0);
+pub const POISON_FILL_COLOR: Color = Color::BLACK;
+pub const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
+pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
+pub const WALL_COLOR: Color = Color::srgb(0.25, 0.25, 0.25);
+
 #[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
 }
+
+type CommandResources<'a> = SystemState<(
+    Commands<'a, 'a>,
+    ResMut<'a, Assets<Mesh>>,
+    Res<'a, DiplopodColors>,
+)>;
 
 impl From<Position> for Transform {
     fn from(position: Position) -> Self {
@@ -109,12 +127,23 @@ enum Rumble {
     Death,
 }
 
+#[derive(Resource)]
+pub struct DiplopodColors {
+    pub antidote: MeshMaterial2d<ColorMaterial>,
+    pub diplopod_immune: MeshMaterial2d<ColorMaterial>,
+    pub diplopod_normal: MeshMaterial2d<ColorMaterial>,
+    pub food: MeshMaterial2d<ColorMaterial>,
+    pub poison_fill: MeshMaterial2d<ColorMaterial>,
+    pub poison_outline: MeshMaterial2d<ColorMaterial>,
+    pub superfood: MeshMaterial2d<ColorMaterial>,
+    pub wall: MeshMaterial2d<ColorMaterial>,
+}
+
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(ShapePlugin)
-            .add_systems(OnEnter(GameState::Game), setup_game)
+        app.add_systems(OnEnter(GameState::Game), setup_game)
             .add_systems(
                 Update,
                 (
@@ -250,7 +279,10 @@ fn spawn_consumables(
                 commands.entity(ent).despawn();
             }
 
-            if last_special_spawn.0 % (SPECIAL_SPAWN_INTERVAL * 2) == 0 {
+            if last_special_spawn
+                .0
+                .is_multiple_of(SPECIAL_SPAWN_INTERVAL * 2)
+            {
                 for ent in antidotes.iter() {
                     commands.entity(ent).despawn();
                 }

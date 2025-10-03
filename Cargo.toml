@@ -47,6 +47,7 @@ features = [
   "bevy_ui",            # UI toolkit
   "bevy_state",
   "bevy_window",
+  "bevy_log",
 
   # File formats:
   #"png",
@@ -85,7 +86,6 @@ features = [
 [dependencies]
 anyhow = "1"
 bevy_embedded_assets = "0.13"
-bevy_prototype_lyon = { git = "https://github.com/rparrett/bevy_prototype_lyon", branch = "fix-dynamic-examples" }
 directories = "6"
 getrandom = { version = "0.3", features = ["wasm_js"] }
 rand = "0.9"

@@ -1,10 +1,10 @@
-use bevy::{color::palettes::css::RED, prelude::*};
-use bevy_prototype_lyon::prelude::*;
+use bevy::{ecs::system::SystemState, prelude::*};
+
+use crate::game::CommandResources;
 
 use super::{Obstacle, OnGameScreen, Position, RADIUS_FACTOR, TILE_SIZE};
 
-const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
-const POISON_FILL_COLOR: Color = Color::BLACK;
+const FILL_RADIUS_FACTOR: f32 = 0.7;
 
 pub struct SpawnPoison {
     pub position: Position,
@@ -12,21 +12,25 @@ pub struct SpawnPoison {
 
 impl Command for SpawnPoison {
     fn apply(self, world: &mut World) {
-        let shape = shapes::Circle {
-            radius: TILE_SIZE * RADIUS_FACTOR,
-            center: Vec2::new(0., 0.),
-        };
+        let mut command_resources: CommandResources = SystemState::new(world);
+        let (mut commands, mut meshes, colors) = command_resources.get_mut(world);
 
         let transform: Transform = self.position.into();
 
-        world.spawn((
-            ShapeBuilder::with(&shape)
-                .fill(POISON_FILL_COLOR)
-                .stroke((POISON_OUTLINE_COLOR, 7.))
-                .build(),
-            transform,
-            Obstacle::Poison,
-            OnGameScreen,
-        ));
+        commands
+            .spawn((
+                Mesh2d(meshes.add(Circle::new(TILE_SIZE * RADIUS_FACTOR))),
+                colors.poison_outline.clone(),
+                transform,
+                Obstacle::Poison,
+                OnGameScreen,
+            ))
+            .with_child((
+                Mesh2d(meshes.add(Circle::new(TILE_SIZE * RADIUS_FACTOR * FILL_RADIUS_FACTOR))),
+                colors.poison_fill.clone(),
+                Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
+            ));
+
+        command_resources.apply(world);
     }
 }
