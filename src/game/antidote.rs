@@ -87,7 +87,7 @@ pub fn control_antidote_sound(
             {
                 sound.0.play();
             }
-        } else if !head.immunity.finished() {
+        } else if !head.immunity.is_finished() {
             if let Ok(sound) = antidote_sound.single() {
                 sound.0.toggle_playback();
             }

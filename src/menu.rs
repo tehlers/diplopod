@@ -59,7 +59,7 @@ fn keyboard(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut selected: ResMut<Selected>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: MessageWriter<AppExit>,
     query: Query<(&mut BackgroundColor, &MenuButton)>,
 ) {
     if keyboard_input.any_just_released([KeyCode::ArrowUp, KeyCode::KeyW, KeyCode::KeyK]) {
@@ -90,7 +90,7 @@ pub fn gamepad(
     mut selected: ResMut<Selected>,
     query: Query<(&mut BackgroundColor, &MenuButton)>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut app_exit_events: EventWriter<AppExit>,
+    mut app_exit_events: MessageWriter<AppExit>,
 ) {
     for gamepad in gamepads.iter() {
         if gamepad.just_released(GamepadButton::DPadUp) {

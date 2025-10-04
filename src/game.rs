@@ -113,15 +113,15 @@ struct OnGameScreen;
 #[derive(Default, Resource)]
 pub struct LastSpecialSpawn(pub u32);
 
-#[derive(Event)]
+#[derive(Message)]
 pub struct GameOver;
 
-#[derive(Event)]
+#[derive(Message)]
 struct SpawnConsumables {
     pub regular: bool,
 }
 
-#[derive(Event)]
+#[derive(Message)]
 enum Rumble {
     Eat,
     Death,
@@ -162,7 +162,7 @@ impl Plugin for GamePlugin {
                             antidote::control_antidote_sound,
                         )
                             .run_if(on_timer(Duration::from_millis(75))),
-                        game_over.run_if(on_event::<GameOver>),
+                        game_over.run_if(on_message::<GameOver>),
                     )
                         .run_if(in_state(GameState::Game)),
                     rumble,
@@ -174,16 +174,16 @@ impl Plugin for GamePlugin {
                     diplopod::movement.run_if(on_timer(Duration::from_millis(75))),
                     antidote::move_antidote.run_if(on_timer(Duration::from_millis(500))),
                     check_collision,
-                    spawn_consumables.run_if(on_event::<SpawnConsumables>),
+                    spawn_consumables.run_if(on_message::<SpawnConsumables>),
                 )
                     .run_if(in_state(GameState::Game)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .init_resource::<DiplopodSegments>()
             .init_resource::<LastSpecialSpawn>()
-            .add_event::<GameOver>()
-            .add_event::<Rumble>()
-            .add_event::<SpawnConsumables>();
+            .add_message::<GameOver>()
+            .add_message::<Rumble>()
+            .add_message::<SpawnConsumables>();
     }
 }
 
@@ -250,7 +250,7 @@ fn get_randomized_free_positions(occupied: Vec<Position>) -> Vec<Position> {
 fn spawn_consumables(
     mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
-    mut spawn_consumables_reader: EventReader<SpawnConsumables>,
+    mut spawn_consumables_reader: MessageReader<SpawnConsumables>,
     obstacles: Query<&Transform>,
     superfood: Query<Entity, With<Superfood>>,
     antidotes: Query<Entity, With<Antidote>>,
@@ -308,9 +308,9 @@ fn check_collision(
     mut commands: Commands,
     mut heads: Query<(&mut DiplopodHead, &Transform)>,
     obstacles: Query<(Entity, &Transform, &Obstacle)>,
-    mut spawn_consumables_writer: EventWriter<SpawnConsumables>,
-    mut game_over_writer: EventWriter<GameOver>,
-    mut rumble_writer: EventWriter<Rumble>,
+    mut spawn_consumables_writer: MessageWriter<SpawnConsumables>,
+    mut game_over_writer: MessageWriter<GameOver>,
+    mut rumble_writer: MessageWriter<Rumble>,
     sounds: Res<Sounds>,
 ) {
     for (mut head, head_transform) in heads.iter_mut() {
@@ -353,7 +353,7 @@ fn check_collision(
                     }
 
                     Obstacle::Poison => {
-                        if !head.immunity.finished() {
+                        if !head.immunity.is_finished() {
                             commands.entity(entity).despawn();
                             commands.queue(SpawnDiplopodSegment);
 
@@ -372,7 +372,7 @@ fn check_collision(
                     Obstacle::Antidote => {
                         commands.entity(entity).despawn();
 
-                        if head.immunity.finished() {
+                        if head.immunity.is_finished() {
                             commands.spawn((
                                 AudioPlayer(sounds.antidote.clone()),
                                 PlaybackSettings::LOOP,
@@ -399,14 +399,14 @@ fn check_collision(
 #[allow(clippy::too_many_arguments)]
 fn game_over(
     mut commands: Commands,
-    mut reader: EventReader<GameOver>,
+    mut reader: MessageReader<GameOver>,
     mut segments: ResMut<DiplopodSegments>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     sounds: Res<Sounds>,
     mut game_state: ResMut<NextState<GameState>>,
     mut lastscore: ResMut<Lastscore>,
     mut highscore: ResMut<Highscore>,
-    mut rumble_writer: EventWriter<Rumble>,
+    mut rumble_writer: MessageWriter<Rumble>,
 ) {
     if reader.read().next().is_some() {
         commands.spawn((
@@ -430,8 +430,8 @@ fn game_over(
 }
 
 fn rumble(
-    mut rumble_reader: EventReader<Rumble>,
-    mut rumble_writer: EventWriter<GamepadRumbleRequest>,
+    mut rumble_reader: MessageReader<Rumble>,
+    mut rumble_writer: MessageWriter<GamepadRumbleRequest>,
     gamepads: Query<Entity, With<Gamepad>>,
 ) {
     if let Some(rumble) = rumble_reader.read().next() {

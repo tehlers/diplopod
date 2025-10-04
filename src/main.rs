@@ -2,9 +2,8 @@ mod game;
 mod highscore;
 mod menu;
 
-use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
-use bevy::window::PrimaryWindow;
+use bevy::window::{CursorOptions, PrimaryWindow};
+use bevy::{camera::ScalingMode, prelude::*};
 
 use crate::game::{
     ANTIDOTE_COLOR, DIPLOPOD_COLOR, DIPLOPOD_IMMUNE_COLOR, DiplopodColors, FOOD_COLOR,
@@ -42,7 +41,7 @@ fn main() {
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     title: TITLE.into(),
-                    resolution: (1149., 645.).into(),
+                    resolution: (1149, 645).into(),
                     ..default()
                 }),
                 ..default()
@@ -64,7 +63,7 @@ fn main() {
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut cursor_options: Single<&mut CursorOptions, With<PrimaryWindow>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
@@ -91,9 +90,7 @@ fn setup(
     let font = asset_server.load("fonts/AllertaStencil-Regular.ttf");
     commands.insert_resource(DefaultFontHandle(font));
 
-    if let Ok(mut window) = windows.single_mut() {
-        window.cursor_options.visible = false;
-    }
+    cursor_options.visible = false;
 
     commands.insert_resource(DiplopodColors {
         diplopod_normal: MeshMaterial2d(materials.add(DIPLOPOD_COLOR)),
@@ -112,8 +109,9 @@ fn set_default_font(
     mut fonts: ResMut<Assets<Font>>,
     default_font_handle: Res<DefaultFontHandle>,
 ) {
-    if let Some(font) = fonts.remove(&default_font_handle.0) {
-        fonts.insert(&TextFont::default().font, font);
+    if let Some(font) = fonts.remove(&default_font_handle.0)
+        && fonts.insert(&TextFont::default().font, font).is_ok()
+    {
         commands.remove_resource::<DefaultFontHandle>();
     }
 }

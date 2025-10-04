@@ -124,7 +124,7 @@ fn remove_initial_delay(mut commands: Commands) {
 
 /// Forwards to the menu when any key is pressed after an initial delay.
 fn keyboard(
-    mut keyboard_event: EventReader<KeyboardInput>,
+    mut keyboard_event: MessageReader<KeyboardInput>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
     for ev in keyboard_event.read() {

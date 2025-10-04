@@ -1,5 +1,5 @@
 use bevy::{
-    ecs::{component::HookContext, system::SystemState, world::DeferredWorld},
+    ecs::{lifecycle::HookContext, system::SystemState, world::DeferredWorld},
     prelude::*,
 };
 
@@ -62,7 +62,7 @@ impl Command for SpawnDiplopodSegment {
                 .get::<DiplopodHead>(*segments.first().unwrap())
                 .unwrap()
                 .immunity
-                .finished()
+                .is_finished()
         };
 
         let mut command_resources: CommandResources = SystemState::new(world);
@@ -154,7 +154,7 @@ pub fn movement(
     mut heads: Query<(Entity, &DiplopodHead)>,
     mut positions: Query<&mut Transform>,
     segments: ResMut<DiplopodSegments>,
-    mut game_over_writer: EventWriter<GameOver>,
+    mut game_over_writer: MessageWriter<GameOver>,
 ) {
     if let Some((head_entity, head)) = heads.iter_mut().next() {
         let segment_positions = segments
@@ -184,7 +184,7 @@ pub fn movement(
 
 pub fn limit_immunity(mut heads: Query<&mut DiplopodHead>, time: Res<Time>) {
     if let Ok(mut head) = heads.single_mut()
-        && !head.immunity.finished()
+        && !head.immunity.is_finished()
     {
         head.immunity.tick(time.delta());
     }
@@ -198,7 +198,7 @@ pub fn change_color_during_immunity(
     if let Ok(head) = heads.single() {
         let target_color = if head.immunity.remaining_secs() > 2.0 {
             diplopod_colors.diplopod_immune.clone()
-        } else if !head.immunity.finished() {
+        } else if !head.immunity.is_finished() {
             if let Some(current_color) = query.iter().next() {
                 if current_color.0 == diplopod_colors.diplopod_normal.0 {
                     diplopod_colors.diplopod_immune.clone()

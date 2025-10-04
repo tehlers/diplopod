@@ -23,7 +23,7 @@ impl Command for SpawnFadingText {
                 ..default()
             },
             TextColor::WHITE,
-            TextLayout::new_with_justify(JustifyText::Center),
+            TextLayout::new_with_justify(Justify::Center),
             Transform::from_translation(self.transform.translation.with_z(2.0)),
             OnGameScreen,
             FadingText {
@@ -42,7 +42,7 @@ pub fn fade_text(
     for (entity, mut fading_text) in query.iter_mut() {
         fading_text.timer.tick(time.delta());
 
-        if fading_text.timer.finished() {
+        if fading_text.timer.is_finished() {
             commands.entity(entity).despawn();
         } else {
             writer
