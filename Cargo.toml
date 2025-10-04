@@ -85,7 +85,6 @@ features = [
 
 [dependencies]
 anyhow = "1"
-bevy_embedded_assets = "0.13"
 directories = "6"
 getrandom = { version = "0.3", features = ["wasm_js"] }
 rand = "0.9"

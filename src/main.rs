@@ -5,7 +5,6 @@ mod menu;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy::window::PrimaryWindow;
-use bevy_embedded_assets::EmbeddedAssetPlugin;
 
 use crate::game::{
     ANTIDOTE_COLOR, DIPLOPOD_COLOR, DIPLOPOD_IMMUNE_COLOR, DiplopodColors, FOOD_COLOR,
@@ -48,7 +47,6 @@ fn main() {
                 }),
                 ..default()
             }),
-            EmbeddedAssetPlugin::default(), // does not work anymore in this game since Bevy 0.13.1
             menu::MenuPlugin,
             highscore::HighscorePlugin,
             game::GamePlugin,
