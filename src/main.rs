@@ -23,9 +23,6 @@ enum GameState {
 }
 
 #[derive(Resource)]
-struct DefaultFontHandle(Handle<Font>);
-
-#[derive(Resource)]
 struct Sounds {
     eat_food: Handle<AudioSource>,
     eat_poison: Handle<AudioSource>,
@@ -51,10 +48,6 @@ fn main() {
             game::GamePlugin,
         ))
         .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            set_default_font.run_if(resource_exists::<DefaultFontHandle>),
-        )
         .init_state::<GameState>()
         .insert_resource(ClearColor(Color::BLACK))
         .run();
@@ -87,9 +80,6 @@ fn setup(
     };
     commands.insert_resource(sounds);
 
-    let font = asset_server.load("fonts/AllertaStencil-Regular.ttf");
-    commands.insert_resource(DefaultFontHandle(font));
-
     cursor_options.visible = false;
 
     commands.insert_resource(DiplopodColors {
@@ -102,18 +92,6 @@ fn setup(
         superfood: MeshMaterial2d(materials.add(SUPERFOOD_COLOR)),
         wall: MeshMaterial2d(materials.add(WALL_COLOR)),
     });
-}
-
-fn set_default_font(
-    mut commands: Commands,
-    mut fonts: ResMut<Assets<Font>>,
-    default_font_handle: Res<DefaultFontHandle>,
-) {
-    if let Some(font) = fonts.remove(&default_font_handle.0)
-        && fonts.insert(&TextFont::default().font, font).is_ok()
-    {
-        commands.remove_resource::<DefaultFontHandle>();
-    }
 }
 
 // Generic system that takes a component as a parameter, and will despawn all entities with that component

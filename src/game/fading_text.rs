@@ -15,15 +15,20 @@ pub struct SpawnFadingText {
 }
 
 impl Command for SpawnFadingText {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
+        let asset_server = &world.resource::<AssetServer>();
+
         world.spawn((
             Text2d::new(&self.text),
             TextFont {
-                font_size: 36.0,
+                font: asset_server.load("fonts/AllertaStencil-Regular.ttf").into(),
+                font_size: FontSize::Px(36.0),
                 ..default()
             },
             TextColor::WHITE,
-            TextLayout::new_with_justify(Justify::Center),
+            TextLayout::justify(Justify::Center),
             Transform::from_translation(self.transform.translation.with_z(2.0)),
             OnGameScreen,
             FadingText {

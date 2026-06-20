@@ -45,6 +45,8 @@ fn on_add_diplopod_segment(mut world: DeferredWorld, HookContext { entity, .. }:
 pub struct SpawnDiplopodSegment;
 
 impl Command for SpawnDiplopodSegment {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let segments = &world.resource::<DiplopodSegments>().0;
         let is_head = segments.is_empty();
@@ -66,7 +68,7 @@ impl Command for SpawnDiplopodSegment {
         };
 
         let mut command_resources: CommandResources = SystemState::new(world);
-        let (mut commands, mut meshes, colors) = command_resources.get_mut(world);
+        let (mut commands, mut meshes, colors) = command_resources.get_mut(world).unwrap();
 
         let color = if immune {
             colors.diplopod_immune.clone()

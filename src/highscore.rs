@@ -57,8 +57,9 @@ impl Plugin for HighscorePlugin {
             )
             .add_systems(
                 Update,
-                save_highscore
-                    .run_if(resource_changed::<Highscore>.and(not(resource_added::<Highscore>))),
+                save_highscore.run_if(
+                    resource_changed::<Highscore>.and_then(not(resource_added::<Highscore>)),
+                ),
             )
             .insert_resource(load_highscore())
             .init_resource::<Lastscore>();
@@ -145,7 +146,14 @@ pub fn gamepad(gamepads: Query<&Gamepad>, mut game_state: ResMut<NextState<GameS
 }
 
 /// Creates the UI of the highscore screen.
-fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore: Res<Lastscore>) {
+fn setup_highscore(
+    mut commands: Commands,
+    highscore: Res<Highscore>,
+    lastscore: Res<Lastscore>,
+    asset_server: Res<AssetServer>,
+) {
+    let font: FontSource = asset_server.load("fonts/AllertaStencil-Regular.ttf").into();
+
     commands
         .spawn((
             Node {
@@ -168,7 +176,8 @@ fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore:
                     parent.spawn((
                         Text::new(TITLE),
                         TextFont {
-                            font_size: 128.0,
+                            font: font.clone(),
+                            font_size: FontSize::Px(128.0),
                             ..default()
                         },
                         TextColor(TITLE_COLOR),
@@ -181,7 +190,8 @@ fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore:
                     parent.spawn((
                         Text::new("Highscore"),
                         TextFont {
-                            font_size: 64.0,
+                            font: font.clone(),
+                            font_size: FontSize::Px(64.0),
                             ..default()
                         },
                         TextColor(HEADLINE_COLOR),
@@ -194,7 +204,8 @@ fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore:
                     parent.spawn((
                         Text::new(format!("Highscore {}", &highscore.0)),
                         TextFont {
-                            font_size: 64.0,
+                            font: font.clone(),
+                            font_size: FontSize::Px(64.0),
                             ..default()
                         },
                         TextColor(HIGHSCORE_COLOR),
@@ -207,7 +218,8 @@ fn setup_highscore(mut commands: Commands, highscore: Res<Highscore>, lastscore:
                     parent.spawn((
                         Text::new(format!("Your last score was {}", &lastscore.0)),
                         TextFont {
-                            font_size: 64.0,
+                            font: font.clone(),
+                            font_size: FontSize::Px(64.0),
                             ..default()
                         },
                         TextColor(HIGHSCORE_COLOR),

@@ -150,7 +150,7 @@ impl Plugin for GamePlugin {
                     (
                         toggle_pause.run_if(
                             input_just_pressed(KeyCode::Space)
-                                .or(input_just_pressed(KeyCode::KeyP)),
+                                .or_else(input_just_pressed(KeyCode::KeyP)),
                         ),
                         diplopod::keyboard,
                         diplopod::gamepad,

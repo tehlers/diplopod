@@ -21,9 +21,11 @@ pub struct SpawnAntidote {
 }
 
 impl Command for SpawnAntidote {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let mut command_resources: CommandResources = SystemState::new(world);
-        let (mut commands, mut meshes, colors) = command_resources.get_mut(world);
+        let (mut commands, mut meshes, colors) = command_resources.get_mut(world).unwrap();
 
         let transform: Transform = self.position.into();
         commands

@@ -130,7 +130,7 @@ fn update_selected_button(
     }
 }
 
-fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
+fn setup_menu(mut commands: Commands, selected: Res<Selected>, asset_server: Res<AssetServer>) {
     let button_node = Node {
         width: Val::Px(340.0),
         height: Val::Px(65.0),
@@ -140,6 +140,8 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
         align_items: AlignItems::Center,
         ..default()
     };
+
+    let font: FontSource = asset_server.load("fonts/AllertaStencil-Regular.ttf").into();
 
     commands
         .spawn((
@@ -163,7 +165,8 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                     parent.spawn((
                         Text::new(TITLE),
                         TextFont {
-                            font_size: 128.0,
+                            font: font.clone(),
+                            font_size: FontSize::Px(128.0),
                             ..default()
                         },
                         TextColor(TITLE_COLOR),
@@ -184,7 +187,8 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                             parent.spawn((
                                 Text::new("Play"),
                                 TextFont {
-                                    font_size: 64.0,
+                                    font: font.clone(),
+                                    font_size: FontSize::Px(64.0),
                                     ..default()
                                 },
                                 TextColor(BUTTON_TEXT_COLOR),
@@ -202,7 +206,8 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                             parent.spawn((
                                 Text::new("Highscore"),
                                 TextFont {
-                                    font_size: 64.0,
+                                    font: font.clone(),
+                                    font_size: FontSize::Px(64.0),
                                     ..default()
                                 },
                                 TextColor(BUTTON_TEXT_COLOR),
@@ -220,7 +225,8 @@ fn setup_menu(mut commands: Commands, selected: Res<Selected>) {
                             parent.spawn((
                                 Text::new("Quit"),
                                 TextFont {
-                                    font_size: 64.0,
+                                    font: font.clone(),
+                                    font_size: FontSize::Px(64.0),
                                     ..default()
                                 },
                                 TextColor(BUTTON_TEXT_COLOR),
