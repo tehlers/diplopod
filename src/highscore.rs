@@ -107,7 +107,7 @@ fn write_highscore_to_file(highscore: u16) -> Result<()> {
         std::fs::create_dir_all(data_dir)?;
 
         let mut file = File::create(data_dir.join(HIGHSCORE))?;
-        write!(file, "{}", &highscore)?;
+        write!(file, "{}", highscore)?;
 
         Ok(())
     } else {
@@ -202,7 +202,7 @@ fn setup_highscore(
                     ));
 
                     parent.spawn((
-                        Text::new(format!("Highscore {}", &highscore.0)),
+                        Text::new(format!("Highscore {}", highscore.0)),
                         TextFont {
                             font: font.clone(),
                             font_size: FontSize::Px(64.0),
@@ -216,7 +216,7 @@ fn setup_highscore(
                     ));
 
                     parent.spawn((
-                        Text::new(format!("Your last score was {}", &lastscore.0)),
+                        Text::new(format!("Your last score was {}", lastscore.0)),
                         TextFont {
                             font: font.clone(),
                             font_size: FontSize::Px(64.0),
