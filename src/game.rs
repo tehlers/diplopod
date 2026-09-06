@@ -250,7 +250,7 @@ fn get_randomized_free_positions(occupied: Vec<Position>) -> Vec<Position> {
 #[allow(clippy::too_many_arguments)]
 fn spawn_consumables(
     mut commands: Commands,
-    segments: ResMut<DiplopodSegments>,
+    segments: Res<DiplopodSegments>,
     mut spawn_consumables_reader: MessageReader<SpawnConsumables>,
     obstacles: Query<&Transform, With<Obstacle>>,
     diplopod: Query<&Transform, With<DiplopodSegment>>,

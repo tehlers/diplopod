@@ -44,7 +44,7 @@ pub fn add_mesh(
 
 pub fn move_antidote(
     mut antidotes: Query<&mut Transform, (With<Antidote>, Without<DiplopodSegment>)>,
-    mut segment_positions: Query<&mut Transform, With<DiplopodSegment>>,
+    segment_positions: Query<&Transform, With<DiplopodSegment>>,
 ) {
     for mut transform in antidotes.iter_mut() {
         let mut new_pos: Position = (*transform).into();
@@ -61,7 +61,7 @@ pub fn move_antidote(
             || new_pos.y < 1
             || new_pos.y >= CONSUMABLE_HEIGHT
             || segment_positions
-                .iter_mut()
+                .iter()
                 .map(|p| (*p).into())
                 .any(|p: Position| p == new_pos)
         {

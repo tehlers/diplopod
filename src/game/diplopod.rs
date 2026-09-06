@@ -147,12 +147,12 @@ pub fn gamepad(gamepads: Query<&Gamepad>, mut heads: Query<&mut DiplopodHead>) {
 }
 
 pub fn movement(
-    mut heads: Query<(Entity, &DiplopodHead)>,
+    heads: Query<(Entity, &DiplopodHead)>,
     mut positions: Query<&mut Transform>,
-    segments: ResMut<DiplopodSegments>,
+    segments: Res<DiplopodSegments>,
     mut game_over_writer: MessageWriter<GameOver>,
 ) {
-    if let Some((head_entity, head)) = heads.iter_mut().next() {
+    if let Some((head_entity, head)) = heads.iter().next() {
         let segment_positions = segments
             .0
             .iter()
