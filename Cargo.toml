@@ -22,7 +22,7 @@ opt-level = 'z'
 
 [dependencies]
 anyhow = "1"
-bevy = "0.19.1"
+bevy = { version = "0.19.1", default-features = false, features = ["2d", "audio", "ui"] }
 directories = "6"
 getrandom = { version = "0.3", features = ["wasm_js"] }
 rand = "0.9"
