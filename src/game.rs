@@ -11,13 +11,15 @@ use crate::MAX_X;
 use crate::MAX_Y;
 use crate::Sounds;
 use crate::despawn_screen;
+use crate::game::food::Food;
+use crate::game::poison::Poison;
+use crate::game::wall::Wall;
 use crate::highscore::Highscore;
 use crate::highscore::Lastscore;
 use antidote::*;
 use bevy::color::palettes::css::BLUE;
 use bevy::color::palettes::css::ORANGE;
 use bevy::color::palettes::css::RED;
-use bevy::ecs::system::SystemState;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::gamepad::GamepadRumbleIntensity;
 use bevy::input::gamepad::GamepadRumbleRequest;
@@ -25,14 +27,11 @@ use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use diplopod::*;
 use fading_text::SpawnFadingText;
-use food::SpawnFood;
-use poison::SpawnPoison;
 use rand::Rng;
 use rand::rng;
 use rand::seq::SliceRandom;
 use std::time::Duration;
 use superfood::*;
-use wall::SpawnWall;
 
 const CONSUMABLE_WIDTH: i32 = 39 + 1;
 const CONSUMABLE_HEIGHT: i32 = 21 + 1;
@@ -59,17 +58,11 @@ pub const POISON_OUTLINE_COLOR: Color = Color::Srgba(RED);
 pub const SUPERFOOD_COLOR: Color = Color::Srgba(BLUE);
 pub const WALL_COLOR: Color = Color::srgb(0.25, 0.25, 0.25);
 
-#[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Component, Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
 }
-
-type CommandResources<'a> = SystemState<(
-    Commands<'a, 'a>,
-    ResMut<'a, Assets<Mesh>>,
-    Res<'a, DiplopodColors>,
-)>;
 
 impl From<Position> for Transform {
     fn from(position: Position) -> Self {
@@ -179,6 +172,12 @@ impl Plugin for GamePlugin {
                     .run_if(in_state(GameState::Game)),
             )
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
+            .add_observer(antidote::add_mesh)
+            .add_observer(diplopod::add_mesh)
+            .add_observer(food::add_mesh)
+            .add_observer(poison::add_mesh)
+            .add_observer(superfood::add_mesh)
+            .add_observer(wall::add_mesh)
             .init_resource::<DiplopodSegments>()
             .init_resource::<LastSpecialSpawn>()
             .add_message::<GameOver>()
@@ -191,38 +190,40 @@ fn setup_game(mut commands: Commands) {
     commands.queue(SpawnDiplopodSegment);
 
     for x in 0..CONSUMABLE_WIDTH + 1 {
-        let position = Position { x, y: 0 };
-        commands.queue(SpawnWall { position });
+        commands.spawn((Wall, Position { x, y: 0 }));
 
-        let position = Position {
-            x,
-            y: CONSUMABLE_HEIGHT,
-        };
-        commands.queue(SpawnWall { position });
+        commands.spawn((
+            Wall,
+            Position {
+                x,
+                y: CONSUMABLE_HEIGHT,
+            },
+        ));
     }
 
     for y in 1..CONSUMABLE_HEIGHT {
-        let position = Position { x: 0, y };
-        commands.queue(SpawnWall { position });
+        commands.spawn((Wall, Position { x: 0, y }));
 
-        let position = Position {
-            x: CONSUMABLE_WIDTH,
-            y,
-        };
-        commands.queue(SpawnWall { position });
+        commands.spawn((
+            Wall,
+            Position {
+                x: CONSUMABLE_WIDTH,
+                y,
+            },
+        ));
     }
 
     let mut free_positions = get_randomized_free_positions(vec![START_POSITION.into()]);
 
     for _ in 0..AMOUNT_OF_FOOD {
         if let Some(position) = free_positions.pop() {
-            commands.queue(SpawnFood { position });
+            commands.spawn((Food, position));
         }
     }
 
     for _ in 0..AMOUNT_OF_POISON {
         if let Some(position) = free_positions.pop() {
-            commands.queue(SpawnPoison { position });
+            commands.spawn((Poison, position));
         }
     }
 }
@@ -263,11 +264,11 @@ fn spawn_consumables(
 
         if spawn_event.regular {
             if let Some(position) = free_positions.pop() {
-                commands.queue(SpawnFood { position });
+                commands.spawn((Food, position));
             }
 
             if let Some(position) = free_positions.pop() {
-                commands.queue(SpawnPoison { position });
+                commands.spawn((Poison, position));
             }
         }
 
@@ -288,12 +289,12 @@ fn spawn_consumables(
                 }
 
                 if let Some(position) = free_positions.pop() {
-                    commands.queue(SpawnAntidote { position });
+                    commands.spawn((Antidote, position));
                 }
             }
 
             if let Some(position) = free_positions.pop() {
-                commands.queue(SpawnSuperfood { position });
+                commands.spawn((Superfood, position));
             }
 
             commands.spawn((

@@ -1,30 +1,28 @@
-use bevy::{ecs::system::SystemState, prelude::*};
+use bevy::prelude::*;
 
-use crate::game::CommandResources;
+use crate::game::DiplopodColors;
 
 use super::{Obstacle, OnGameScreen, Position, RADIUS_FACTOR, TILE_SIZE};
 
-pub struct SpawnFood {
-    pub position: Position,
-}
+#[derive(Component)]
+pub struct Food;
 
-impl Command for SpawnFood {
-    type Out = ();
+pub fn add_mesh(
+    food: On<Add, Food>,
+    positions: Query<&Position>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    colors: Res<DiplopodColors>,
+) {
+    if let Ok(position) = positions.get(food.entity) {
+        let transform: Transform = (*position).into();
 
-    fn apply(self, world: &mut World) {
-        let mut command_resources: CommandResources = SystemState::new(world);
-        let (mut commands, mut meshes, colors) = command_resources.get_mut(world).unwrap();
-
-        let transform: Transform = self.position.into();
-
-        commands.spawn((
+        commands.entity(food.entity).insert((
             Mesh2d(meshes.add(Circle::new(TILE_SIZE * RADIUS_FACTOR))),
             colors.food.clone(),
             transform,
             Obstacle::Food,
             OnGameScreen,
         ));
-
-        command_resources.apply(world);
     }
 }

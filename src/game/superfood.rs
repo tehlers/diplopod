@@ -1,6 +1,6 @@
-use bevy::{ecs::system::SystemState, prelude::*};
+use bevy::prelude::*;
 
-use crate::game::CommandResources;
+use crate::game::DiplopodColors;
 
 use super::{Obstacle, OnGameScreen, Position, TILE_SIZE};
 
@@ -9,33 +9,29 @@ const STROKE_WIDTH: f32 = 7.5;
 #[derive(Component)]
 pub struct Superfood;
 
-pub struct SpawnSuperfood {
-    pub position: Position,
-}
+pub fn add_mesh(
+    superfood: On<Add, Superfood>,
+    positions: Query<&Position>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    colors: Res<DiplopodColors>,
+) {
+    if let Ok(position) = positions.get(superfood.entity) {
+        let transform: Transform = (*position).into();
 
-impl Command for SpawnSuperfood {
-    type Out = ();
-
-    fn apply(self, world: &mut World) {
-        let mut command_resources: CommandResources = SystemState::new(world);
-        let (mut commands, mut meshes, colors) = command_resources.get_mut(world).unwrap();
-
-        let transform: Transform = self.position.into();
         commands
-            .spawn((
+            .entity(superfood.entity)
+            .insert((
                 Mesh2d(meshes.add(Rectangle::new(TILE_SIZE * 2.0, STROKE_WIDTH))),
                 colors.superfood.clone(),
                 transform,
                 Obstacle::Superfood,
-                Superfood,
                 OnGameScreen,
             ))
             .with_child((
                 Mesh2d(meshes.add(Rectangle::new(STROKE_WIDTH, TILE_SIZE * 2.0))),
                 colors.superfood.clone(),
             ));
-
-        command_resources.apply(world);
     }
 }
 

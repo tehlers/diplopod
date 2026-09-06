@@ -1,7 +1,7 @@
-use bevy::{ecs::system::SystemState, prelude::*};
+use bevy::prelude::*;
 use rand::{Rng, rng};
 
-use crate::game::CommandResources;
+use crate::game::DiplopodColors;
 
 use super::{
     CONSUMABLE_HEIGHT, CONSUMABLE_WIDTH, Obstacle, OnGameScreen, Position, TILE_SIZE,
@@ -16,35 +16,32 @@ pub struct Antidote;
 #[derive(Component)]
 pub struct AntidoteSound;
 
-pub struct SpawnAntidote {
-    pub position: Position,
-}
+pub fn add_mesh(
+    antidote: On<Add, Antidote>,
+    positions: Query<&Position>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    colors: Res<DiplopodColors>,
+) {
+    if let Ok(position) = positions.get(antidote.entity) {
+        let transform: Transform = (*position).into();
 
-impl Command for SpawnAntidote {
-    type Out = ();
-
-    fn apply(self, world: &mut World) {
-        let mut command_resources: CommandResources = SystemState::new(world);
-        let (mut commands, mut meshes, colors) = command_resources.get_mut(world).unwrap();
-
-        let transform: Transform = self.position.into();
         commands
-            .spawn((
+            .entity(antidote.entity)
+            .insert((
                 Mesh2d(meshes.add(Rectangle::new(TILE_SIZE * 2.0, STROKE_WIDTH))),
                 colors.antidote.clone(),
-                transform.with_translation(transform.translation + Vec3::Z * 2.0),
+                transform,
                 Obstacle::Antidote,
-                Antidote,
                 OnGameScreen,
             ))
             .with_child((
                 Mesh2d(meshes.add(Rectangle::new(STROKE_WIDTH, TILE_SIZE * 2.0))),
                 colors.antidote.clone(),
             ));
-
-        command_resources.apply(world);
     }
 }
+
 pub fn move_antidote(
     mut antidotes: Query<&mut Transform, (With<Antidote>, Without<DiplopodSegment>)>,
     mut segment_positions: Query<&mut Transform, With<DiplopodSegment>>,

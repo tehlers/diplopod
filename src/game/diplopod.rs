@@ -1,12 +1,9 @@
 use bevy::{
-    ecs::{lifecycle::HookContext, system::SystemState, world::DeferredWorld},
+    ecs::{lifecycle::HookContext, world::DeferredWorld},
     prelude::*,
 };
 
-use crate::{
-    MAX_X, MAX_Y,
-    game::{CommandResources, DiplopodColors},
-};
+use crate::{MAX_X, MAX_Y, game::DiplopodColors};
 
 use super::{ARENA_HEIGHT, ARENA_WIDTH, GameOver, OnGameScreen, TILE_SIZE, UPPER_LEFT};
 
@@ -57,39 +54,36 @@ impl Command for SpawnDiplopodSegment {
             *world.get::<Transform>(*segments.last().unwrap()).unwrap()
         };
 
-        let immune = if is_head {
-            false
-        } else {
-            !world
-                .get::<DiplopodHead>(*segments.first().unwrap())
-                .unwrap()
-                .immunity
-                .is_finished()
-        };
-
-        let mut command_resources: CommandResources = SystemState::new(world);
-        let (mut commands, mut meshes, colors) = command_resources.get_mut(world).unwrap();
-
-        let color = if immune {
-            colors.diplopod_immune.clone()
-        } else {
-            colors.diplopod_normal.clone()
-        };
-
-        let mut segment = commands.spawn((
-            Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),
-            color,
-            position,
-            DiplopodSegment,
-            OnGameScreen,
-        ));
+        let mut segment = world.spawn((DiplopodSegment, position));
 
         if is_head {
             segment.insert(DiplopodHead::default());
         }
-
-        command_resources.apply(world);
     }
+}
+
+pub fn add_mesh(
+    diplopod_segment: On<Add, DiplopodSegment>,
+    heads: Query<&DiplopodHead>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    colors: Res<DiplopodColors>,
+) {
+    let immune = heads
+        .single()
+        .is_ok_and(|head| !head.immunity.is_finished());
+
+    let color = if immune {
+        colors.diplopod_immune.clone()
+    } else {
+        colors.diplopod_normal.clone()
+    };
+
+    commands.entity(diplopod_segment.entity).insert((
+        Mesh2d(meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE))),
+        color,
+        OnGameScreen,
+    ));
 }
 
 pub fn keyboard(keyboard_input: Res<ButtonInput<KeyCode>>, mut heads: Query<&mut DiplopodHead>) {
