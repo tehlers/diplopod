@@ -252,15 +252,21 @@ fn spawn_consumables(
     mut commands: Commands,
     segments: ResMut<DiplopodSegments>,
     mut spawn_consumables_reader: MessageReader<SpawnConsumables>,
-    obstacles: Query<&Transform>,
+    obstacles: Query<&Transform, With<Obstacle>>,
+    diplopod: Query<&Transform, With<DiplopodSegment>>,
     superfood: Query<Entity, With<Superfood>>,
     antidotes: Query<Entity, With<Antidote>>,
     mut last_special_spawn: ResMut<LastSpecialSpawn>,
     sounds: Res<Sounds>,
 ) {
     if let Some(spawn_event) = spawn_consumables_reader.read().next() {
-        let mut free_positions =
-            get_randomized_free_positions(obstacles.iter().map(|o| (*o).into()).collect());
+        let mut free_positions = get_randomized_free_positions(
+            obstacles
+                .iter()
+                .chain(diplopod.iter())
+                .map(|t| (*t).into())
+                .collect(),
+        );
 
         if spawn_event.regular {
             if let Some(position) = free_positions.pop() {
