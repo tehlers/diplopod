@@ -10,7 +10,7 @@ const STROKE_WIDTH: f32 = 7.5;
 pub struct Superfood;
 
 pub fn add_mesh(
-    superfood: On<Add, Superfood>,
+    superfood: On<Add<Superfood>>,
     positions: Query<&Position>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

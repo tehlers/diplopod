@@ -63,7 +63,7 @@ impl Command for SpawnDiplopodSegment {
 }
 
 pub fn add_mesh(
-    diplopod_segment: On<Add, DiplopodSegment>,
+    diplopod_segment: On<Add<DiplopodSegment>>,
     heads: Query<&DiplopodHead>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

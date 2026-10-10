@@ -17,7 +17,7 @@ pub struct Antidote;
 pub struct AntidoteSound;
 
 pub fn add_mesh(
-    antidote: On<Add, Antidote>,
+    antidote: On<Add<Antidote>>,
     positions: Query<&Position>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

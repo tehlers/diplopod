@@ -10,7 +10,7 @@ const FILL_RADIUS_FACTOR: f32 = 0.7;
 pub struct Poison;
 
 pub fn add_mesh(
-    poison: On<Add, Poison>,
+    poison: On<Add<Poison>>,
     positions: Query<&Position>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

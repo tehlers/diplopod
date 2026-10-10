@@ -8,7 +8,7 @@ use super::{Obstacle, OnGameScreen, Position, TILE_SIZE};
 pub struct Wall;
 
 pub fn add_mesh(
-    wall: On<Add, Wall>,
+    wall: On<Add<Wall>>,
     positions: Query<&Position>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

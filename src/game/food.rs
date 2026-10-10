@@ -8,7 +8,7 @@ use super::{Obstacle, OnGameScreen, Position, RADIUS_FACTOR, TILE_SIZE};
 pub struct Food;
 
 pub fn add_mesh(
-    food: On<Add, Food>,
+    food: On<Add<Food>>,
     positions: Query<&Position>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
