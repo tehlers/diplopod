@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use rand::{Rng, rng};
+use rand::RngExt;
+use rand::rng;
 
 use crate::game::DiplopodColors;
 

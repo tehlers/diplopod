@@ -27,7 +27,7 @@ use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use diplopod::*;
 use fading_text::SpawnFadingText;
-use rand::Rng;
+use rand::RngExt;
 use rand::rng;
 use rand::seq::SliceRandom;
 use std::time::Duration;
